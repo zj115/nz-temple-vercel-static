@@ -1,0 +1,61 @@
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh (persisted across all pages)
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>

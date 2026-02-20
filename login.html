@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-login">
+
+<div class="bg-ornament"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh (persisted across all pages)
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+  <!-- Page Header -->
+  <section style="padding:14px 0 10px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div>
+        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;text-transform:capitalize;">
+          <span class="lang-en">Login</span>
+          <span class="lang-zh">登录</span>
+        </h1>
+        <p style="opacity:.82;line-height:1.7;max-width:760px;">
+          <span class="lang-en">Sign in to manage your bookings, view updates, and access member-only guidance.</span>
+          <span class="lang-zh">登录后可管理预约、查看更新，并获得会员专属指引。</span>
+        </p>
+      </div>
+
+      <a class="btn btn-gold" href="booking.html" style="white-space:nowrap;">
+        <span class="lang-en">Go to Booking</span>
+        <span class="lang-zh">前往预约</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="hero" style="padding-top:10px;">
+    <!-- Left: benefits / trust -->
+    <div>
+      <div class="glass-card" style="padding:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+            <span class="lang-en">Member Benefits</span>
+            <span class="lang-zh">会员权益</span>
+          </div>
+          <div style="opacity:.72;font-size:13px;">
+            <span class="lang-en">Private · Secure · Fast</span>
+            <span class="lang-zh">私密 · 安全 · 便捷</span>
+          </div>
+        </div>
+
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+            <div style="font-weight:900;color:var(--gold2);">01</div>
+            <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+              <span class="lang-en">Manage Bookings</span>
+              <span class="lang-zh">管理预约</span>
+            </div>
+            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+              <span class="lang-en">Review your requests and confirmations.</span>
+              <span class="lang-zh">查看提交记录与确认信息。</span>
+            </div>
+          </div>
+
+          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+            <div style="font-weight:900;color:var(--gold2);">02</div>
+            <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+              <span class="lang-en">Saved Details</span>
+              <span class="lang-zh">快速填写</span>
+            </div>
+            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+              <span class="lang-en">Auto-fill your contact info for next time.</span>
+              <span class="lang-zh">下次预约自动填入信息。</span>
+            </div>
+          </div>
+
+          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+            <div style="font-weight:900;color:var(--gold2);">03</div>
+            <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+              <span class="lang-en">Member Guidance</span>
+              <span class="lang-zh">专属指引</span>
+            </div>
+            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+              <span class="lang-en">Access extra notes and updates.</span>
+              <span class="lang-zh">查看会员专属更新与备注。</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;opacity:.7;font-size:13px;line-height:1.6;">
+          <span class="lang-en">Tip: This page is UI-ready. You can later connect it to Spring Security or your own login endpoint.</span>
+          <span class="lang-zh">提示：此页面已完成UI。后续可接入 Spring Security 或自定义登录接口。</span>
+        </div>
+      </div>
+
+      <div class="glass-card" style="padding:18px;margin-top:14px;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+          <span class="lang-en">Need help?</span>
+          <span class="lang-zh">需要帮助？</span>
+        </div>
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+        <div style="display:grid;gap:10px;">
+          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+            <div style="opacity:.75;font-size:12px;">
+              <span class="lang-en">Support</span>
+              <span class="lang-zh">客服</span>
+            </div>
+            <div style="margin-top:6px;font-weight:900;color:var(--gold2);">
+              <span class="lang-en">Reply within 24 hours</span>
+              <span class="lang-zh">24小时内回复</span>
+            </div>
+            <div style="margin-top:8px;opacity:.8;line-height:1.6;">
+              <span class="lang-en">If you cannot sign in, please send your name + contact via the booking page.</span>
+              <span class="lang-zh">若暂时无法登录，可先通过预约页提交姓名与联系方式。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: login form -->
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">Sign in</span>
+          <span class="lang-zh">登录账号</span>
+        </div>
+        <div style="opacity:.72;font-size:13px;">
+          <span class="lang-en">Demo (no backend)</span>
+          <span class="lang-zh">演示（未接后端）</span>
+        </div>
+      </div>
+
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+      <form id="loginForm" action="#" method="post" style="display:grid;gap:12px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label for="loginId" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Email or Phone</span>
+            <span class="lang-zh">邮箱或电话</span>
+          </label>
+          <input id="loginId" name="loginId" type="text" class="form-control" required placeholder="" autocomplete="username" />
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label for="password" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Password</span>
+            <span class="lang-zh">密码</span>
+          </label>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="password" name="password" type="password" class="form-control" required placeholder="" autocomplete="current-password" style="flex:1;" />
+            <button class="btn btn-ghost" type="button" id="togglePwd" style="padding:10px 14px;white-space:nowrap;">
+              <span class="lang-en">Show</span>
+              <span class="lang-zh">显示</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;opacity:.9;">
+            <input id="remember" type="checkbox" style="accent-color: var(--gold2);" />
+            <span class="lang-en">Remember me</span>
+            <span class="lang-zh">记住我</span>
+          </label>
+
+          <a href="booking.html" style="text-decoration:none;color:var(--gold2);font-weight:800;">
+            <span class="lang-en">Forgot password?</span>
+            <span class="lang-zh">忘记密码？</span>
+          </a>
+        </div>
+
+        <button class="btn btn-gold" type="submit" id="loginBtn" style="width:100%;">
+          <span class="lang-en">Login</span>
+          <span class="lang-zh">登录</span>
+        </button>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div style="opacity:.75;font-size:13px;line-height:1.6;">
+            <span class="lang-en">No account yet?</span>
+            <span class="lang-zh">还没有账号？</span>
+          </div>
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Create request</span>
+            <span class="lang-zh">先提交预约</span>
+          </a>
+        </div>
+      </form>
+
+      <div id="loginResult" style="display:none;margin-top:14px;border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="font-weight:900;color:var(--gold2);margin-bottom:6px;">
+          <span class="lang-en">Login received</span>
+          <span class="lang-zh">已收到登录请求</span>
+        </div>
+        <div id="loginResultText" style="opacity:.85;line-height:1.7;"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    function getLang() {
+      var cur = root.getAttribute('data-lang');
+      return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+    }
+
+    var toggleBtn = document.getElementById('togglePwd');
+    var pwd = document.getElementById('password');
+    if (toggleBtn && pwd) {
+      toggleBtn.addEventListener('click', function () {
+        var isPwd = pwd.type === 'password';
+        pwd.type = isPwd ? 'text' : 'password';
+        var l = getLang();
+        toggleBtn.querySelector('.lang-en').textContent = isPwd ? 'Hide' : 'Show';
+        toggleBtn.querySelector('.lang-zh').textContent = isPwd ? '隐藏' : '显示';
+      });
+    }
+
+
+    var form = document.getElementById('loginForm');
+    var box = document.getElementById('loginResult');
+    var text = document.getElementById('loginResultText');
+    if (form && box && text) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var id = (document.getElementById('loginId') || {}).value || '';
+        var l = getLang();
+        var msgEn = 'Thanks. We received your sign-in attempt for: ' + id + '. (Demo mode)';
+        var msgZh = '已收到你的登录尝试：' + id + '。（演示模式）';
+        text.textContent = (l === 'en') ? msgEn : msgZh;
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  })();
+</script>
+</body>
+</html>

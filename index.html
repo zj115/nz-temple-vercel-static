@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NZ Temple</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== Merit Board (Home only) ===== */
+    .merit-board{
+      position:relative;
+      overflow:hidden;
+    }
+    .merit-board::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:radial-gradient(circle at 20% 10%, rgba(255,213,122,.16), transparent 45%),
+                 radial-gradient(circle at 80% 20%, rgba(245,230,179,.10), transparent 55%);
+      filter: blur(16px);
+      opacity:.75;
+      pointer-events:none;
+    }
+    .merit-board-inner{
+      position:relative;
+      border:1px solid rgba(255,213,122,.18);
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      padding:16px;
+    }
+    .merit-board-title{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .merit-board-title .t{
+      font-weight:900;
+      color:var(--gold);
+      letter-spacing:.3px;
+    }
+    .merit-board-title .sub{
+      opacity:.72;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .merit-viewport{
+      position:relative;
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid rgba(255,213,122,.14);
+      background:rgba(255,255,255,.02);
+      max-height:260px;
+    }
+    .merit-viewport::before,
+    .merit-viewport::after{
+      content:"";
+      position:absolute;
+      left:0; right:0;
+      height:30px;
+      z-index:2;
+      pointer-events:none;
+    }
+    .merit-viewport::before{
+      top:0;
+      background:linear-gradient(180deg, rgba(11,11,15,.95), rgba(11,11,15,0));
+    }
+    .merit-viewport::after{
+      bottom:0;
+      background:linear-gradient(0deg, rgba(11,11,15,.95), rgba(11,11,15,0));
+    }
+    .merit-track{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:14px;
+      will-change:transform;
+      animation: meritScroll 16s linear infinite;
+    }
+    .merit-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,213,122,.12);
+      background:rgba(255,255,255,.03);
+    }
+    .merit-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .merit-rank{
+      width:28px;
+      height:28px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      color:var(--gold2);
+      background:rgba(255,213,122,.10);
+      border:1px solid rgba(255,213,122,.22);
+      flex:0 0 auto;
+    }
+    .merit-name{
+      font-weight:800;
+      color:var(--gold);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .merit-amount{
+      font-weight:900;
+      color:var(--gold2);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .merit-amount small{
+      opacity:.78;
+      font-weight:700;
+      margin-left:6px;
+      color:var(--text);
+    }
+    @keyframes meritScroll{
+      0%{ transform: translateY(0); }
+      100%{ transform: translateY(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .merit-track{ animation: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-ornament"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div>
+      <h1 class="hero-title">
+        <span class="lang-en">Wealth · Destiny · Daily Guidance</span>
+        <span class="lang-zh">财富 · 命运 · 每日指引</span>
+      </h1>
+      <p style="opacity:.85;line-height:1.7;margin-bottom:16px;">
+        <span class="lang-en">If you can see this page with gold/dark theme, your Thymeleaf + CSS path is correct.</span>
+        <span class="lang-zh">如果你能看到这个金色/暗黑主题页面，说明 Thymeleaf + CSS 路径是正确的。</span>
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <a class="btn btn-gold" href="fortune.html">
+          <span class="lang-en">View Today’s Guidance</span>
+          <span class="lang-zh">查看今日指引</span>
+        </a>
+        <a class="btn btn-ghost" href="booking.html">
+          <span class="lang-en">Book a Ritual</span>
+          <span class="lang-zh">预约法事</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div style="font-weight:700;margin-bottom:10px;">
+        <span class="lang-en">Today</span>
+        <span class="lang-zh">今日</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,213,122,.14);">
+        <span style="opacity:.75;">
+          <span class="lang-en">Date</span>
+          <span class="lang-zh">日期</span>
+        </span>
+        <span id="todayText" style="color:var(--gold2);font-weight:700;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;">
+        <span style="opacity:.75;">
+          <span class="lang-en">Lucky Hours</span>
+          <span class="lang-zh">吉时</span>
+        </span>
+        <span id="luckyHoursText" style="color:var(--gold2);font-weight:700;"></span>
+      </div>
+      <a class="btn btn-gold" style="margin-top:12px;width:100%;" href="fortune.html">
+        <span class="lang-en">Open Daily Fortune</span>
+        <span class="lang-zh">打开每日运势</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Merit Board (Gongde) -->
+  <section id="merit" style="padding:8px 0 24px;">
+    <div class="merit-board glass-card" style="padding:0;">
+      <div class="merit-board-inner">
+        <div class="merit-board-title">
+          <div class="t">
+            <span class="lang-en">Merit Board</span>
+            <span class="lang-zh">功德榜</span>
+          </div>
+        </div>
+
+        <div class="merit-viewport" aria-label="Merit Board list">
+          <div id="meritTrack" class="merit-track"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Almanac (Huangli) - centered, auto-updated by date -->
+  <section id="almanac" style="padding:8px 0 24px;">
+    <div style="text-align:center;margin:10px 0 16px;">
+      <div style="color:var(--gold);font-weight:800;letter-spacing:.6px;font-size:22px;">
+        <span class="lang-en">Daily Almanac</span>
+        <span class="lang-zh">今日黄历</span>
+      </div>
+      <div style="opacity:.72;margin-top:6px;">
+        <span class="lang-en">Auto-updated by today’s date.</span>
+        <span class="lang-zh">根据当天日期自动更新。</span>
+      </div>
+    </div>
+
+    <div class="glass-card" style="width:100%;padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:999px;border:1px solid rgba(255,213,122,.25);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);">☯</div>
+          <div>
+            <div id="almanacDate" style="font-weight:800;color:var(--gold);"></div>
+            <div id="almanacLunar" style="opacity:.75;font-size:13px;"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+          <div style="min-width:190px;border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.03);">
+            <div style="opacity:.7;font-size:12px;">
+              <span class="lang-en">Wealth God Direction</span>
+              <span class="lang-zh">财神方位</span>
+            </div>
+            <div id="caiPos" style="margin-top:6px;font-weight:800;color:var(--gold2);"></div>
+          </div>
+          <div style="min-width:190px;border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.03);">
+            <div style="opacity:.7;font-size:12px;">
+              <span class="lang-en">Joy God Direction</span>
+              <span class="lang-zh">喜神方位</span>
+            </div>
+            <div id="xiPos" style="margin-top:6px;font-weight:800;color:var(--gold2);"></div>
+          </div>
+          <div style="min-width:190px;border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.03);">
+            <div style="opacity:.7;font-size:12px;">
+              <span class="lang-en">Blessing God Direction</span>
+              <span class="lang-zh">福神方位</span>
+            </div>
+            <div id="fuPos" style="margin-top:6px;font-weight:800;color:var(--gold2);"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:16px 0;"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(70,200,120,.18);border:1px solid rgba(70,200,120,.35);">宜</div>
+            <div style="font-weight:800;color:var(--gold);">
+              <span class="lang-en">Auspicious</span>
+              <span class="lang-zh">宜</span>
+            </div>
+          </div>
+          <div id="yiList" style="line-height:1.9;"></div>
+        </div>
+
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(220,90,90,.18);border:1px solid rgba(220,90,90,.35);">忌</div>
+            <div style="font-weight:800;color:var(--gold);">
+              <span class="lang-en">Inauspicious</span>
+              <span class="lang-zh">忌</span>
+            </div>
+          </div>
+          <div id="jiList" style="line-height:1.9;"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="font-weight:800;color:var(--gold);margin-bottom:10px;">
+          <span class="lang-en">Lucky Hours</span>
+          <span class="lang-zh">今日时运</span>
+        </div>
+        <div id="hoursGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var d = new Date();
+    var root = document.documentElement;
+    var savedLang = localStorage.getItem('lang');
+    var lang = (root.getAttribute('data-lang') === 'en' || root.getAttribute('data-lang') === 'zh')
+      ? root.getAttribute('data-lang')
+      : ((savedLang === 'en' || savedLang === 'zh') ? savedLang : 'zh');
+    root.setAttribute('data-lang', lang);
+
+    function getLang(){
+      var cur = root.getAttribute('data-lang');
+      return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+    }
+
+    var todayEl = document.getElementById("todayText");
+    if (todayEl) {
+      todayEl.textContent = d.toLocaleDateString();
+    }
+
+    function pad2(n){ return (n < 10 ? "0" : "") + n; }
+
+    function seedFromDate(date){
+      return Number(String(date.getFullYear()) + pad2(date.getMonth()+1) + pad2(date.getDate()));
+    }
+
+    function mulberry32(a) {
+      return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+    }
+
+    function pickN(rng, arr, n){
+      var copy = arr.slice();
+      var out = [];
+      while (out.length < n && copy.length) {
+        var idx = Math.floor(rng() * copy.length);
+        out.push(copy.splice(idx, 1)[0]);
+      }
+      return out;
+    }
+
+    var seed = seedFromDate(d);
+    var rng = mulberry32(seed);
+
+    var yiPoolZh = [
+      "祈福",
+      "纳财",
+      "出行",
+      "会友",
+      "开市",
+      "签约",
+      "学习",
+      "整理",
+      "沐浴",
+      "静心"
+    ];
+
+    var yiPoolEn = [
+      "Pray",
+      "Wealth",
+      "Travel",
+      "Meet friends",
+      "Open business",
+      "Sign contract",
+      "Study",
+      "Organize",
+      "Cleanse",
+      "Meditation"
+    ];
+
+    var jiPoolZh = [
+      "争执",
+      "冲动消费",
+      "深夜决定",
+      "大额借贷",
+      "口舌是非",
+      "情绪化沟通",
+      "仓促签约",
+      "拖延",
+      "过度劳累",
+      "久坐不动"
+    ];
+
+    var jiPoolEn = [
+      "Argue",
+      "Impulse spending",
+      "Late-night decisions",
+      "Big loans",
+      "Gossip",
+      "Emotional talk",
+      "Hasty signing",
+      "Procrastination",
+      "Overwork",
+      "Sitting too long"
+    ];
+
+    var posPool = ["正东", "正西", "正南", "正北", "东北", "西北", "东南", "西南"];
+
+    function buildLists(){
+      var l = getLang();
+      var yiPool = (l === 'en') ? yiPoolEn : yiPoolZh;
+      var jiPool = (l === 'en') ? jiPoolEn : jiPoolZh;
+      return {
+        yi: pickN(rng, yiPool, 6),
+        ji: pickN(rng, jiPool, 6)
+      };
+    }
+
+    var lists = buildLists();
+    var yi = lists.yi;
+    var ji = lists.ji;
+
+    var cai = posPool[Math.floor(rng()*posPool.length)];
+    var xi  = posPool[Math.floor(rng()*posPool.length)];
+    var fu  = posPool[Math.floor(rng()*posPool.length)];
+
+    var almanacDate = document.getElementById("almanacDate");
+    var almanacLunar = document.getElementById("almanacLunar");
+
+    if (almanacDate) {
+      var weekday = d.toLocaleDateString(undefined, { weekday: "long" });
+      almanacDate.textContent = d.toLocaleDateString() + " · " + weekday;
+    }
+
+    if (almanacLunar) {
+      try {
+        var lunarFmt = new Intl.DateTimeFormat("zh-Hans-u-ca-chinese", { year: "numeric", month: "numeric", day: "numeric" });
+        almanacLunar.textContent = (getLang() === 'en' ? 'Lunar ' : '农历 ') + lunarFmt.format(d);
+      } catch (e) {
+        almanacLunar.textContent = (getLang() === 'en') ? 'Lunar calendar (requires Intl support)' : '农历（需要 Intl 支持）';
+      }
+    }
+
+    var caiEl = document.getElementById("caiPos");
+    var xiEl  = document.getElementById("xiPos");
+    var fuEl  = document.getElementById("fuPos");
+    if (caiEl) caiEl.textContent = cai;
+    if (xiEl)  xiEl.textContent = xi;
+    if (fuEl)  fuEl.textContent = fu;
+
+    var yiEl = document.getElementById("yiList");
+    var jiEl = document.getElementById("jiList");
+
+    function toPills(list){
+      return list.map(function (t) {
+        return '<span style="display:inline-block;margin:6px 8px 0 0;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);">' + t + '</span>';
+      }).join("");
+    }
+
+    if (yiEl) yiEl.innerHTML = toPills(yi);
+    if (jiEl) jiEl.innerHTML = toPills(ji);
+
+    var hours = [
+      { t: "03:00–04:59", s: "平" },
+      { t: "05:00–06:59", s: "吉" },
+      { t: "07:00–08:59", s: "凶" },
+      { t: "09:00–10:59", s: "吉" },
+      { t: "11:00–12:59", s: "吉" },
+      { t: "13:00–14:59", s: "凶" },
+      { t: "15:00–16:59", s: "吉" },
+      { t: "17:00–18:59", s: "平" },
+      { t: "19:00–20:59", s: "凶" },
+      { t: "21:00–22:59", s: "吉" },
+      { t: "23:00–00:59", s: "平" },
+      { t: "01:00–02:59", s: "凶" }
+    ];
+
+    var lucky = hours.filter(function(h){ return h.s === "吉"; }).map(function(h){ return h.t; });
+    var luckyHoursText = document.getElementById("luckyHoursText");
+    if (luckyHoursText) {
+      luckyHoursText.textContent = lucky.slice(0,2).join(" · ") || "09:00–11:00 · 15:00–17:00";
+    }
+
+    var grid = document.getElementById("hoursGrid");
+    if (grid) {
+      var html = hours.map(function (h) {
+        var badgeBg = h.s === "吉" ? "rgba(70,200,120,.18)" : (h.s === "凶" ? "rgba(220,90,90,.18)" : "rgba(255,255,255,.06)");
+        var badgeBd = h.s === "吉" ? "rgba(70,200,120,.35)" : (h.s === "凶" ? "rgba(220,90,90,.35)" : "rgba(255,213,122,.14)");
+        return (
+          '<div style="border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:10px;background:rgba(255,255,255,.02);text-align:center;">' +
+            '<div style="font-weight:800;color:var(--gold2);">' + h.t + '</div>' +
+            '<div style="margin-top:6px;display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:4px 10px;border-radius:999px;background:' + badgeBg + ';border:1px solid ' + badgeBd + ';">' + h.s + '</div>' +
+          '</div>'
+        );
+      }).join("");
+      grid.innerHTML = html;
+    }
+
+    // Listen for language change to re-render pills and lunar prefix
+    window.addEventListener('langchange', function(){
+      var lists2 = buildLists();
+      if (yiEl) yiEl.innerHTML = toPills(lists2.yi);
+      if (jiEl) jiEl.innerHTML = toPills(lists2.ji);
+      if (almanacLunar) {
+        try {
+          var lunarFmt2 = new Intl.DateTimeFormat("zh-Hans-u-ca-chinese", { year: "numeric", month: "numeric", day: "numeric" });
+          almanacLunar.textContent = (getLang() === 'en' ? 'Lunar ' : '农历 ') + lunarFmt2.format(d);
+        } catch (e) {
+          almanacLunar.textContent = (getLang() === 'en') ? 'Lunar calendar (requires Intl support)' : '农历（需要 Intl 支持）';
+        }
+      }
+    });
+    // ===== Merit Board (Home) =====
+    var meritTrack = document.getElementById('meritTrack');
+    var meritDataCache = null;
+
+    function maskName(name){
+      if (!name) return '';
+      var s = String(name).trim();
+      if (!s) return '';
+
+      // English / spaced names
+      if (s.indexOf(' ') >= 0) {
+        return s.split(/\s+/).map(function(part){
+          if (!part) return '';
+          return part.charAt(0) + '****';
+        }).join(' ');
+      }
+
+      // Chinese or single token
+      if (s.length === 1) return s + '*';
+      if (s.length === 2) return s.charAt(0) + '*';
+      return s.charAt(0) + '**' + s.charAt(s.length - 1);
+    }
+
+    function formatMerit(n){
+      var num = Number(n);
+      if (!isFinite(num)) return String(n);
+      try {
+        return new Intl.NumberFormat().format(num);
+      } catch(e){
+        return String(num);
+      }
+    }
+
+    function renderMerit(list){
+      if (!meritTrack) return;
+      if (!Array.isArray(list) || list.length === 0) {
+        meritTrack.innerHTML = '<div style="opacity:.75;padding:8px;">' + (getLang() === 'en' ? 'No data yet.' : '暂无数据') + '</div>';
+        meritTrack.style.animation = 'none';
+        return;
+      }
+
+      // Sort high to low
+      var sorted = list.slice().sort(function(a,b){
+        return (Number(b.merit)||0) - (Number(a.merit)||0);
+      });
+
+      var unitEn = 'Merit';
+      var unitZh = '功德';
+      var unit = (getLang() === 'en') ? unitEn : unitZh;
+
+      var rows = sorted.map(function(item, idx){
+        var nm = maskName(item && item.name);
+        var amount = formatMerit(item && item.merit);
+        return (
+          '<div class="merit-row">' +
+            '<div class="merit-left">' +
+              '<div class="merit-rank">' + (idx + 1) + '</div>' +
+              '<div class="merit-name">' + nm + '</div>' +
+            '</div>' +
+            '<div class="merit-amount">' + amount + '<small>' + unit + '</small></div>' +
+          '</div>'
+        );
+      }).join('');
+
+      // Duplicate for seamless scroll
+      meritTrack.innerHTML = rows + rows;
+
+      // If too few rows, stop animation so it doesn't look weird
+      if (sorted.length <= 3) {
+        meritTrack.style.animation = 'none';
+      } else {
+        meritTrack.style.animation = '';
+      }
+    }
+
+    function loadMerit(){
+      if (!meritTrack) return;
+      fetch('data/merit.json', { cache: 'no-store' })
+        .then(function(r){
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(data){
+          meritDataCache = data;
+          renderMerit(data);
+        })
+        .catch(function(){
+          meritTrack.innerHTML = '<div style="opacity:.75;padding:8px;">' + (getLang() === 'en' ? 'Merit data not found: /data/merit.json' : '未找到功德数据：/data/merit.json') + '</div>';
+          meritTrack.style.animation = 'none';
+        });
+    }
+
+    loadMerit();
+
+    // Re-render on language change (keep the same data)
+    window.addEventListener('langchange', function(){
+      if (meritDataCache) renderMerit(meritDataCache);
+    });
+  })();
+</script>
+</body>
+</html>

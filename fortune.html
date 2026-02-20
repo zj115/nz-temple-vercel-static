@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Daily Fortune</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-ornament"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh (persisted across all pages)
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+  <!-- Page Title -->
+  <section style="padding:10px 0 18px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <h1 style="color:var(--gold);margin:10px 0 8px;letter-spacing:.6px;">
+          <span class="lang-en">Daily Fortune</span>
+          <span class="lang-zh">每日运势</span>
+        </h1>
+        <div style="opacity:.78;line-height:1.7;max-width:760px;">
+          <span class="lang-en">A calm, elegant fortune page that matches the temple theme. Content updates by today’s date (demo data for now).</span>
+          <span class="lang-zh">一个与财神庙主题一致的高级运势页面。内容会根据当天日期自动变化（当前为演示数据）。</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+        <a class="btn btn-ghost" href="index.html">
+          <span class="lang-en">Back to Home</span>
+          <span class="lang-zh">返回主页</span>
+        </a>
+        <a class="btn btn-gold" href="booking.html">
+          <span class="lang-en">Book a Ritual</span>
+          <span class="lang-zh">预约法事</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top Summary Cards -->
+  <section style="display:grid;grid-template-columns:1.2fr .8fr;gap:18px;padding:0 0 18px;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,213,122,.18);">☯</div>
+          <div>
+            <div style="font-weight:800;color:var(--gold);letter-spacing:.4px;">
+              <span class="lang-en">Today’s Overview</span>
+              <span class="lang-zh">今日概览</span>
+            </div>
+            <div id="fortuneSub" style="opacity:.75;font-size:13px;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+          <div style="border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.03);border-radius:999px;padding:8px 12px;">
+            <span style="opacity:.75;">
+              <span class="lang-en">Lucky Color</span>
+              <span class="lang-zh">幸运色</span>
+            </span>
+            <span id="luckyColor" style="margin-left:8px;color:var(--gold2);font-weight:800;"></span>
+          </div>
+          <div style="border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.03);border-radius:999px;padding:8px 12px;">
+            <span style="opacity:.75;">
+              <span class="lang-en">Lucky Number</span>
+              <span class="lang-zh">幸运数字</span>
+            </span>
+            <span id="luckyNumber" style="margin-left:8px;color:var(--gold2);font-weight:800;"></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:16px 0;"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:800;color:var(--gold);margin-bottom:8px;">
+            <span class="lang-en">Key Message</span>
+            <span class="lang-zh">今日主旨</span>
+          </div>
+          <div id="keyMessage" style="opacity:.9;line-height:1.8;"></div>
+        </div>
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:800;color:var(--gold);margin-bottom:8px;">
+            <span class="lang-en">Mantra</span>
+            <span class="lang-zh">今日祈愿</span>
+          </div>
+          <div id="mantra" style="opacity:.9;line-height:1.8;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card" style="padding:18px;">
+      <div style="font-weight:800;color:var(--gold);margin-bottom:10px;">
+        <span class="lang-en">Lucky Hours</span>
+        <span class="lang-zh">吉时</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,213,122,.14);">
+        <span style="opacity:.75;">
+          <span class="lang-en">Date</span>
+          <span class="lang-zh">日期</span>
+        </span>
+        <span id="todayText" style="color:var(--gold2);font-weight:800;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;">
+        <span style="opacity:.75;">
+          <span class="lang-en">Best Time Windows</span>
+          <span class="lang-zh">推荐时段</span>
+        </span>
+        <span id="bestHours" style="color:var(--gold2);font-weight:800;text-align:right;"></span>
+      </div>
+
+      <div style="margin-top:12px;border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:12px;background:rgba(255,255,255,.03);">
+        <div style="font-weight:800;color:var(--gold);margin-bottom:10px;">
+          <span class="lang-en">Today’s Actions</span>
+          <span class="lang-zh">今日行动</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn btn-gold" style="padding:10px 14px;" href="booking.html">
+            <span class="lang-en">Ritual Booking</span>
+            <span class="lang-zh">法事预约</span>
+          </a>
+          <a class="btn btn-ghost" style="padding:10px 14px;" href="shop.html">
+            <span class="lang-en">Temple Shop</span>
+            <span class="lang-zh">法物商城</span>
+          </a>
+          <a class="btn btn-ghost" style="padding:10px 14px;" href="courses.html">
+            <span class="lang-en">Courses</span>
+            <span class="lang-zh">课程</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scoreboard -->
+  <section class="glass-card" style="padding:18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-weight:800;color:var(--gold);letter-spacing:.4px;">
+          <span class="lang-en">Fortune Scores</span>
+          <span class="lang-zh">运势指数</span>
+        </div>
+        <div style="opacity:.75;margin-top:4px;line-height:1.6;">
+          <span class="lang-en">Demo scoring for UI. Later you can connect it to real data or your own rules.</span>
+          <span class="lang-zh">当前为演示评分（用于页面效果）。后续可接入真实数据或你自己的规则。</span>
+        </div>
+      </div>
+      <div style="opacity:.75;font-size:13px;">
+        <span class="lang-en">Tip: language button affects the whole site.</span>
+        <span class="lang-zh">提示：右上角语言按钮会影响全站显示。</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;">
+      <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="opacity:.75;font-size:12px;">
+          <span class="lang-en">Wealth</span>
+          <span class="lang-zh">财运</span>
+        </div>
+        <div id="scoreWealth" style="margin-top:6px;font-weight:900;color:var(--gold2);font-size:22px;"></div>
+        <div id="barWealth" style="margin-top:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;"></div>
+      </div>
+      <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="opacity:.75;font-size:12px;">
+          <span class="lang-en">Career</span>
+          <span class="lang-zh">事业</span>
+        </div>
+        <div id="scoreCareer" style="margin-top:6px;font-weight:900;color:var(--gold2);font-size:22px;"></div>
+        <div id="barCareer" style="margin-top:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;"></div>
+      </div>
+      <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="opacity:.75;font-size:12px;">
+          <span class="lang-en">Love</span>
+          <span class="lang-zh">感情</span>
+        </div>
+        <div id="scoreLove" style="margin-top:6px;font-weight:900;color:var(--gold2);font-size:22px;"></div>
+        <div id="barLove" style="margin-top:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;"></div>
+      </div>
+      <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="opacity:.75;font-size:12px;">
+          <span class="lang-en">Health</span>
+          <span class="lang-zh">健康</span>
+        </div>
+        <div id="scoreHealth" style="margin-top:6px;font-weight:900;color:var(--gold2);font-size:22px;"></div>
+        <div id="barHealth" style="margin-top:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Do / Don't -->
+  <section style="padding:18px 0 0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="glass-card" style="padding:18px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(70,200,120,.18);border:1px solid rgba(70,200,120,.35);">宜</div>
+          <div style="font-weight:900;color:var(--gold);">
+            <span class="lang-en">Recommended</span>
+            <span class="lang-zh">宜</span>
+          </div>
+        </div>
+        <div id="yiList" style="line-height:1.9;"></div>
+      </div>
+
+      <div class="glass-card" style="padding:18px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(220,90,90,.18);border:1px solid rgba(220,90,90,.35);">忌</div>
+          <div style="font-weight:900;color:var(--gold);">
+            <span class="lang-en">Avoid</span>
+            <span class="lang-zh">忌</span>
+          </div>
+        </div>
+        <div id="jiList" style="line-height:1.9;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Note -->
+  <section style="padding:18px 0 8px;">
+    <div class="glass-card" style="padding:16px;opacity:.9;">
+      <div style="font-weight:800;color:var(--gold);margin-bottom:6px;">
+        <span class="lang-en">Note</span>
+        <span class="lang-zh">说明</span>
+      </div>
+      <div style="opacity:.78;line-height:1.8;">
+        <span class="lang-en">This page uses demo rules and seed-by-date randomness. It is for UI/learning only and can be replaced with real fortune logic or API later.</span>
+        <span class="lang-zh">本页面使用“按日期种子随机”的演示规则，仅用于展示 UI/学习，后续可替换为真实运势逻辑或 API。</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var key = 'lang';
+
+    // Ensure lang attribute exists (works even if header script runs later)
+    var saved = localStorage.getItem(key);
+    var lang = (root.getAttribute('data-lang') === 'en' || root.getAttribute('data-lang') === 'zh')
+      ? root.getAttribute('data-lang')
+      : ((saved === 'en' || saved === 'zh') ? saved : 'zh');
+    root.setAttribute('data-lang', lang);
+
+    function getLang(){
+      var cur = root.getAttribute('data-lang');
+      return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+    }
+
+    function pad2(n){ return (n < 10 ? '0' : '') + n; }
+
+    function seedFromDate(date){
+      return Number(String(date.getFullYear()) + pad2(date.getMonth()+1) + pad2(date.getDate()));
+    }
+
+    function mulberry32(a) {
+      return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+    }
+
+    function pickN(rng, arr, n){
+      var copy = arr.slice();
+      var out = [];
+      while (out.length < n && copy.length) {
+        var idx = Math.floor(rng() * copy.length);
+        out.push(copy.splice(idx, 1)[0]);
+      }
+      return out;
+    }
+
+    function toPills(list){
+      return list.map(function (t) {
+        return '<span style="display:inline-block;margin:6px 8px 0 0;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);">' + t + '</span>';
+      }).join('');
+    }
+
+    function setBar(el, score){
+      if (!el) return;
+      var pct = Math.max(0, Math.min(100, score));
+      el.innerHTML = '<div style="height:100%;width:' + pct + '%;border-radius:999px;background:linear-gradient(90deg,var(--gold2),var(--gold));"></div>';
+    }
+
+    var d = new Date();
+    var seed = seedFromDate(d);
+    var rng = mulberry32(seed);
+
+    // Date
+    var todayEl = document.getElementById('todayText');
+    if (todayEl) todayEl.textContent = d.toLocaleDateString();
+
+    // Lucky hours
+    var hours = [
+      { t: '03:00–04:59', s: '平' },
+      { t: '05:00–06:59', s: '吉' },
+      { t: '07:00–08:59', s: '凶' },
+      { t: '09:00–10:59', s: '吉' },
+      { t: '11:00–12:59', s: '吉' },
+      { t: '13:00–14:59', s: '凶' },
+      { t: '15:00–16:59', s: '吉' },
+      { t: '17:00–18:59', s: '平' },
+      { t: '19:00–20:59', s: '凶' },
+      { t: '21:00–22:59', s: '吉' },
+      { t: '23:00–00:59', s: '平' },
+      { t: '01:00–02:59', s: '凶' }
+    ];
+    var lucky = hours.filter(function(h){ return h.s === '吉'; }).map(function(h){ return h.t; });
+    var bestHours = document.getElementById('bestHours');
+    if (bestHours) bestHours.textContent = (lucky.slice(0,2).join(' · ') || '09:00–10:59 · 15:00–16:59');
+
+    // Pools
+    var luckyColorsZh = ['金色', '米白', '琥珀', '墨绿', '深蓝'];
+    var luckyColorsEn = ['Gold', 'Ivory', 'Amber', 'Emerald', 'Deep Blue'];
+
+    var keyMsgZh = [
+      '稳住节奏，先做最重要的一件事，今天就会顺起来。',
+      '财气在“细节”里：核对、整理、复盘会带来好运。',
+      '遇到机会先别急着答应，确认规则后再行动。',
+      '把情绪放慢一点，你的判断会更准。'
+    ];
+    var keyMsgEn = [
+      'Hold a steady rhythm. Finish the most important task first and the day will flow.',
+      'Wealth hides in details: review, organize, and double-check to invite luck.',
+      'When an opportunity appears, confirm the rules before you commit.',
+      'Slow down your emotions and your judgment becomes sharper.'
+    ];
+
+    var mantraZh = [
+      '心静则明，财路自开。',
+      '诚心所愿，皆得圆满。',
+      '一步一印，福运相随。'
+    ];
+    var mantraEn = [
+      'A calm mind sees clearly; wealth finds its way.',
+      'With sincerity, wishes turn into blessings.',
+      'Step by step, fortune follows.'
+    ];
+
+    var yiPoolZh = ['祈福','纳财','出行','会友','开市','签约','学习','整理','沐浴','静心'];
+    var yiPoolEn = ['Pray','Wealth','Travel','Meet friends','Open business','Sign contract','Study','Organize','Cleanse','Meditation'];
+
+    var jiPoolZh = ['争执','冲动消费','深夜决定','大额借贷','口舌是非','情绪化沟通','仓促签约','拖延','过度劳累','久坐不动'];
+    var jiPoolEn = ['Argue','Impulse spending','Late-night decisions','Big loans','Gossip','Emotional talk','Hasty signing','Procrastination','Overwork','Sitting too long'];
+
+    function render(){
+      // Re-seed to keep deterministic for the date
+      rng = mulberry32(seed);
+
+      var l = getLang();
+
+      // Sub title
+      var fortuneSub = document.getElementById('fortuneSub');
+      if (fortuneSub) {
+        var weekdayEn = d.toLocaleDateString(undefined, { weekday: 'long' });
+        var weekdayZh = d.toLocaleDateString('zh-CN', { weekday: 'long' });
+        fortuneSub.textContent = (l === 'en')
+          ? (d.toLocaleDateString() + ' · ' + weekdayEn)
+          : (d.toLocaleDateString() + ' · ' + weekdayZh);
+      }
+
+      // Lucky color & number
+      var lc = (l === 'en') ? luckyColorsEn : luckyColorsZh;
+      var luckyColor = document.getElementById('luckyColor');
+      if (luckyColor) luckyColor.textContent = lc[Math.floor(rng()*lc.length)];
+
+      var luckyNumber = document.getElementById('luckyNumber');
+      if (luckyNumber) luckyNumber.textContent = String(1 + Math.floor(rng()*9));
+
+      // Key message
+      var km = (l === 'en') ? keyMsgEn : keyMsgZh;
+      var keyMessage = document.getElementById('keyMessage');
+      if (keyMessage) keyMessage.textContent = km[Math.floor(rng()*km.length)];
+
+      // Mantra
+      var mt = (l === 'en') ? mantraEn : mantraZh;
+      var mantra = document.getElementById('mantra');
+      if (mantra) mantra.textContent = mt[Math.floor(rng()*mt.length)];
+
+      // Scores
+      var scoreWealth = 55 + Math.floor(rng()*41);
+      var scoreCareer = 50 + Math.floor(rng()*46);
+      var scoreLove   = 45 + Math.floor(rng()*51);
+      var scoreHealth = 55 + Math.floor(rng()*41);
+
+      var sw = document.getElementById('scoreWealth');
+      var sc = document.getElementById('scoreCareer');
+      var sl = document.getElementById('scoreLove');
+      var sh = document.getElementById('scoreHealth');
+
+      if (sw) sw.textContent = scoreWealth + '/100';
+      if (sc) sc.textContent = scoreCareer + '/100';
+      if (sl) sl.textContent = scoreLove + '/100';
+      if (sh) sh.textContent = scoreHealth + '/100';
+
+      setBar(document.getElementById('barWealth'), scoreWealth);
+      setBar(document.getElementById('barCareer'), scoreCareer);
+      setBar(document.getElementById('barLove'), scoreLove);
+      setBar(document.getElementById('barHealth'), scoreHealth);
+
+      // Do / Don't
+      var yi = pickN(rng, (l === 'en') ? yiPoolEn : yiPoolZh, 6);
+      var ji = pickN(rng, (l === 'en') ? jiPoolEn : jiPoolZh, 6);
+
+      var yiEl = document.getElementById('yiList');
+      var jiEl = document.getElementById('jiList');
+      if (yiEl) yiEl.innerHTML = toPills(yi);
+      if (jiEl) jiEl.innerHTML = toPills(ji);
+    }
+
+    render();
+
+    // Re-render when header toggles language
+    window.addEventListener('langchange', function(){
+      render();
+    });
+  })();
+</script>
+
+<style>
+  @media (max-width: 900px) {
+    main.container > section:nth-of-type(2) { grid-template-columns: 1fr !important; }
+    main.container > section:nth-of-type(3) > div { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  @media (max-width: 520px) {
+    main.container > section:nth-of-type(3) > div { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+</body>
+</html>

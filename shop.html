@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-ornament"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh (persisted across all pages)
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+  <!-- Page Header -->
+  <section style="padding:14px 0 10px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div>
+        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;text-transform:capitalize;">
+          <span class="lang-en">Shop</span>
+          <span class="lang-zh">法物商城</span>
+        </h1>
+        <p style="opacity:.82;line-height:1.7;max-width:760px;">
+          <span class="lang-en">Carefully selected ritual items. Each item can be customized with your intention.</span>
+          <span class="lang-zh">精选法物，可按你的需求与愿望进行定制。</span>
+        </p>
+      </div>
+
+      <a class="btn btn-gold" href="booking.html" style="white-space:nowrap;">
+        <span class="lang-en">Book a Ritual</span>
+        <span class="lang-zh">预约法事</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Featured banner -->
+  <section class="glass-card shop-feature" style="padding:18px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div style="min-width:240px;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">Featured</span>
+          <span class="lang-zh">精选推荐</span>
+        </div>
+        <div style="opacity:.78;line-height:1.7;margin-top:6px;max-width:720px;">
+          <span class="lang-en">Talisman sets, Taoist compass, peach wood sword, and blessing gourd — presented in a calm, premium style.</span>
+          <span class="lang-zh">符纸套装、道教罗盘、桃木剑、开运葫芦——简洁高级的呈现方式。</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);font-weight:800;color:var(--gold2);letter-spacing:.4px;font-size:12px;">
+          <span class="lang-en">Hand-picked</span>
+          <span class="lang-zh">严选</span>
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);font-weight:800;color:var(--gold2);letter-spacing:.4px;font-size:12px;">
+          <span class="lang-en">Gift-ready</span>
+          <span class="lang-zh">可送礼</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section style="padding:16px 0 10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px;">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+        <span class="lang-en">Items</span>
+        <span class="lang-zh">法物列表</span>
+      </div>
+      <div style="opacity:.72;font-size:13px;">
+        <span class="lang-en">(Images can be replaced later)</span>
+        <span class="lang-zh">（图片后续可替换）</span>
+      </div>
+    </div>
+
+    <div class="shop-grid">
+      <!-- 1: Talisman -->
+      <div class="glass-card shop-item" style="padding:14px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02);">
+          <div style="aspect-ratio: 4 / 3;display:flex;align-items:center;justify-content:center;">
+            <img src="images/talisman.JPG" alt="Talisman" style="width:100%;height:100%;object-fit:cover;display:block;" />
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold2);line-height:1.2;">
+            <span class="lang-en">Talisman Set</span>
+            <span class="lang-zh">符纸套装</span>
+          </div>
+          <div style="opacity:.7;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">Blessing</span>
+            <span class="lang-zh">祈福</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;opacity:.82;line-height:1.6;">
+          <span class="lang-en">For wealth and harmony. Suitable for home or travel.</span>
+          <span class="lang-zh">用于招财、护身与和合，居家或随身皆可。</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <span style="font-weight:900;color:var(--gold);letter-spacing:.2px;">
+            <span class="lang-en">From NZD 49</span>
+            <span class="lang-zh">NZD 49 起</span>
+          </span>
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Request</span>
+            <span class="lang-zh">咨询</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2: Taoist Compass -->
+      <div class="glass-card shop-item" style="padding:14px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02);">
+          <div style="aspect-ratio: 4 / 3;display:flex;align-items:center;justify-content:center;">
+            <img src="images/luopan.PNG" alt="Taoist Compass" style="width:100%;height:100%;object-fit:cover;display:block;" />
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold2);line-height:1.2;">
+            <span class="lang-en">Taoist Compass</span>
+            <span class="lang-zh">道教罗盘</span>
+          </div>
+          <div style="opacity:.7;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">Feng Shui</span>
+            <span class="lang-zh">风水</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;opacity:.82;line-height:1.6;">
+          <span class="lang-en">For layout guidance and direction selection. Premium craft feel.</span>
+          <span class="lang-zh">用于风水布局与择向，质感高级耐看。</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <span style="font-weight:900;color:var(--gold);letter-spacing:.2px;">
+            <span class="lang-en">From NZD 129</span>
+            <span class="lang-zh">NZD 129 起</span>
+          </span>
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Request</span>
+            <span class="lang-zh">咨询</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 3: Peach Wood Sword -->
+      <div class="glass-card shop-item" style="padding:14px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02);">
+          <div style="aspect-ratio: 4 / 3;display:flex;align-items:center;justify-content:center;">
+            <img src="images/peach-sword.PNG" alt="Peach Wood Sword" style="width:100%;height:100%;object-fit:cover;display:block;" />
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold2);line-height:1.2;">
+            <span class="lang-en">Peach Wood Sword</span>
+            <span class="lang-zh">桃木剑</span>
+          </div>
+          <div style="opacity:.7;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">Protection</span>
+            <span class="lang-zh">护佑</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;opacity:.82;line-height:1.6;">
+          <span class="lang-en">Symbol of protection. Display piece for home and altar.</span>
+          <span class="lang-zh">护身辟邪象征，可居家摆放或供奉。</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <span style="font-weight:900;color:var(--gold);letter-spacing:.2px;">
+            <span class="lang-en">From NZD 89</span>
+            <span class="lang-zh">NZD 89 起</span>
+          </span>
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Request</span>
+            <span class="lang-zh">咨询</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 4: Blessing Gourd -->
+      <div class="glass-card shop-item" style="padding:14px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02);">
+          <div style="aspect-ratio: 4 / 3;display:flex;align-items:center;justify-content:center;">
+            <img src="images/gourd.PNG" alt="Blessing Gourd" style="width:100%;height:100%;object-fit:cover;display:block;" />
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold2);line-height:1.2;">
+            <span class="lang-en">Blessing Gourd</span>
+            <span class="lang-zh">开运葫芦</span>
+          </div>
+          <div style="opacity:.7;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">Harmony</span>
+            <span class="lang-zh">安稳</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;opacity:.82;line-height:1.6;">
+          <span class="lang-en">A calm, elegant home item. Helps create a peaceful atmosphere.</span>
+          <span class="lang-zh">温润耐看，适合居家陈设，营造安稳气场。</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <span style="font-weight:900;color:var(--gold);letter-spacing:.2px;">
+            <span class="lang-en">From NZD 39</span>
+            <span class="lang-zh">NZD 39 起</span>
+          </span>
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Request</span>
+            <span class="lang-zh">咨询</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;opacity:.7;font-size:13px;line-height:1.6;">
+      <span class="lang-en">Tip: put your images into <b>src/main/resources/static/images</b> with these names: talisman.JPG, luopan.PNG, peach-sword.PNG, gourd.PNG.</span>
+      <span class="lang-zh">提示：把图片放到 <b>src/main/resources/static/images</b>，并命名为：talisman.JPG、luopan.PNG、peach-sword.PNG、gourd.PNG。</span>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section style="padding:8px 0 26px;">
+    <div class="glass-card">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+        <span class="lang-en">FAQ</span>
+        <span class="lang-zh">常见问题</span>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+      <details style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+        <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+          <span class="lang-en">Do you ship?</span>
+          <span class="lang-zh">可以邮寄吗？</span>
+        </summary>
+        <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+          <span class="lang-en">Yes. After you submit a request, we confirm address and shipping method.</span>
+          <span class="lang-zh">可以。提交咨询后，我们会与你确认地址与配送方式。</span>
+        </div>
+      </details>
+
+      <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+        <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+          <span class="lang-en">Can items be customized?</span>
+          <span class="lang-zh">可以定制吗？</span>
+        </summary>
+        <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+          <span class="lang-en">Yes. Tell us your intention (wealth, protection, relationship, etc.).</span>
+          <span class="lang-zh">可以。告诉我们你的诉求（招财、护身、姻缘等）。</span>
+        </div>
+      </details>
+
+      <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+        <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+          <span class="lang-en">How do I order?</span>
+          <span class="lang-zh">怎么下单？</span>
+        </summary>
+        <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+          <span class="lang-en">For now, please use the booking/request page. We will contact you to confirm details.</span>
+          <span class="lang-zh">目前请通过“咨询/预约”提交信息，我们会联系你确认细节。</span>
+        </div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<style>
+  /* page-local responsive + premium polish (only affects this page) */
+  .shop-feature{
+    position:relative;
+    overflow:hidden;
+  }
+  .shop-feature::before{
+    content:"";
+    position:absolute;
+    inset:-40%;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(255,213,122,.14), transparent 55%),
+      radial-gradient(circle at 80% 35%, rgba(245,230,179,.10), transparent 60%);
+    filter: blur(18px);
+    pointer-events:none;
+  }
+  .shop-feature > *{position:relative;}
+
+  .shop-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:12px;
+  }
+
+  .shop-item{
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+  .shop-item:hover{
+    transform: translateY(-2px);
+    border-color: rgba(255,213,122,.32);
+    background: rgba(255,255,255,.06);
+    box-shadow: 0 18px 40px rgba(0,0,0,.35);
+  }
+
+  .shop-item img{
+    transform: scale(1);
+    transition: transform .35s ease;
+  }
+  .shop-item:hover img{
+    transform: scale(1.03);
+  }
+
+  @media (max-width: 1000px){
+    .shop-grid{grid-template-columns:repeat(2,1fr) !important;}
+  }
+  @media (max-width: 600px){
+    .shop-grid{grid-template-columns:1fr !important;}
+  }
+</style>
+
+</body>
+</html>

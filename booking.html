@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ritual Booking</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-booking">
+<div class="bg-ornament"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh (persisted across all pages)
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+  <!-- Page Header -->
+  <section style="padding:14px 0 10px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div>
+        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;">
+          <span class="lang-en">Ritual Booking</span>
+          <span class="lang-zh">法事预约</span>
+        </h1>
+        <p style="opacity:.82;line-height:1.7;max-width:760px;">
+          <span class="lang-en">Book a ritual for wealth, love, protection, and daily guidance. Choose a service, pick a preferred date, and we will contact you to confirm.</span>
+          <span class="lang-zh">预约招财、姻缘、护身与日常指引等法事。选择项目、填写意向日期，我们会联系你确认细节。</span>
+        </p>
+      </div>
+
+      <a class="btn btn-gold" href="fortune.html" style="white-space:nowrap;">
+        <span class="lang-en">Check Daily Fortune</span>
+        <span class="lang-zh">查看今日运势</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Hero + Quick facts -->
+  <section class="hero" style="padding-top:10px;">
+    <div>
+      <div class="glass-card" style="padding:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="font-weight:800;color:var(--gold);letter-spacing:.3px;">
+            <span class="lang-en">How it works</span>
+            <span class="lang-zh">预约流程</span>
+          </div>
+          <div style="opacity:.72;font-size:13px;">
+            <span class="lang-en">Fast · Private · Confirmed by message</span>
+            <span class="lang-zh">快速 · 私密 · 信息确认</span>
+          </div>
+        </div>
+
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+            <div style="font-weight:800;color:var(--gold2);">01</div>
+            <div style="margin-top:6px;font-weight:800;color:var(--gold);">
+              <span class="lang-en">Choose a ritual</span>
+              <span class="lang-zh">选择法事</span>
+            </div>
+            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+              <span class="lang-en">Pick the service that matches your goal.</span>
+              <span class="lang-zh">根据你的需求选择合适项目。</span>
+            </div>
+          </div>
+
+          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+            <div style="font-weight:800;color:var(--gold2);">02</div>
+            <div style="margin-top:6px;font-weight:800;color:var(--gold);">
+              <span class="lang-en">Submit your request</span>
+              <span class="lang-zh">提交预约</span>
+            </div>
+            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+              <span class="lang-en">Fill in your name and preferred date/time.</span>
+              <span class="lang-zh">填写姓名与意向日期/时间段。</span>
+            </div>
+          </div>
+
+          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+            <div style="font-weight:800;color:var(--gold2);">03</div>
+            <div style="margin-top:6px;font-weight:800;color:var(--gold);">
+              <span class="lang-en">We confirm with you</span>
+              <span class="lang-zh">我们确认</span>
+            </div>
+            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+              <span class="lang-en">We’ll contact you to confirm details and fees.</span>
+              <span class="lang-zh">我们会联系你确认细节与费用。</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;opacity:.7;font-size:13px;line-height:1.6;">
+          <span class="lang-en">Note: This is a demo booking page (no payment). You can later connect it to a database and real confirmation workflow.</span>
+          <span class="lang-zh">提示：这是演示预约页（暂不含支付）。后续可接数据库并实现真实确认流程。</span>
+        </div>
+      </div>
+
+      <!-- Service Cards -->
+      <div style="margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px;">
+          <div style="font-weight:800;color:var(--gold);letter-spacing:.3px;">
+            <span class="lang-en">Popular rituals</span>
+            <span class="lang-zh">热门法事</span>
+          </div>
+          <div style="opacity:.72;font-size:13px;">
+            <span class="lang-en">Tap to auto-fill the form</span>
+            <span class="lang-zh">点击可自动填入表单</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <button type="button" class="glass-card" style="text-align:left;cursor:pointer;" data-service="Wealth Blessing" data-service-zh="招财祈福">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="font-weight:900;color:var(--gold2);">
+                <span class="lang-en">Wealth Blessing</span>
+                <span class="lang-zh">招财祈福</span>
+              </div>
+              <div style="opacity:.72;font-size:12px;">
+                <span class="lang-en">45–60 min</span>
+                <span class="lang-zh">45–60分钟</span>
+              </div>
+            </div>
+            <div style="opacity:.8;line-height:1.65;margin-top:8px;">
+              <span class="lang-en">For career, business, and money flow.</span>
+              <span class="lang-zh">提升事业、财运与资金流动。</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">◎ <span class="lang-en">Focus</span><span class="lang-zh">重点</span></span>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">★ <span class="lang-en">Popular</span><span class="lang-zh">热门</span></span>
+            </div>
+          </button>
+
+          <button type="button" class="glass-card" style="text-align:left;cursor:pointer;" data-service="Love & Relationship" data-service-zh="姻缘和合">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="font-weight:900;color:var(--gold2);">
+                <span class="lang-en">Love & Relationship</span>
+                <span class="lang-zh">姻缘和合</span>
+              </div>
+              <div style="opacity:.72;font-size:12px;">
+                <span class="lang-en">40–60 min</span>
+                <span class="lang-zh">40–60分钟</span>
+              </div>
+            </div>
+            <div style="opacity:.8;line-height:1.65;margin-top:8px;">
+              <span class="lang-en">For harmony, connection, and communication.</span>
+              <span class="lang-zh">改善关系、沟通与情感连接。</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">♥ <span class="lang-en">Harmony</span><span class="lang-zh">和合</span></span>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">☾ <span class="lang-en">Calm</span><span class="lang-zh">安稳</span></span>
+            </div>
+          </button>
+
+          <button type="button" class="glass-card" style="text-align:left;cursor:pointer;" data-service="Protection & Peace" data-service-zh="护身平安">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="font-weight:900;color:var(--gold2);">
+                <span class="lang-en">Protection & Peace</span>
+                <span class="lang-zh">护身平安</span>
+              </div>
+              <div style="opacity:.72;font-size:12px;">
+                <span class="lang-en">30–45 min</span>
+                <span class="lang-zh">30–45分钟</span>
+              </div>
+            </div>
+            <div style="opacity:.8;line-height:1.65;margin-top:8px;">
+              <span class="lang-en">For safety, clarity, and removing bad luck.</span>
+              <span class="lang-zh">祈求平安顺遂，化解不顺。</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">🛡 <span class="lang-en">Protect</span><span class="lang-zh">护佑</span></span>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">✦ <span class="lang-en">Peace</span><span class="lang-zh">平安</span></span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Form -->
+    <div class="glass-card booking-form-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">Request a booking</span>
+          <span class="lang-zh">提交预约信息</span>
+        </div>
+        <div style="opacity:.72;font-size:13px;">
+          <span class="lang-en">We reply within 24 hours</span>
+          <span class="lang-zh">24小时内回复</span>
+        </div>
+      </div>
+
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+      <form id="bookingForm" action="#" method="post" class="booking-form-grid">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label for="service" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Service</span>
+            <span class="lang-zh">项目</span>
+          </label>
+          <select id="service" name="service" required class="form-control">
+            <option value="" selected disabled data-en="Select a service" data-zh="请选择项目">Select a service</option>
+            <option value="Wealth Blessing" data-en="Wealth Blessing" data-zh="招财祈福">Wealth Blessing</option>
+            <option value="Love & Relationship" data-en="Love & Relationship" data-zh="姻缘和合">Love & Relationship</option>
+            <option value="Protection & Peace" data-en="Protection & Peace" data-zh="护身平安">Protection & Peace</option>
+            <option value="Requiem & Liberation" data-en="Requiem & Liberation" data-zh="往生超度">Requiem & Liberation</option>
+            <option value="Health Blessing" data-en="Health Blessing" data-zh="健康祈福">Health Blessing</option>
+            <option value="Ancestral Blessing" data-en="Ancestral Blessing" data-zh="祖先祈福">Ancestral Blessing</option>
+            <option value="Home Protection" data-en="Home Protection" data-zh="家宅平安">Home Protection</option>
+            <option value="Business Opening Blessing" data-en="Business Opening Blessing" data-zh="开业祈福">Business Opening Blessing</option>
+          </select>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label for="date" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Preferred date</span>
+            <span class="lang-zh">意向日期</span>
+          </label>
+          <input id="date" name="date" type="date" required class="form-control" />
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label for="time" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Preferred time</span>
+            <span class="lang-zh">意向时间</span>
+          </label>
+          <select id="time" name="time" required class="form-control">
+            <option value="" selected disabled data-en="Select a time" data-zh="请选择时间">Select a time</option>
+            <option value="Morning" data-en="Morning" data-zh="上午">Morning</option>
+            <option value="Afternoon" data-en="Afternoon" data-zh="下午">Afternoon</option>
+            <option value="Evening" data-en="Evening" data-zh="晚上">Evening</option>
+          </select>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label for="name" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Your name</span>
+            <span class="lang-zh">姓名</span>
+          </label>
+          <input id="name" name="name" type="text" required placeholder="" class="form-control" />
+        </div>
+
+        <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
+          <label for="contact" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Contact (email or phone)</span>
+            <span class="lang-zh">联系方式（邮箱或电话）</span>
+          </label>
+          <input id="contact" name="contact" type="text" required class="form-control" />
+        </div>
+
+        <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
+          <label for="notes" style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Notes (optional)</span>
+            <span class="lang-zh">备注（可选）</span>
+          </label>
+          <textarea id="notes" name="notes" rows="4" class="form-control"></textarea>
+        </div>
+
+        <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div style="opacity:.72;font-size:13px;line-height:1.6;">
+            <span class="lang-en">By submitting, you agree we may contact you to confirm the booking.</span>
+            <span class="lang-zh">提交后表示你同意我们联系你确认预约。</span>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" type="reset">
+              <span class="lang-en">Reset</span>
+              <span class="lang-zh">重置</span>
+            </button>
+            <button class="btn btn-gold" type="submit" id="submitBtn">
+              <span class="lang-en">Submit Request</span>
+              <span class="lang-zh">提交预约</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div id="result" style="display:none;margin-top:14px;border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+        <div style="font-weight:900;color:var(--gold2);margin-bottom:6px;">
+          <span class="lang-en">Request received</span>
+          <span class="lang-zh">已收到预约</span>
+        </div>
+        <div id="resultText" style="opacity:.85;line-height:1.7;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ + Contact -->
+  <section style="padding:8px 0 26px;">
+    <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px;">
+      <div class="glass-card">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+          <span class="lang-en">FAQ</span>
+          <span class="lang-zh">常见问题</span>
+        </div>
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <details style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+            <span class="lang-en">How do I confirm the booking?</span>
+            <span class="lang-zh">预约如何确认？</span>
+          </summary>
+          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+            <span class="lang-en">After you submit the form, we contact you to confirm the exact time, location/online option, and fee.</span>
+            <span class="lang-zh">提交表单后，我们会联系你确认具体时间、线下/线上方式以及费用。</span>
+          </div>
+        </details>
+
+        <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+            <span class="lang-en">Can I change my date?</span>
+            <span class="lang-zh">可以改期吗？</span>
+          </summary>
+          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+            <span class="lang-en">Yes. Reply to our confirmation message and propose a new time. We’ll help reschedule.</span>
+            <span class="lang-zh">可以。直接回复我们的确认信息并提出新的时间，我们会协助改期。</span>
+          </div>
+        </details>
+
+        <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+            <span class="lang-en">What information should I provide?</span>
+            <span class="lang-zh">需要提供哪些信息？</span>
+          </summary>
+          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+            <span class="lang-en">Name and contact are required. Notes can include your intention, topic, or any special concerns.</span>
+            <span class="lang-zh">姓名与联系方式必填。备注可写你的诉求、主题或特殊情况。</span>
+          </div>
+        </details>
+      </div>
+
+      <div class="glass-card">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+          <span class="lang-en">Contact</span>
+          <span class="lang-zh">联系我们</span>
+        </div>
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <div style="display:grid;gap:10px;">
+          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+            <div style="opacity:.75;font-size:12px;">
+              <span class="lang-en">Response time</span>
+              <span class="lang-zh">回复时间</span>
+            </div>
+            <div style="margin-top:6px;font-weight:900;color:var(--gold2);">
+              <span class="lang-en">Within 24 hours</span>
+              <span class="lang-zh">24小时内</span>
+            </div>
+          </div>
+
+          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+            <div style="opacity:.75;font-size:12px;">
+              <span class="lang-en">Quick links</span>
+              <span class="lang-zh">快捷入口</span>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
+              <a class="btn btn-ghost" href="shop.html" style="padding:8px 12px;">
+                <span class="lang-en">Go to Shop</span>
+                <span class="lang-zh">前往法物</span>
+              </a>
+              <a class="btn btn-ghost" href="courses.html" style="padding:8px 12px;">
+                <span class="lang-en">View Courses</span>
+                <span class="lang-zh">查看课程</span>
+              </a>
+            </div>
+          </div>
+
+          <div style="opacity:.72;font-size:13px;line-height:1.6;">
+            <span class="lang-en">Tip: Later you can connect this form to a Spring controller and save bookings into a database.</span>
+            <span class="lang-zh">提示：后续可以把表单连接到 Spring Controller，并把预约保存到数据库。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    function getLang() {
+      var cur = root.getAttribute('data-lang');
+      return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+    }
+
+    // Auto-fill service when clicking cards
+    function wireServiceCards() {
+      var cards = document.querySelectorAll('[data-service]');
+      var serviceSelect = document.getElementById('service');
+      if (!cards || !serviceSelect) return;
+
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          var en = card.getAttribute('data-service') || '';
+          var zh = card.getAttribute('data-service-zh') || '';
+
+          // Try match by value
+          for (var i = 0; i < serviceSelect.options.length; i++) {
+            if (serviceSelect.options[i].value === en) {
+              serviceSelect.selectedIndex = i;
+              break;
+            }
+          }
+
+          // Focus the next field
+          var dateEl = document.getElementById('date');
+          if (dateEl) dateEl.focus();
+
+          // Small visual feedback
+          card.style.transform = 'translateY(-1px)';
+          setTimeout(function(){ card.style.transform = 'none'; }, 120);
+        });
+      });
+    }
+
+    // Simple submit (demo): show a confirmation box without backend
+    function wireForm() {
+      var form = document.getElementById('bookingForm');
+      var result = document.getElementById('result');
+      var resultText = document.getElementById('resultText');
+      if (!form || !result || !resultText) return;
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var serviceEl = document.getElementById('service');
+        var service = (serviceEl || {}).value || '';
+        var serviceZh = service;
+        if (serviceEl && serviceEl.selectedIndex >= 0) {
+          serviceZh = serviceEl.options[serviceEl.selectedIndex].getAttribute('data-zh') || service;
+        }
+        var date = (document.getElementById('date') || {}).value || '';
+        var time = (document.getElementById('time') || {}).value || '';
+        var name = (document.getElementById('name') || {}).value || '';
+        var contact = (document.getElementById('contact') || {}).value || '';
+
+        var l = getLang();
+        var timeLabel = (time === 'Morning') ? (l === 'en' ? 'Morning' : '上午')
+                      : (time === 'Afternoon') ? (l === 'en' ? 'Afternoon' : '下午')
+                      : (time === 'Evening') ? (l === 'en' ? 'Evening' : '晚上')
+                      : time;
+
+        var msgEn = 'Thank you, ' + name + '. We received your request for "' + service + '" on ' + date + ' (' + timeLabel + '). We will contact you at: ' + contact + '.';
+        var msgZh = '谢谢你，' + name + '。我们已收到你的预约：' + serviceZh + '，日期 ' + date + '（' + timeLabel + '）。我们将通过 ' + contact + ' 联系你确认。';
+
+        resultText.textContent = (l === 'en') ? msgEn : msgZh;
+        result.style.display = 'block';
+        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      form.addEventListener('reset', function(){
+        if (result) result.style.display = 'none';
+      });
+    }
+
+    // Re-render small bits on language switch
+    function wireLangChange(){
+      window.addEventListener('langchange', function(){
+        applySelectLang();
+      });
+    }
+
+    function applySelectLang(){
+      var l = getLang();
+
+      var serviceSelect = document.getElementById('service');
+      if (serviceSelect) {
+        for (var i = 0; i < serviceSelect.options.length; i++) {
+          var opt = serviceSelect.options[i];
+          var en = opt.getAttribute('data-en') || opt.textContent;
+          var zh = opt.getAttribute('data-zh') || en;
+          opt.textContent = (l === 'zh') ? zh : en;
+        }
+      }
+
+      var timeSelect = document.getElementById('time');
+      if (timeSelect) {
+        for (var j = 0; j < timeSelect.options.length; j++) {
+          var opt2 = timeSelect.options[j];
+          var en2 = opt2.getAttribute('data-en') || opt2.textContent;
+          var zh2 = opt2.getAttribute('data-zh') || en2;
+          opt2.textContent = (l === 'zh') ? zh2 : en2;
+        }
+      }
+    }
+
+    applySelectLang();
+    wireServiceCards();
+    wireForm();
+    wireLangChange();
+
+    // Make the layout responsive like the rest of the site
+    function responsiveTweaks(){
+      var mq = window.matchMedia('(max-width: 900px)');
+      function apply(){
+        var gridSections = document.querySelectorAll('section.hero > div:first-child .glass-card > div[style*="grid-template-columns:repeat(3,1fr)"]');
+        // We keep existing CSS; this is a safe no-op if not found.
+        if (mq.matches && gridSections) {
+          gridSections.forEach(function(el){
+            el.style.gridTemplateColumns = '1fr';
+          });
+        }
+      }
+      apply();
+      window.addEventListener('resize', apply);
+    }
+
+    responsiveTweaks();
+  })();
+</script>
+</body>
+</html>

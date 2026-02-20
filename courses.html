@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Courses</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-ornament"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+
+      <a class="btn btn-ghost" href="login.html">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+
+      // Default language: zh (persisted across all pages)
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+  <!-- Page Header -->
+  <section style="padding:14px 0 10px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div>
+        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;text-transform:none;">
+          <span class="lang-en">Courses</span>
+          <span class="lang-zh">课程</span>
+        </h1>
+        <p style="opacity:.82;line-height:1.7;max-width:820px;">
+          <span class="lang-en">Learn traditional metaphysics with a modern, practical approach. Choose a course, study step-by-step, and apply it to daily decisions.</span>
+          <span class="lang-zh">以现代、实用的方式学习传统玄学课程。选择课程，循序渐进学习，并应用到日常决策。</span>
+        </p>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn btn-gold" href="booking.html" style="white-space:nowrap;">
+          <span class="lang-en">Book a Ritual</span>
+          <span class="lang-zh">预约法事</span>
+        </a>
+        <a class="btn btn-ghost" href="shop.html" style="white-space:nowrap;">
+          <span class="lang-en">Explore Shop</span>
+          <span class="lang-zh">逛逛法物</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Highlights -->
+  <section style="padding:10px 0 16px;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">What you will get</span>
+          <span class="lang-zh">你将获得</span>
+        </div>
+        <div style="opacity:.72;font-size:13px;">
+          <span class="lang-en">Clear structure · Practical cases · Private study</span>
+          <span class="lang-zh">结构清晰 · 案例实战 · 私密学习</span>
+        </div>
+      </div>
+
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:900;color:var(--gold2);">01</div>
+          <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+            <span class="lang-en">From basics to mastery</span>
+            <span class="lang-zh">从入门到精通</span>
+          </div>
+          <div style="opacity:.82;line-height:1.6;margin-top:6px;">
+            <span class="lang-en">Start with fundamentals, then move to patterns, methods, and real-life reading.</span>
+            <span class="lang-zh">从基础概念开始，再到格局、方法和实战解读。</span>
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:900;color:var(--gold2);">02</div>
+          <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+            <span class="lang-en">Case-based learning</span>
+            <span class="lang-zh">案例驱动学习</span>
+          </div>
+          <div style="opacity:.82;line-height:1.6;margin-top:6px;">
+            <span class="lang-en">Each lesson includes examples you can copy and apply to your own situation.</span>
+            <span class="lang-zh">每节课配套案例，你可以直接套用到自己的问题上。</span>
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:900;color:var(--gold2);">03</div>
+          <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+            <span class="lang-en">Private guidance</span>
+            <span class="lang-zh">私密指导</span>
+          </div>
+          <div style="opacity:.82;line-height:1.6;margin-top:6px;">
+            <span class="lang-en">Ask questions, get feedback, and learn at your own pace.</span>
+            <span class="lang-zh">可提问、可反馈，按自己的节奏学习。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Course List -->
+  <section style="padding:6px 0 22px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px;">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+        <span class="lang-en">Featured courses</span>
+        <span class="lang-zh">精选课程</span>
+      </div>
+      <div style="opacity:.72;font-size:13px;">
+        <span class="lang-en">Beginner-friendly · Structured · High-end experience</span>
+        <span class="lang-zh">新手友好 · 结构清晰 · 高端体验</span>
+      </div>
+    </div>
+
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <!-- Qimen Dunjia -->
+      <div class="glass-card" style="padding:16px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold);line-height:1.2;">
+            <span class="lang-en">Qimen Dunjia</span>
+            <span class="lang-zh">奇门遁甲</span>
+            <div style="opacity:.72;font-size:12px;margin-top:6px;">
+              <span class="lang-en">Decision-making · Timing · Strategy</span>
+              <span class="lang-zh">决策择时 · 布局策略</span>
+            </div>
+          </div>
+          <div style="padding:7px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.22);background:rgba(255,255,255,.03);color:var(--gold2);font-weight:900;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">8 lessons</span>
+            <span class="lang-zh">8节课</span>
+          </div>
+        </div>
+
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <ul style="margin:0;padding-left:18px;opacity:.85;line-height:1.75;">
+          <li><span class="lang-en">Core chart structure and symbols</span><span class="lang-zh">盘面结构与符号入门</span></li>
+          <li><span class="lang-en">How to read timing and opportunities</span><span class="lang-zh">如何看时机与机会</span></li>
+          <li><span class="lang-en">Practical cases: career, business, relationships</span><span class="lang-zh">实战案例：事业、商业、感情</span></li>
+        </ul>
+
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Ask / Book</span>
+            <span class="lang-zh">咨询/预约</span>
+          </a>
+          <a class="btn btn-gold" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Start learning</span>
+            <span class="lang-zh">开始学习</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Feng Shui -->
+      <div class="glass-card" style="padding:16px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold);line-height:1.2;">
+            <span class="lang-en">Feng Shui</span>
+            <span class="lang-zh">风水</span>
+            <div style="opacity:.72;font-size:12px;margin-top:6px;">
+              <span class="lang-en">Home · Office · Energy flow</span>
+              <span class="lang-zh">居家 · 办公 · 气场流动</span>
+            </div>
+          </div>
+          <div style="padding:7px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.22);background:rgba(255,255,255,.03);color:var(--gold2);font-weight:900;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">6 lessons</span>
+            <span class="lang-zh">6节课</span>
+          </div>
+        </div>
+
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <ul style="margin:0;padding-left:18px;opacity:.85;line-height:1.75;">
+          <li><span class="lang-en">Layout basics: doors, beds, desks</span><span class="lang-zh">基础布局：门、床、书桌</span></li>
+          <li><span class="lang-en">Wealth position and daily adjustments</span><span class="lang-zh">财位判断与日常调整</span></li>
+          <li><span class="lang-en">Practical checklist for a stronger space</span><span class="lang-zh">强化空间气场的实用清单</span></li>
+        </ul>
+
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Ask / Book</span>
+            <span class="lang-zh">咨询/预约</span>
+          </a>
+          <a class="btn btn-gold" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Start learning</span>
+            <span class="lang-zh">开始学习</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Bazi -->
+      <div class="glass-card" style="padding:16px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="font-weight:900;color:var(--gold);line-height:1.2;">
+            <span class="lang-en">Bazi (Four Pillars)</span>
+            <span class="lang-zh">八字命理</span>
+            <div style="opacity:.72;font-size:12px;margin-top:6px;">
+              <span class="lang-en">Personality · Luck cycles · Planning</span>
+              <span class="lang-zh">性格 · 流年 · 规划</span>
+            </div>
+          </div>
+          <div style="padding:7px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.22);background:rgba(255,255,255,.03);color:var(--gold2);font-weight:900;font-size:12px;white-space:nowrap;">
+            <span class="lang-en">10 lessons</span>
+            <span class="lang-zh">10节课</span>
+          </div>
+        </div>
+
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <ul style="margin:0;padding-left:18px;opacity:.85;line-height:1.75;">
+          <li><span class="lang-en">Elements and strength: how to judge a chart</span><span class="lang-zh">五行与旺衰：如何看命盘</span></li>
+          <li><span class="lang-en">Luck cycles (Da Yun) and annual trends</span><span class="lang-zh">大运与流年：趋势怎么看</span></li>
+          <li><span class="lang-en">Real-life cases: work, love, money</span><span class="lang-zh">真实案例：工作、感情、财运</span></li>
+        </ul>
+
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Ask / Book</span>
+            <span class="lang-zh">咨询/预约</span>
+          </a>
+          <a class="btn btn-gold" href="booking.html" style="padding:8px 12px;">
+            <span class="lang-en">Start learning</span>
+            <span class="lang-zh">开始学习</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card" style="margin-top:12px;padding:16px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+            <span class="lang-en">More topics</span>
+            <span class="lang-zh">更多主题</span>
+          </div>
+          <div style="opacity:.82;margin-top:6px;line-height:1.7;">
+            <span class="lang-en">Also available: Taiyi, Liuren, name analysis, talisman basics, and personal planning.</span>
+            <span class="lang-zh">也可安排：太乙、六壬、姓名学、符法入门与个人规划等。</span>
+          </div>
+        </div>
+        <a class="btn btn-ghost" href="booking.html" style="white-space:nowrap;">
+          <span class="lang-en">Contact us</span>
+          <span class="lang-zh">联系咨询</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section style="padding:0 0 26px;">
+    <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px;">
+      <div class="glass-card">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+          <span class="lang-en">FAQ</span>
+          <span class="lang-zh">常见问题</span>
+        </div>
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <details style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+            <span class="lang-en">Do I need any background knowledge?</span>
+            <span class="lang-zh">需要基础吗？</span>
+          </summary>
+          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+            <span class="lang-en">No. We provide a beginner track and a clear learning path.</span>
+            <span class="lang-zh">不需要。我们有新手路线和清晰学习路径。</span>
+          </div>
+        </details>
+
+        <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+            <span class="lang-en">How do I choose a course?</span>
+            <span class="lang-zh">怎么选课程？</span>
+          </summary>
+          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+            <span class="lang-en">If you want timing and strategy, start with Qimen. For home/space, start with Feng Shui. For long-term planning, start with Bazi.</span>
+            <span class="lang-zh">想做决策择时选奇门；想改善居住/办公选风水；想长期规划选八字。</span>
+          </div>
+        </details>
+
+        <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
+            <span class="lang-en">Is this private?</span>
+            <span class="lang-zh">是否私密？</span>
+          </summary>
+          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+            <span class="lang-en">Yes. Your questions and study content are kept private.</span>
+            <span class="lang-zh">是的。你的问题与学习内容都会保密。</span>
+          </div>
+        </details>
+      </div>
+
+      <div class="glass-card">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+          <span class="lang-en">Next step</span>
+          <span class="lang-zh">下一步</span>
+        </div>
+        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
+
+        <div style="display:grid;gap:10px;">
+          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+            <div style="opacity:.75;font-size:12px;">
+              <span class="lang-en">Recommended</span>
+              <span class="lang-zh">推荐</span>
+            </div>
+            <div style="margin-top:6px;font-weight:900;color:var(--gold2);">
+              <span class="lang-en">Start with one course + one consultation</span>
+              <span class="lang-zh">先学一门课 + 做一次咨询</span>
+            </div>
+          </div>
+
+          <div style="opacity:.82;font-size:13px;line-height:1.7;">
+            <span class="lang-en">If you want a tailored plan, you can book a time and leave your goal in the notes. We will reply within 24 hours.</span>
+            <span class="lang-zh">想要定制学习方案的话，可以先预约并在备注写下目标，我们会在24小时内回复。</span>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a class="btn btn-gold" href="booking.html" style="flex:1;min-width:180px;">
+              <span class="lang-en">Book / Ask</span>
+              <span class="lang-zh">预约/咨询</span>
+            </a>
+            <a class="btn btn-ghost" href="index.html" style="flex:1;min-width:180px;">
+              <span class="lang-en">Back to Home</span>
+              <span class="lang-zh">返回主页</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Keep the same responsive behavior as other pages
+    (function(){
+      function responsive(){
+        var mq = window.matchMedia('(max-width: 900px)');
+        var grids = document.querySelectorAll('[data-course-grid]');
+        if (!grids || !grids.length) return;
+        grids.forEach(function(el){
+          el.style.gridTemplateColumns = mq.matches ? '1fr' : 'repeat(3,1fr)';
+        });
+      }
+      // Mark the main grid for optional responsive tweaks
+      var mainGrid = document.querySelector('main .container > section:nth-of-type(3) div[style*="grid-template-columns:repeat(3,1fr)"]');
+      if (mainGrid) mainGrid.setAttribute('data-course-grid','1');
+      responsive();
+      window.addEventListener('resize', responsive);
+    })();
+  </script>
+</main>
+</body>
+</html>

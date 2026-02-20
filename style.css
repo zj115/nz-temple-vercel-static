@@ -1,0 +1,365 @@
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0b0b0f;
+  --gold:#f5e6b3;
+  --gold2:#ffd57a;
+  --text:#e6d8a8;
+  --line:rgba(255,213,122,.22);
+  --content-max:1100px;
+  --content-pad:18px;
+}
+body{
+  background: radial-gradient(circle at top, #14162a, var(--bg) 60%);
+  color: var(--text);
+  font-family: "Times New Roman","Songti SC","Noto Serif SC",serif;
+  min-height:100vh;
+}
+.bg-ornament{
+  position:fixed; inset:-20%;
+  background:
+          radial-gradient(circle at 20% 10%, rgba(255,213,122,.12), transparent 45%),
+          radial-gradient(circle at 80% 15%, rgba(245,230,179,.10), transparent 50%),
+          radial-gradient(circle at 50% 60%, rgba(255,255,255,.05), transparent 60%);
+  filter: blur(25px);
+  pointer-events:none;
+  z-index:-1;
+}
+.container{max-width:var(--content-max);margin:0 auto;padding:30px var(--content-pad);}
+.topbar{
+  position:sticky; top:0; z-index:10;
+  background: linear-gradient(180deg, rgba(10,10,15,.85), rgba(10,10,15,.45));
+  backdrop-filter: blur(12px) saturate(150%);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:var(--content-max);margin:0 auto;padding:14px var(--content-pad);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;min-width:280px;}
+.brand-mark{
+  width:44px;height:44px;border-radius:14px;
+  display:grid;place-items:center;
+  overflow:hidden;
+  background:rgba(255,213,122,.10);
+  border:1px solid rgba(255,213,122,.28);
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.brand-logo{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* When header uses the new logo wrapper, make it look smaller and more refined */
+.brand-logo-wrap{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,213,122,.20);
+}
+.brand-logo-wrap .brand-logo{
+  width:28px;
+  height:28px;
+  object-fit:contain;
+  border-radius:999px;
+  background:#fff;
+  padding:2px;
+}
+
+.brand-title{font-weight:700;color:var(--gold);}
+.brand-subtitle{font-size:12px;opacity:.75;}
+.navlinks{display:flex;gap:10px;flex-wrap:wrap;flex:1;justify-content:center;}
+.navlinks a{
+  color:rgba(230,216,168,.9);
+  text-decoration:none;
+  padding:8px 10px;border-radius:10px;
+}
+.navlinks a:hover{background:rgba(255,255,255,.06);}
+.topbar-actions{
+  min-width:120px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 16px;
+  border-radius:999px;
+  text-decoration:none;
+  cursor:pointer;
+  border:0;
+  background:none;
+  font:inherit;
+  color:inherit;
+}
+.btn-ghost{
+  color:var(--text);
+  border:1px solid rgba(255,213,122,.25);
+  background:rgba(255,255,255,.03);
+}
+.btn-gold{
+  color:#1a1a1a;font-weight:700;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  border:1px solid rgba(255,213,122,.3);
+}
+.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;padding:26px 0;align-items:start;}
+.hero > *{min-width:0;}
+.hero-title{font-size:44px;line-height:1.1;color:var(--gold);margin-bottom:12px;}
+.glass-card{
+  border:1px solid rgba(255,213,122,.22);
+  background:rgba(255,255,255,.05);
+  border-radius:18px;padding:18px;
+}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;}
+  .navlinks{display:none;}
+  .brand{min-width:auto;}
+  .topbar-actions{min-width:0;}
+}
+
+/* ===== Align Almanac card with page container ===== */
+.container .glass-card[style*="max-width:920px"]{
+  max-width:none !important;
+  width:100% !important;
+  margin:0 !important;
+}
+
+/* ===== Language Toggle (EN / 中文) ===== */
+/* Default to English before JS runs (avoid EN+ZH showing together) */
+html:not([data-lang]) .lang-zh{display:none !important;}
+
+html[data-lang="zh"] .lang-en{display:none !important;}
+html[data-lang="en"] .lang-zh{display:none !important;}
+
+.btn-lang{padding:10px 14px;}
+
+/* ===== Booking / Forms (fix “table-like” border lines) ===== */
+.form-control{
+  width:100%;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,213,122,.18);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  outline:none;
+  min-width:0;
+}
+.form-control::placeholder{color:rgba(230,216,168,.65);}
+.form-control:focus{
+  border-color:rgba(255,213,122,.38);
+  box-shadow:0 0 0 3px rgba(255,213,122,.10);
+}
+
+/* Ensure grid gaps always exist so borders don’t visually connect */
+.booking-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px !important;
+  column-gap:12px !important;
+  row-gap:12px !important;
+  align-items:start;
+}
+.booking-form-grid > *{min-width:0;}
+
+.booking-form-grid .span-2{grid-column:1 / -1;}
+
+/* Prevent any accidental column-divider lines */
+.booking-form-grid, .booking-form-grid *{
+  background-image:none !important;
+}
+
+/* Normalize select look across browsers */
+select.form-control{
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(245,230,179,.9) 50%),
+    linear-gradient(135deg, rgba(245,230,179,.9) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size:6px 6px, 6px 6px;
+  background-repeat:no-repeat;
+  padding-right:34px;
+}
+
+textarea.form-control{resize:vertical;}
+
+/* If any inputs live inside glass-cards, prevent border “bleed” */
+.glass-card input,
+.glass-card select,
+.glass-card textarea{
+  background-clip:padding-box;
+}
+
+@media(max-width:900px){
+  .booking-form-grid{grid-template-columns:1fr;}
+}
+
+/* ===== Booking page: remove the faint cross/grid lines inside the form card ===== */
+.page-booking .booking-form-card{
+  position: relative;
+  overflow: hidden;
+}
+
+.page-booking .booking-form-card::before,
+.page-booking .booking-form-card::after{
+  content: none !important;
+  display: none !important;
+}
+
+/* Give the form a subtle inner panel so gaps don’t look like divider lines */
+.page-booking .booking-form-grid{
+  background: rgba(255,255,255,.02);
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.page-booking .booking-form-card .form-control{
+  box-shadow: none;
+  background-clip: padding-box;
+}
+
+.page-booking .booking-form-card input[type="date"]::-webkit-calendar-picker-indicator{
+  opacity: .85;
+  filter: invert(1) sepia(1) saturate(3) hue-rotate(15deg);
+}
+
+/* ===== Booking page: fix black/default text (buttons/details) to match site gold tone ===== */
+.page-booking button,
+.page-booking summary,
+.page-booking details,
+.page-booking option{
+  color: var(--text);
+}
+
+/* Service cards are <button class="glass-card">; force them to inherit readable text */
+.page-booking button.glass-card,
+.page-booking button.glass-card *{
+  color: var(--text);
+}
+
+/* Keep gold buttons readable (do NOT change their intended dark text) */
+.page-booking .btn.btn-gold,
+.page-booking .btn.btn-gold *{
+  color: #1a1a1a;
+}
+
+/* ===== Booking page: Popular rituals section text should be gold (only this section) ===== */
+.page-booking .popular-rituals,
+.page-booking .popular-rituals *{
+  color: var(--gold2) !important;
+}
+
+/* Keep gold buttons readable even if they appear inside the section */
+.page-booking .popular-rituals .btn.btn-gold,
+.page-booking .popular-rituals .btn.btn-gold *{
+  color: #1a1a1a !important;
+}
+
+/* ===== Merit Board (Home) ===== */
+.merit-board{
+  padding:18px;
+  margin-top:16px;
+}
+
+.merit-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.merit-title{
+  font-weight:900;
+  letter-spacing:.4px;
+  color:var(--gold);
+  font-size:18px;
+}
+
+.merit-sub{
+  margin-top:6px;
+  opacity:.72;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.merit-badge{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,213,122,.22);
+  background:rgba(255,255,255,.03);
+  color:var(--gold2);
+  font-weight:800;
+  letter-spacing:.6px;
+  font-size:12px;
+}
+
+.merit-mask{
+  position:relative;
+  overflow:hidden;
+  border-radius:16px;
+  border:1px solid rgba(255,213,122,.14);
+  background:rgba(255,255,255,.02);
+}
+
+.merit-list{
+  list-style:none;
+  display:grid;
+  gap:10px;
+  padding:12px;
+  margin:0;
+  will-change:transform;
+}
+
+.merit-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,213,122,.12);
+}
+
+.merit-rank{
+  color:var(--gold2);
+  font-weight:900;
+  font-size:12px;
+  min-width:42px;
+  letter-spacing:.6px;
+}
+
+.merit-name{
+  color:var(--gold);
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+.merit-dot{
+  flex:1;
+  height:1px;
+  background:rgba(255,213,122,.14);
+}
+
+.merit-score{
+  color:var(--gold2);
+  font-weight:900;
+  letter-spacing:.2px;
+  white-space:nowrap;
+}
+
+.merit-foot{
+  margin-top:10px;
+  opacity:.65;
+  font-size:12px;
+  line-height:1.5;
+}
+
+/* hover：更高级一点 */
+.merit-mask:hover .merit-item{
+  border-color: rgba(255,213,122,.18);
+  background: rgba(255,255,255,.04);
+}
