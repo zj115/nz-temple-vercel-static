@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Profile</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    .page-profile .grid-2{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;}
+    .page-profile .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .page-profile .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .page-profile .span-2{grid-column:1/-1;}
+    .page-profile .mode-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+    .page-profile .mode-btn{appearance:none;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);color:var(--gold2);border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer;transition:.18s ease;}
+    .page-profile .mode-btn.active{background:rgba(255,213,122,.14);border-color:rgba(255,213,122,.32);color:var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.18);}
+    .page-profile .mode-panel{display:none;}
+    .page-profile .mode-panel.active{display:block;}
+    .page-profile .mini-title{font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;}
+    .page-profile .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+    .page-profile .tag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;color:var(--gold2);font-weight:800;}
+    .page-profile .hint{opacity:.72;font-size:13px;line-height:1.7;}
+    .page-profile .kv{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,213,122,.14);}
+    .page-profile .kv:last-child{border-bottom:none;}
+    .page-profile .kv .k{opacity:.75;}
+    .page-profile .kv .v{color:var(--gold2);font-weight:800;text-align:right;}
+    .page-profile .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);font-weight:800;color:var(--gold2);letter-spacing:.2px;font-size:12px;white-space:nowrap;}
+    .page-profile .result-block{border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);}
+    .page-profile .bazi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px;}
+    .page-profile .bazi-cell{border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:10px;background:rgba(255,255,255,.02);text-align:center;}
+    .page-profile .bazi-cell .t{opacity:.75;font-size:12px;}
+    .page-profile .bazi-cell .g{margin-top:6px;font-weight:900;color:var(--gold2);font-size:18px;letter-spacing:.4px;}
+    .page-profile .member-panel{border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);margin-bottom:12px;}
+    .page-profile .member-level-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,213,122,.28);background:rgba(255,213,122,.08);color:var(--gold);font-weight:900;font-size:13px;letter-spacing:.3px;}
+    .page-profile .dao-name-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid rgba(245,230,179,.22);background:rgba(245,230,179,.06);color:var(--gold2);font-weight:800;font-size:12px;letter-spacing:.4px;margin-top:6px;}
+    .page-profile .record-list{display:grid;gap:10px;margin-top:10px;}
+    .page-profile .record-item{border:1px solid rgba(255,213,122,.12);border-radius:14px;padding:12px;background:rgba(255,255,255,.02);}
+    .page-profile .record-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .page-profile .record-title{color:var(--gold);font-weight:900;}
+    .page-profile .record-points{color:var(--gold2);font-weight:900;white-space:nowrap;}
+    /* friends */
+    .page-profile .friends-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .page-profile .friend-card{border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);margin-bottom:10px;}
+    .page-profile .friend-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .page-profile .friend-name{font-weight:900;color:var(--gold);font-size:16px;letter-spacing:.3px;}
+    .page-profile .friend-rel{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.18);font-size:12px;font-weight:800;color:var(--gold2);margin-top:4px;}
+    .page-profile .friend-actions{display:flex;gap:8px;flex-shrink:0;}
+    .page-profile .friend-bazi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+    .page-profile .friend-bazi-cell{border:1px solid rgba(255,213,122,.1);border-radius:12px;padding:8px;background:rgba(255,255,255,.02);text-align:center;}
+    .page-profile .friend-bazi-cell .t{opacity:.7;font-size:11px;}
+    .page-profile .friend-bazi-cell .g{margin-top:4px;font-weight:900;color:var(--gold2);font-size:16px;}
+    .page-profile .friend-form-wrap{border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:16px;background:rgba(255,255,255,.03);margin-top:14px;display:none;}
+    .page-profile .friend-form-wrap.open{display:block;}
+    /* certificates */
+    .cert-list{display:grid;gap:10px;margin-top:10px;}
+    .cert-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,213,122,.12);border-radius:14px;padding:12px;background:rgba(255,255,255,.02);flex-wrap:wrap;}
+    .cert-name{color:var(--gold);font-weight:900;}
+    .cert-actions{display:flex;gap:8px;flex-shrink:0;}
+    /* loading overlay */
+    #pageLoader{position:fixed;inset:0;background:#0b0b0f;display:flex;align-items:center;justify-content:center;z-index:9999;font-weight:900;color:var(--gold2);letter-spacing:.4px;}
+    .btn:disabled{opacity:.5;cursor:not-allowed;}
+    @media(max-width:980px){.page-profile .grid-2{grid-template-columns:1fr;}}
+    @media(max-width:640px){.page-profile .form-grid{grid-template-columns:1fr;}.page-profile .bazi-grid{grid-template-columns:repeat(2,1fr);}.page-profile .friend-bazi{grid-template-columns:repeat(2,1fr);}}
+  </style>
+</head>
+<body class="page-profile">
+<div id="pageLoader"><span class="lang-en">Loading…</span><span class="lang-zh">加载中…</span></div>
+<div class="bg-ornament"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container" id="mainContent" style="display:none;">
+
+  <!-- ── 顶部：会员卡片 ── -->
+  <section style="padding:14px 0 10px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div>
+        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;">
+          <span class="lang-en">Member Profile</span>
+          <span class="lang-zh">会员资料中心</span>
+        </h1>
+        <p class="hint" style="max-width:760px;">
+          <span class="lang-en">Your personal data, Bazi, family records, merit book, and certificates — all in one place.</span>
+          <span class="lang-zh">你的个人资料、八字、亲友档案、功德本和证书，全部在这里管理。</span>
+        </p>
+      </div>
+      <button class="btn btn-ghost" id="btnLogout" style="white-space:nowrap;">
+        <span class="lang-en">Logout</span>
+        <span class="lang-zh">退出登录</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ── 会员信息概览 ── -->
+  <section style="padding:0 0 14px;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">Member Overview</span>
+          <span class="lang-zh">会员概览</span>
+        </div>
+        <div class="member-level-badge" id="memberLevelBadge">—</div>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+      <div class="grid-3" style="gap:14px;">
+        <div class="member-panel" style="margin-bottom:0;">
+          <div class="kv"><div class="k"><span class="lang-en">Name</span><span class="lang-zh">姓名</span></div><div class="v" id="ovName">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Email</span><span class="lang-zh">邮箱</span></div><div class="v" id="ovEmail" style="font-size:12px;">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Phone</span><span class="lang-zh">电话</span></div><div class="v" id="ovPhone">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Dao Name</span><span class="lang-zh">道名</span></div><div class="v" id="ovDaoName" style="color:var(--gold2);">—</div></div>
+        </div>
+        <div class="member-panel" style="margin-bottom:0;">
+          <div style="opacity:.72;font-size:12px;margin-bottom:8px;letter-spacing:.2px;"><span class="lang-en">Level · Admin assigned</span><span class="lang-zh">等级 · 由管理员设置</span></div>
+          <div style="font-size:20px;font-weight:900;color:var(--gold);letter-spacing:.4px;" id="ovLevel">—</div>
+          <div style="height:1px;background:rgba(255,213,122,.12);margin:14px 0;"></div>
+          <div style="opacity:.72;font-size:12px;margin-bottom:8px;letter-spacing:.2px;"><span class="lang-en">Merit Points · Admin assigned</span><span class="lang-zh">功德分 · 由管理员设置</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-size:26px;font-weight:900;color:var(--gold2);" id="ovPoints">—</span>
+            <span style="opacity:.65;font-size:13px;"><span class="lang-en">pts</span><span class="lang-zh">分</span></span>
+          </div>
+        </div>
+        <div class="member-panel" style="margin-bottom:0;">
+          <div class="kv"><div class="k"><span class="lang-en">Member since</span><span class="lang-zh">注册时间</span></div><div class="v" id="ovCreated" style="font-size:12px;">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Role</span><span class="lang-zh">身份</span></div><div class="v" id="ovRole">—</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 主区域：基本信息 + 八字 ── -->
+  <section class="grid-2" style="padding:0 0 14px;">
+    <!-- 左：基本信息 + 编辑 -->
+    <div class="glass-card" style="padding:18px;">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:14px;">
+        <span class="lang-en">Basic Information</span>
+        <span class="lang-zh">基本信息</span>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin-bottom:14px;"></div>
+
+      <div class="form-grid" id="basicInfoForm">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Full Name</span><span class="lang-zh">姓名</span>
+          </label>
+          <input id="biName" class="form-control" type="text" />
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Phone</span><span class="lang-zh">电话</span>
+          </label>
+          <input id="biPhone" class="form-control" type="text" />
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Dao Name</span><span class="lang-zh">道名（可选，自填）</span>
+          </label>
+          <input id="biDaoName" class="form-control" type="text" placeholder="如：清虚子 / Leave blank if none" />
+        </div>
+        <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;">
+            <span class="lang-en">Email (read-only)</span><span class="lang-zh">邮箱（不可改）</span>
+          </label>
+          <input id="biEmail" class="form-control" type="email" readonly style="opacity:.6;" />
+        </div>
+        <div class="span-2" style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+          <button class="btn btn-gold" type="button" id="btnSaveBasic">
+            <span class="lang-en">Save</span><span class="lang-zh">保存</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="basicToast" style="display:none;margin-top:12px;border:1px solid rgba(255,213,122,.18);border-radius:14px;padding:10px 14px;background:rgba(255,255,255,.03);font-size:13px;opacity:.9;"></div>
+
+      <!-- 八字摘要（保存后显示） -->
+      <div id="baziSummary" style="display:none;margin-top:16px;">
+        <div style="height:1px;background:rgba(255,213,122,.14);margin-bottom:12px;"></div>
+        <div style="font-weight:900;color:var(--gold);font-size:13px;letter-spacing:.3px;margin-bottom:10px;">
+          <span class="lang-en">Saved Bazi</span><span class="lang-zh">已保存八字</span>
+        </div>
+        <div class="kv"><div class="k"><span class="lang-en">Gender</span><span class="lang-zh">性别</span></div><div class="v" id="sumGender">—</div></div>
+        <div class="kv"><div class="k"><span class="lang-en">Birth datetime</span><span class="lang-zh">出生时间</span></div><div class="v" id="sumBirth" style="font-size:12px;">—</div></div>
+        <div class="kv"><div class="k"><span class="lang-en">Birth place</span><span class="lang-zh">出生地区</span></div><div class="v" id="sumPlace">—</div></div>
+        <div class="kv"><div class="k"><span class="lang-en">Timezone</span><span class="lang-zh">时区</span></div><div class="v" id="sumTimezone">—</div></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;">
+          <div class="bazi-cell"><div class="t"><span class="lang-en">Year</span><span class="lang-zh">年柱</span></div><div class="g" id="sumYear">—</div></div>
+          <div class="bazi-cell"><div class="t"><span class="lang-en">Month</span><span class="lang-zh">月柱</span></div><div class="g" id="sumMonth">—</div></div>
+          <div class="bazi-cell"><div class="t"><span class="lang-en">Day</span><span class="lang-zh">日柱</span></div><div class="g" id="sumDay">—</div></div>
+          <div class="bazi-cell"><div class="t"><span class="lang-en">Hour</span><span class="lang-zh">时柱</span></div><div class="g" id="sumHour">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：命理资料 / 八字 -->
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">Bazi · Birth Info</span>
+          <span class="lang-zh">命理资料 · 生辰八字</span>
+        </div>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin-bottom:14px;"></div>
+
+      <div class="mode-switch">
+        <button type="button" class="mode-btn active" id="modeSolarBtn">
+          <span class="lang-en">Method A: Birth datetime</span>
+          <span class="lang-zh">方式A：出生年月日时</span>
+        </button>
+        <button type="button" class="mode-btn" id="modePillarsBtn">
+          <span class="lang-en">Method B: Direct Four Pillars</span>
+          <span class="lang-zh">方式B：直接输入八字</span>
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;"><span class="lang-en">Gender</span><span class="lang-zh">性别</span></label>
+          <select id="gender" class="form-control">
+            <option value="" disabled selected data-en="Select" data-zh="请选择">请选择</option>
+            <option value="male"   data-en="Male"   data-zh="男">男</option>
+            <option value="female" data-en="Female" data-zh="女">女</option>
+            <option value="other"  data-en="Other"  data-zh="其他">其他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Method A -->
+      <div id="modeSolarPanel" class="mode-panel active" style="margin-top:12px;">
+        <div class="mini-title"><span class="lang-en">Solar birth datetime</span><span class="lang-zh">阳历出生时间</span></div>
+        <div class="form-grid">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Birth date &amp; time</span><span class="lang-zh">出生日期时间</span></label>
+            <input id="birthDateTime" class="form-control" type="datetime-local" step="60" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Timezone</span><span class="lang-zh">时区</span></label>
+            <select id="timezone" class="form-control">
+              <option value="local" data-en="Use device timezone" data-zh="使用设备时区">使用设备时区</option>
+              <option value="NZ"    data-en="New Zealand (NZDT/NZST)" data-zh="新西兰（NZDT/NZST）">新西兰</option>
+              <option value="CN"    data-en="China (UTC+8)" data-zh="中国（UTC+8）">中国</option>
+            </select>
+          </div>
+          <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Birth place</span><span class="lang-zh">出生地区</span></label>
+            <input id="birthPlace" class="form-control" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Method B -->
+      <div id="modePillarsPanel" class="mode-panel" style="margin-top:12px;">
+        <div class="mini-title"><span class="lang-en">Direct Four Pillars input</span><span class="lang-zh">直接输入四柱</span></div>
+        <div class="form-grid">
+          <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-weight:700;opacity:.9;"><span class="lang-en">Year Pillar</span><span class="lang-zh">年柱</span></label><input id="pillarYear"  class="form-control" type="text" placeholder="如 甲子" /></div>
+          <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-weight:700;opacity:.9;"><span class="lang-en">Month Pillar</span><span class="lang-zh">月柱</span></label><input id="pillarMonth" class="form-control" type="text" placeholder="如 丙寅" /></div>
+          <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-weight:700;opacity:.9;"><span class="lang-en">Day Pillar</span><span class="lang-zh">日柱</span></label><input id="pillarDay"   class="form-control" type="text" placeholder="如 丁卯" /></div>
+          <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-weight:700;opacity:.9;"><span class="lang-en">Hour Pillar</span><span class="lang-zh">时柱</span></label><input id="pillarHour"  class="form-control" type="text" placeholder="如 己酉" /></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
+        <label style="font-weight:700;opacity:.9;"><span class="lang-en">Notes (optional)</span><span class="lang-zh">备注（可选）</span></label>
+        <textarea id="baziNote" class="form-control" rows="3"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px;">
+        <button class="btn btn-ghost"  type="button" id="btnBaziClear"><span class="lang-en">Clear</span><span class="lang-zh">清空</span></button>
+        <button class="btn btn-ghost"  type="button" id="btnBaziSave"><span class="lang-en">Save</span><span class="lang-zh">保存</span></button>
+        <button class="btn btn-gold"   type="button" id="btnBaziCalc"><span class="lang-en">Generate</span><span class="lang-zh">生成</span></button>
+      </div>
+      <div id="baziToast" style="display:none;margin-top:12px;border:1px solid rgba(255,213,122,.18);border-radius:14px;padding:10px 14px;background:rgba(255,255,255,.03);font-size:13px;opacity:.9;"></div>
+    </div>
+  </section>
+
+  <!-- ── 八字结果 ── -->
+  <section id="baziResultSection" style="padding:0 0 14px;display:none;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:14px;">
+        <span class="lang-en">Bazi Result</span><span class="lang-zh">八字生成结果</span>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin-bottom:14px;"></div>
+      <div class="grid-2" style="gap:14px;">
+        <div class="result-block">
+          <div class="kv"><div class="k"><span class="lang-en">Solar</span><span class="lang-zh">阳历</span></div><div class="v" id="outSolar">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Lunar</span><span class="lang-zh">阴历</span></div><div class="v" id="outLunar">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Birth hour</span><span class="lang-zh">出生时辰</span></div><div class="v" id="outHour">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Birth place</span><span class="lang-zh">出生地区</span></div><div class="v" id="outPlace">—</div></div>
+          <div class="kv"><div class="k"><span class="lang-en">Gender</span><span class="lang-zh">性别</span></div><div class="v" id="outGender">—</div></div>
+        </div>
+        <div class="result-block">
+          <div style="font-weight:900;color:var(--gold);margin-bottom:10px;"><span class="lang-en">Four Pillars</span><span class="lang-zh">四柱八字</span></div>
+          <div class="bazi-grid">
+            <div class="bazi-cell"><div class="t"><span class="lang-en">Year</span><span class="lang-zh">年柱</span></div><div class="g" id="gzYear">—</div></div>
+            <div class="bazi-cell"><div class="t"><span class="lang-en">Month</span><span class="lang-zh">月柱</span></div><div class="g" id="gzMonth">—</div></div>
+            <div class="bazi-cell"><div class="t"><span class="lang-en">Day</span><span class="lang-zh">日柱</span></div><div class="g" id="gzDay">—</div></div>
+            <div class="bazi-cell"><div class="t"><span class="lang-en">Hour</span><span class="lang-zh">时柱</span></div><div class="g" id="gzHour">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 亲朋好友 ── -->
+  <section style="padding:0 0 14px;">
+    <div class="glass-card" style="padding:18px;">
+      <div class="friends-header">
+        <div>
+          <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;font-size:18px;">
+            <span class="lang-en">Family &amp; Friends · Bazi</span>
+            <span class="lang-zh">亲朋好友 · 生辰八字</span>
+          </div>
+          <div class="hint" style="margin-top:6px;">
+            <span class="lang-en">Add birth info for family and friends to keep their Bazi records.</span>
+            <span class="lang-zh">为亲朋好友录入生辰八字，方便随时查阅。</span>
+          </div>
+        </div>
+        <button class="btn btn-gold" type="button" id="btnAddFriend" style="white-space:nowrap;">
+          <span class="lang-en">+ Add Person</span><span class="lang-zh">+ 添加联系人</span>
+        </button>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin-bottom:14px;"></div>
+      <div id="friendList"></div>
+
+      <!-- 亲友表单 -->
+      <div class="friend-form-wrap" id="friendFormWrap">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:14px;" id="friendFormTitle">
+          <span class="lang-en">Add Person</span><span class="lang-zh">添加联系人</span>
+        </div>
+        <div class="form-grid">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Name</span><span class="lang-zh">姓名</span></label>
+            <input id="fName" class="form-control" type="text" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Relationship</span><span class="lang-zh">关系</span></label>
+            <input id="fRelationship" class="form-control" type="text" placeholder="如 父亲 / Father" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Gender</span><span class="lang-zh">性别</span></label>
+            <select id="fGender" class="form-control">
+              <option value="" disabled selected>请选择</option>
+              <option value="male">男 / Male</option>
+              <option value="female">女 / Female</option>
+              <option value="other">其他 / Other</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Birth datetime</span><span class="lang-zh">出生时间</span></label>
+            <input id="fBirthDateTime" class="form-control" type="datetime-local" step="60" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Timezone</span><span class="lang-zh">时区</span></label>
+            <select id="fTimezone" class="form-control">
+              <option value="NZ">新西兰 / New Zealand</option>
+              <option value="CN">中国 / China (UTC+8)</option>
+              <option value="local">设备时区 / Device timezone</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Birth place</span><span class="lang-zh">出生地区</span></label>
+            <input id="fBirthPlace" class="form-control" type="text" />
+          </div>
+          <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-weight:700;opacity:.9;"><span class="lang-en">Notes (optional)</span><span class="lang-zh">备注（可选）</span></label>
+            <textarea id="fNote" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" type="button" id="btnFriendCancel"><span class="lang-en">Cancel</span><span class="lang-zh">取消</span></button>
+          <button class="btn btn-gold"  type="button" id="btnFriendSave"><span class="lang-en">Save</span><span class="lang-zh">保存</span></button>
+        </div>
+        <input type="hidden" id="fEditId" value="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 功德本 ── -->
+  <section style="padding:0 0 14px;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+          <span class="lang-en">Merit Book</span><span class="lang-zh">功德本</span>
+        </div>
+        <div class="hint"><span class="lang-en">Read-only · Maintained by admin</span><span class="lang-zh">只读 · 由管理员维护</span></div>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+      <div class="record-list" id="meritRecordList">
+        <div class="record-item"><div class="hint"><span class="lang-en">Loading…</span><span class="lang-zh">加载中…</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 证书 ── -->
+  <section style="padding:0 0 26px;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+            <span class="lang-en">Certificates</span><span class="lang-zh">证书文件</span>
+          </div>
+          <div class="hint" style="margin-top:4px;">
+            <span class="lang-en">Upload your certificates (皈依证, 传度证, etc.)</span>
+            <span class="lang-zh">上传你的证书文件（皈依证、传度证等）</span>
+          </div>
+        </div>
+      </div>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+      <!-- Upload form -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;">
+        <div style="flex:1;min-width:160px;display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;font-size:13px;"><span class="lang-en">Certificate name</span><span class="lang-zh">证书名称</span></label>
+          <input id="certTitle" class="form-control" type="text" placeholder="如 皈依证 / Certificate name" />
+        </div>
+        <div style="flex:1;min-width:160px;display:flex;flex-direction:column;gap:6px;">
+          <label style="font-weight:700;opacity:.9;font-size:13px;"><span class="lang-en">File (image/PDF)</span><span class="lang-zh">文件（图片/PDF）</span></label>
+          <input id="certFile" class="form-control" type="file" accept="image/*,.pdf" style="padding:8px;" />
+        </div>
+        <button class="btn btn-gold" type="button" id="btnUploadCert" style="white-space:nowrap;">
+          <span class="lang-en">Upload</span><span class="lang-zh">上传</span>
+        </button>
+      </div>
+      <div id="certUploadMsg" style="display:none;margin-bottom:12px;font-size:13px;opacity:.9;border:1px solid rgba(255,213,122,.18);border-radius:12px;padding:8px 12px;background:rgba(255,255,255,.02);"></div>
+
+      <!-- Note about Storage bucket -->
+      <div class="hint" style="margin-bottom:12px;padding:10px;border:1px solid rgba(255,213,122,.1);border-radius:12px;">
+        <span class="lang-en">⚠ File upload requires a Supabase Storage bucket named <strong>certificates</strong> (set to Public). Create it in Supabase → Storage.</span>
+        <span class="lang-zh">⚠ 上传文件需要在 Supabase → Storage 创建名为 <strong>certificates</strong> 的 bucket（设为 Public）。</span>
+      </div>
+
+      <div class="cert-list" id="certList">
+        <div class="record-item"><div class="hint"><span class="lang-en">Loading…</span><span class="lang-zh">加载中…</span></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  function getLang() {
+    var cur = root.getAttribute('data-lang');
+    return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+  }
+
+  function showMsg(elId, msg) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+    clearTimeout(el.__t);
+    el.__t = setTimeout(function () { el.style.display = 'none'; }, 2800);
+  }
+
+  // ── Bazi helpers ─────────────────────────────────────────
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  function getHourBranch(hour) {
+    var b = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    return b[Math.floor(((Number(hour) + 1) % 24) / 2)];
+  }
+
+  function getGZ(idx) {
+    var g = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    var z = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    return g[idx % 10] + z[idx % 12];
+  }
+
+  function approxYearGZ(date) {
+    var idx = (date.getFullYear() - 4) % 60;
+    return getGZ(idx < 0 ? idx + 60 : idx);
+  }
+
+  function approxMonthGZ(date) {
+    var mBranches = ['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'];
+    var m = date.getMonth() + 1;
+    var yg = approxYearGZ(date).charAt(0);
+    var sg = {'甲':'丙','己':'丙','乙':'戊','庚':'戊','丙':'庚','辛':'庚','丁':'壬','壬':'壬'}[yg] || '甲';
+    var gl = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    return gl[(gl.indexOf(sg) + m - 1) % 10] + mBranches[m - 1];
+  }
+
+  function approxDayGZ(date) {
+    var base = Date.UTC(1984, 1, 2);
+    var now  = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    var days = Math.floor((now - base) / 86400000);
+    var idx  = days % 60;
+    return getGZ(idx < 0 ? idx + 60 : idx);
+  }
+
+  function approxHourGZ(dayGZ, hour) {
+    var gl = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    var dg = dayGZ.charAt(0);
+    var sg = {'甲':'甲','己':'甲','乙':'丙','庚':'丙','丙':'戊','辛':'戊','丁':'庚','壬':'庚','戊':'壬','癸':'壬'}[dg] || '甲';
+    var zi = Math.floor(((Number(hour) + 1) % 24) / 2);
+    var zhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][zi];
+    return gl[(gl.indexOf(sg) + zi) % 10] + zhi;
+  }
+
+  function formatLunarLocal(date) {
+    try {
+      return new Intl.DateTimeFormat('zh-Hans-u-ca-chinese', { year:'numeric', month:'numeric', day:'numeric' }).format(date);
+    } catch(e) { return '—'; }
+  }
+
+  // ── setMode ──────────────────────────────────────────────
+  function setMode(mode) {
+    var next = mode === 'pillars' ? 'pillars' : 'solar';
+    root.setAttribute('data-input-mode', next);
+    document.getElementById('modeSolarBtn').classList.toggle('active', next === 'solar');
+    document.getElementById('modePillarsBtn').classList.toggle('active', next === 'pillars');
+    document.getElementById('modeSolarPanel').classList.toggle('active', next === 'solar');
+    document.getElementById('modePillarsPanel').classList.toggle('active', next === 'pillars');
+  }
+
+  // ── render member card ────────────────────────────────────
+  function renderMemberCard(p) {
+    var l = getLang();
+    var level  = p.level || '信众';
+    var points = Number(p.merit_points) || 0;
+
+    document.getElementById('ovName').textContent    = p.full_name || '—';
+    document.getElementById('ovEmail').textContent   = p.email    || '—';
+    document.getElementById('ovPhone').textContent   = p.phone    || '—';
+    document.getElementById('ovDaoName').textContent = p.dao_name || (l==='en'?'(Not set)':'（未填写）');
+    document.getElementById('ovLevel').textContent   = level;
+    document.getElementById('ovPoints').textContent  = String(points);
+    document.getElementById('ovCreated').textContent = p.created_at ? formatDate(p.created_at) : '—';
+    document.getElementById('ovRole').textContent    = p.role === 'admin' ? (l==='en'?'Admin':'管理员') : (l==='en'?'Member':'会员');
+    document.getElementById('memberLevelBadge').textContent = level;
+  }
+
+  // ── fill bazi form from profile ──────────────────────────
+  function fillBaziForm(p) {
+    if (p.birth_gender)   document.getElementById('gender').value = p.birth_gender;
+    if (p.birth_datetime) document.getElementById('birthDateTime').value = p.birth_datetime.slice(0,16);
+    if (p.birth_timezone) document.getElementById('timezone').value = p.birth_timezone;
+    if (p.birth_place)    document.getElementById('birthPlace').value = p.birth_place;
+    if (p.bazi_year)  document.getElementById('pillarYear').value  = p.bazi_year;
+    if (p.bazi_month) document.getElementById('pillarMonth').value = p.bazi_month;
+    if (p.bazi_day)   document.getElementById('pillarDay').value   = p.bazi_day;
+    if (p.bazi_hour)  document.getElementById('pillarHour').value  = p.bazi_hour;
+    // detect mode
+    if (p.bazi_year && !p.birth_datetime) setMode('pillars');
+    else setMode('solar');
+  }
+
+  // ── fill basic info form ─────────────────────────────────
+  function fillBasicForm(p, email) {
+    document.getElementById('biName').value    = p.full_name || '';
+    document.getElementById('biEmail').value   = p.email || email || '';
+    document.getElementById('biPhone').value   = p.phone || '';
+    document.getElementById('biDaoName').value = p.dao_name || '';
+  }
+
+  // ── save bazi ────────────────────────────────────────────
+  async function saveBazi() {
+    var l    = getLang();
+    var mode = root.getAttribute('data-input-mode') || 'solar';
+    var updates = {
+      birth_gender:   document.getElementById('gender').value,
+      birth_timezone: document.getElementById('timezone').value,
+      birth_place:    document.getElementById('birthPlace').value
+    };
+    if (mode === 'solar') {
+      var dt = document.getElementById('birthDateTime').value;
+      if (!updates.birth_gender || !dt || !updates.birth_place) {
+        showMsg('baziToast', l==='en'?'Please fill in all required fields.':'请填写所有必填项。');
+        return;
+      }
+      updates.birth_datetime = dt ? new Date(dt).toISOString() : null;
+      // also calc pillars
+      var dtParts = dt.split('T');
+      var dp = (dtParts[0]||'').split('-');
+      var tp = (dtParts[1]||'00:00').split(':');
+      var d  = new Date(Number(dp[0]), Number(dp[1])-1, Number(dp[2]), Number(tp[0]), Number(tp[1]));
+      updates.bazi_year  = approxYearGZ(d);
+      updates.bazi_month = approxMonthGZ(d);
+      updates.bazi_day   = approxDayGZ(d);
+      updates.bazi_hour  = approxHourGZ(updates.bazi_day, Number(tp[0]));
+    } else {
+      updates.bazi_year  = document.getElementById('pillarYear').value;
+      updates.bazi_month = document.getElementById('pillarMonth').value;
+      updates.bazi_day   = document.getElementById('pillarDay').value;
+      updates.bazi_hour  = document.getElementById('pillarHour').value;
+      if (!updates.birth_gender || !updates.bazi_year || !updates.bazi_month || !updates.bazi_day || !updates.bazi_hour) {
+        showMsg('baziToast', l==='en'?'Please fill in all required fields.':'请填写所有必填项。');
+        return;
+      }
+    }
+    var btn = document.getElementById('btnBaziSave');
+    if (btn) btn.disabled = true;
+    var r = await updateMyProfile(updates);
+    if (btn) btn.disabled = false;
+    if (r.error) { showMsg('baziToast', r.error.message); return; }
+    showMsg('baziToast', l==='en'?'Bazi saved.':'八字资料已保存。');
+    // 刷新摘要显示
+    var updated = await getMyProfile();
+    if (updated) renderBaziSummary(updated);
+  }
+
+  // ── render bazi summary in basic info card ───────────────
+  function renderBaziSummary(p) {
+    var box = document.getElementById('baziSummary');
+    if (!box) return;
+    var hasBazi = p.bazi_year || p.bazi_month || p.bazi_day || p.bazi_hour || p.birth_datetime || p.birth_gender;
+    if (!hasBazi) { box.style.display = 'none'; return; }
+    box.style.display = '';
+    var l = getLang();
+    var gMap = { male: l==='en'?'Male':'男', female: l==='en'?'Female':'女', other: l==='en'?'Other':'其他' };
+    document.getElementById('sumGender').textContent   = gMap[p.birth_gender] || p.birth_gender || '—';
+    document.getElementById('sumBirth').textContent    = p.birth_datetime ? formatDateTime(p.birth_datetime) : '—';
+    document.getElementById('sumPlace').textContent    = p.birth_place    || '—';
+    document.getElementById('sumTimezone').textContent = p.birth_timezone || '—';
+    document.getElementById('sumYear').textContent     = p.bazi_year   || '—';
+    document.getElementById('sumMonth').textContent    = p.bazi_month  || '—';
+    document.getElementById('sumDay').textContent      = p.bazi_day    || '—';
+    document.getElementById('sumHour').textContent     = p.bazi_hour   || '—';
+  }
+
+  // ── calc bazi ────────────────────────────────────────────
+  function calcBazi() {
+    var l    = getLang();
+    var mode = root.getAttribute('data-input-mode') || 'solar';
+    var gender = document.getElementById('gender').value;
+    if (!gender) { showMsg('baziToast', l==='en'?'Please select gender.':'请选择性别。'); return; }
+
+    var gMap = { male: l==='en'?'Male':'男', female: l==='en'?'Female':'女', other: l==='en'?'Other':'其他' };
+    document.getElementById('outGender').textContent = gMap[gender] || gender;
+    document.getElementById('outPlace').textContent  = document.getElementById('birthPlace').value || '—';
+
+    var yGz, mGz, dGz, hGz;
+    if (mode === 'pillars') {
+      yGz = document.getElementById('pillarYear').value  || '—';
+      mGz = document.getElementById('pillarMonth').value || '—';
+      dGz = document.getElementById('pillarDay').value   || '—';
+      hGz = document.getElementById('pillarHour').value  || '—';
+      document.getElementById('outSolar').textContent = l==='en'?'Entered directly':'直接输入';
+      document.getElementById('outLunar').textContent = l==='en'?'Entered directly':'直接输入';
+      document.getElementById('outHour').textContent  = hGz;
+    } else {
+      var dt = document.getElementById('birthDateTime').value;
+      if (!dt) { showMsg('baziToast', l==='en'?'Please enter birth datetime.':'请输入出生时间。'); return; }
+      var dp = (dt.split('T')[0]||'').split('-');
+      var tp = (dt.split('T')[1]||'00:00').split(':');
+      var d  = new Date(Number(dp[0]), Number(dp[1])-1, Number(dp[2]), Number(tp[0]), Number(tp[1]));
+      yGz = approxYearGZ(d);
+      mGz = approxMonthGZ(d);
+      dGz = approxDayGZ(d);
+      hGz = approxHourGZ(dGz, Number(tp[0]));
+      document.getElementById('outSolar').textContent = dp[0]+'-'+pad2(Number(dp[1]))+'-'+pad2(Number(dp[2]))+' '+pad2(Number(tp[0]))+':'+pad2(Number(tp[1]));
+      document.getElementById('outLunar').textContent = formatLunarLocal(d);
+      document.getElementById('outHour').textContent  = pad2(Number(tp[0]))+':'+pad2(Number(tp[1]))+' ('+getHourBranch(Number(tp[0]))+')';
+    }
+    document.getElementById('gzYear').textContent  = yGz;
+    document.getElementById('gzMonth').textContent = mGz;
+    document.getElementById('gzDay').textContent   = dGz;
+    document.getElementById('gzHour').textContent  = hGz;
+    document.getElementById('baziResultSection').style.display = '';
+    showMsg('baziToast', l==='en'?'Generated.':'已生成。');
+  }
+
+  // ── render merit records ─────────────────────────────────
+  function renderMeritRecords(records) {
+    var l   = getLang();
+    var el  = document.getElementById('meritRecordList');
+    if (!el) return;
+    if (!records || !records.length) {
+      el.innerHTML = '<div class="record-item"><div class="hint">'+(l==='en'?'No merit records yet.':'暂时还没有功德记录。')+'</div></div>';
+      return;
+    }
+    el.innerHTML = records.map(function (r) {
+      var pts = Number(r.points) || 0;
+      var sign = pts >= 0 ? '+' : '';
+      return '<div class="record-item">'
+        + '<div class="record-top">'
+        + '<div><div class="record-title">'+(r.title||'功德记录')+'</div>'
+        + '<div class="hint" style="margin-top:4px;">'+(r.record_date||r.created_at||'—')+'</div>'
+        + (r.notes ? '<div class="hint" style="margin-top:2px;">'+r.notes+'</div>' : '')
+        + '</div>'
+        + '<div class="record-points">'+sign+pts+'</div>'
+        + '</div></div>';
+    }).join('');
+  }
+
+  // ── render friends ───────────────────────────────────────
+  function renderFriends(friends) {
+    var l  = getLang();
+    var el = document.getElementById('friendList');
+    if (!el) return;
+    if (!friends || !friends.length) {
+      el.innerHTML = '<div class="hint" style="padding:10px 0;">'+(l==='en'?'No contacts yet. Click "+ Add Person" to add one.':'暂无亲友档案，点击"+ 添加联系人"开始添加。')+'</div>';
+      return;
+    }
+    el.innerHTML = friends.map(function (f) {
+      var bazi = [f.bazi_year, f.bazi_month, f.bazi_day, f.bazi_hour].filter(Boolean).join(' ');
+      return '<div class="friend-card" data-id="'+f.id+'">'
+        + '<div class="friend-card-top">'
+        + '<div><div class="friend-name">'+(f.full_name||'—')+'</div>'
+        + (f.relationship ? '<div class="friend-rel">'+f.relationship+'</div>' : '')
+        + (f.birth_place ? '<div class="hint" style="margin-top:4px;">📍 '+f.birth_place+'</div>' : '')
+        + (f.birth_datetime ? '<div class="hint" style="margin-top:2px;">🕐 '+formatDateTime(f.birth_datetime)+'</div>' : '')
+        + (bazi ? '<div class="hint" style="margin-top:2px;">八字：'+bazi+'</div>' : '')
+        + '</div>'
+        + '<div class="friend-actions">'
+        + '<button class="btn btn-ghost" style="padding:6px 10px;font-size:12px;" onclick="editFriend(\''+f.id+'\')">'
+        + '<span class="lang-en">Edit</span><span class="lang-zh">编辑</span></button>'
+        + '<button class="btn btn-ghost" style="padding:6px 10px;font-size:12px;color:#e57373;" onclick="deleteFriendById(\''+f.id+'\')">'
+        + '<span class="lang-en">Del</span><span class="lang-zh">删除</span></button>'
+        + '</div></div></div>';
+    }).join('');
+  }
+
+  // ── render certificates ──────────────────────────────────
+  function renderCertificates(certs) {
+    var l  = getLang();
+    var el = document.getElementById('certList');
+    if (!el) return;
+    if (!certs || !certs.length) {
+      el.innerHTML = '<div class="record-item"><div class="hint">'+(l==='en'?'No certificates uploaded yet.':'暂无上传的证书文件。')+'</div></div>';
+      return;
+    }
+    el.innerHTML = certs.map(function (c) {
+      return '<div class="cert-item">'
+        + '<div><div class="cert-name">'+(c.title||'证书')+'</div>'
+        + '<div class="hint" style="margin-top:4px;">'+(c.created_at?formatDate(c.created_at):'—')+'</div></div>'
+        + '<div class="cert-actions">'
+        + (c.file_url ? '<a class="btn btn-ghost" style="padding:6px 10px;font-size:12px;" href="'+c.file_url+'" target="_blank"><span class="lang-en">View</span><span class="lang-zh">查看</span></a>' : '')
+        + '<button class="btn btn-ghost" style="padding:6px 10px;font-size:12px;color:#e57373;" onclick="deleteCertById(\''+c.id+'\',\''+c.file_path+'\')"><span class="lang-en">Del</span><span class="lang-zh">删除</span></button>'
+        + '</div></div>';
+    }).join('');
+  }
+
+  // ── global helpers for inline onclick ────────────────────
+  var _friendsCache = [];
+
+  window.editFriend = function (id) {
+    var f = _friendsCache.find(function (x) { return x.id === id; });
+    if (!f) return;
+    document.getElementById('fEditId').value        = id;
+    document.getElementById('fName').value          = f.full_name    || '';
+    document.getElementById('fRelationship').value  = f.relationship || '';
+    document.getElementById('fGender').value        = f.gender       || '';
+    document.getElementById('fBirthDateTime').value = f.birth_datetime ? f.birth_datetime.slice(0,16) : '';
+    document.getElementById('fTimezone').value      = f.birth_timezone || 'NZ';
+    document.getElementById('fBirthPlace').value    = f.birth_place   || '';
+    document.getElementById('fNote').value          = f.notes         || '';
+    var wrap  = document.getElementById('friendFormWrap');
+    var title = document.getElementById('friendFormTitle');
+    var l = getLang();
+    if (title) title.innerHTML = '<span class="lang-en">Edit Person</span><span class="lang-zh">编辑联系人</span>';
+    if (wrap) { wrap.classList.add('open'); wrap.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  };
+
+  window.deleteFriendById = async function (id) {
+    var l = getLang();
+    if (!confirm(l==='en'?'Delete this contact?':'确定删除这个联系人？')) return;
+    var r = await deleteFamilyFriend(id);
+    if (r.error) { alert(r.error.message); return; }
+    _friendsCache = _friendsCache.filter(function (x) { return x.id !== id; });
+    renderFriends(_friendsCache);
+  };
+
+  window.deleteCertById = async function (id, filePath) {
+    var l = getLang();
+    if (!confirm(l==='en'?'Delete this certificate?':'确定删除这个证书？')) return;
+    var r = await deleteCertificate(id, filePath);
+    if (r.error) { alert(r.error.message); return; }
+    var certs = await getCertificates();
+    renderCertificates(certs);
+  };
+
+  // ── init ─────────────────────────────────────────────────
+  async function init() {
+    // require login
+    var session = await requireAuth();
+    if (!session) return;
+
+    renderNavAuthBtn();
+
+    // load profile
+    var profile = await getMyProfile();
+    if (!profile) {
+      // profile might not exist yet (trigger async), retry once
+      await new Promise(function(r){setTimeout(r,1200)});
+      profile = await getMyProfile();
+    }
+
+    // hide loader, show content
+    document.getElementById('pageLoader').style.display = 'none';
+    document.getElementById('mainContent').style.display = '';
+
+    if (profile) {
+      renderMemberCard(profile);
+      // fill basic info
+      fillBasicForm(profile, session.user.email);
+      // fill bazi
+      fillBaziForm(profile);
+      renderBaziSummary(profile);
+    } else {
+      document.getElementById('biEmail').value = session.user.email || '';
+    }
+
+    // load merit records
+    var merits = await getMeritRecords();
+    renderMeritRecords(merits);
+
+    // load family/friends
+    _friendsCache = await getFamilyFriends();
+    renderFriends(_friendsCache);
+
+    // load certificates
+    var certs = await getCertificates();
+    renderCertificates(certs);
+
+    // ── wire up buttons ─────────────────────────────────
+
+    // logout
+    document.getElementById('btnLogout').addEventListener('click', async function () {
+      await _sb.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    // basic info save
+    document.getElementById('btnSaveBasic').addEventListener('click', async function () {
+      var l = getLang();
+      var btn = this;
+      btn.disabled = true;
+      var r = await updateMyProfile({
+        full_name: document.getElementById('biName').value.trim(),
+        phone:     document.getElementById('biPhone').value.trim(),
+        dao_name:  document.getElementById('biDaoName').value.trim()
+      });
+      btn.disabled = false;
+      if (r.error) { showMsg('basicToast', r.error.message); return; }
+      showMsg('basicToast', l==='en'?'Basic info saved.':'基本信息已保存。');
+      if (r.data) {
+        document.getElementById('ovName').textContent    = r.data.full_name || '—';
+        document.getElementById('ovPhone').textContent   = r.data.phone     || '—';
+        document.getElementById('ovDaoName').textContent = r.data.dao_name  || (l==='en'?'(Not set)':'（未填写）');
+        document.getElementById('memberLevelBadge').textContent = r.data.level || '信众';
+      }
+    });
+
+    // bazi mode
+    document.getElementById('modeSolarBtn').addEventListener('click',   function () { setMode('solar');   });
+    document.getElementById('modePillarsBtn').addEventListener('click', function () { setMode('pillars'); });
+
+    // bazi buttons
+    document.getElementById('btnBaziSave').addEventListener('click',  saveBazi);
+    document.getElementById('btnBaziCalc').addEventListener('click',  calcBazi);
+    document.getElementById('btnBaziClear').addEventListener('click', function () {
+      ['gender','birthDateTime','birthPlace','pillarYear','pillarMonth','pillarDay','pillarHour','baziNote'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('baziResultSection').style.display = 'none';
+      setMode('solar');
+    });
+
+    // add friend
+    document.getElementById('btnAddFriend').addEventListener('click', function () {
+      var wrap = document.getElementById('friendFormWrap');
+      document.getElementById('fEditId').value = '';
+      ['fName','fRelationship','fBirthDateTime','fBirthPlace','fNote'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('fGender').value   = '';
+      document.getElementById('fTimezone').value = 'NZ';
+      var title = document.getElementById('friendFormTitle');
+      if (title) title.innerHTML = '<span class="lang-en">Add Person</span><span class="lang-zh">添加联系人</span>';
+      wrap.classList.add('open');
+      wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    });
+
+    // cancel friend form
+    document.getElementById('btnFriendCancel').addEventListener('click', function () {
+      document.getElementById('friendFormWrap').classList.remove('open');
+    });
+
+    // save friend
+    document.getElementById('btnFriendSave').addEventListener('click', async function () {
+      var l    = getLang();
+      var name = (document.getElementById('fName').value || '').trim();
+      if (!name) { alert(l==='en'?'Name is required.':'请填写姓名。'); return; }
+      var editId = document.getElementById('fEditId').value;
+      var record = {
+        full_name:     name,
+        relationship:  document.getElementById('fRelationship').value.trim(),
+        gender:        document.getElementById('fGender').value,
+        birth_datetime: (function(){ var v=document.getElementById('fBirthDateTime').value; return v ? new Date(v).toISOString() : null; })(),
+        birth_timezone: document.getElementById('fTimezone').value,
+        birth_place:   document.getElementById('fBirthPlace').value.trim(),
+        notes:         document.getElementById('fNote').value.trim()
+      };
+      var btn = this;
+      btn.disabled = true;
+      var r;
+      if (editId) {
+        r = await updateFamilyFriend(editId, record);
+      } else {
+        r = await addFamilyFriend(record);
+      }
+      btn.disabled = false;
+      if (r.error) { alert(r.error.message); return; }
+      document.getElementById('friendFormWrap').classList.remove('open');
+      _friendsCache = await getFamilyFriends();
+      renderFriends(_friendsCache);
+    });
+
+    // upload certificate
+    document.getElementById('btnUploadCert').addEventListener('click', async function () {
+      var l     = getLang();
+      var title = (document.getElementById('certTitle').value || '').trim();
+      var file  = document.getElementById('certFile').files[0];
+      if (!title || !file) {
+        showMsg('certUploadMsg', l==='en'?'Please enter a name and select a file.':'请填写证书名称并选择文件。');
+        return;
+      }
+      var btn = this;
+      btn.disabled = true;
+      showMsg('certUploadMsg', l==='en'?'Uploading…':'上传中…');
+      var r = await uploadCertificate(file, title);
+      btn.disabled = false;
+      if (r.error) { showMsg('certUploadMsg', r.error.message); return; }
+      showMsg('certUploadMsg', l==='en'?'Certificate uploaded.':'证书上传成功。');
+      document.getElementById('certTitle').value = '';
+      document.getElementById('certFile').value  = '';
+      var certs = await getCertificates();
+      renderCertificates(certs);
+    });
+
+    // language
+    window.addEventListener('langchange', function () {
+      if (profile) renderMemberCard(profile);
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

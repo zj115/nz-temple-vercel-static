@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Courses</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
 </head>
 <body>
 <div class="bg-ornament"></div>
@@ -32,6 +34,7 @@
       <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
     </nav>
 
     <div class="topbar-actions">
@@ -40,7 +43,7 @@
         <span class="lang-zh">EN</span>
       </button>
 
-      <a class="btn btn-ghost" href="login.html">
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
         <span class="lang-en">Login</span><span class="lang-zh">登录</span>
       </a>
     </div>
@@ -67,6 +70,7 @@
         window.dispatchEvent(new Event('langchange'));
       });
     })();
+    renderNavAuthBtn();
   </script>
 </header>
 

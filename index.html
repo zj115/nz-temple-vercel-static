@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>NZ Temple</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
   <style>
     /* ===== Merit Board (Home only) ===== */
     .merit-board{
@@ -162,6 +164,7 @@
       <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
     </nav>
 
     <div class="topbar-actions">
@@ -170,7 +173,7 @@
         <span class="lang-zh">EN</span>
       </button>
 
-      <a class="btn btn-ghost" href="login.html">
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
         <span class="lang-en">Login</span><span class="lang-zh">登录</span>
       </a>
     </div>
@@ -197,6 +200,7 @@
         window.dispatchEvent(new Event('langchange'));
       });
     })();
+    renderNavAuthBtn();
   </script>
 </header>
 
@@ -595,16 +599,11 @@
         return;
       }
 
-      // Sort high to low
-      var sorted = list.slice().sort(function(a,b){
-        return (Number(b.merit)||0) - (Number(a.merit)||0);
-      });
-
       var unitEn = 'Merit';
       var unitZh = '功德';
       var unit = (getLang() === 'en') ? unitEn : unitZh;
 
-      var rows = sorted.map(function(item, idx){
+      var rows = list.map(function(item, idx){
         var nm = maskName(item && item.name);
         var amount = formatMerit(item && item.merit);
         return (
@@ -622,7 +621,7 @@
       meritTrack.innerHTML = rows + rows;
 
       // If too few rows, stop animation so it doesn't look weird
-      if (sorted.length <= 3) {
+      if (list.length <= 3) {
         meritTrack.style.animation = 'none';
       } else {
         meritTrack.style.animation = '';
@@ -631,18 +630,23 @@
 
     function loadMerit(){
       if (!meritTrack) return;
-      fetch('data/merit.json', { cache: 'no-store' })
-        .then(function(r){
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
-        .then(function(data){
-          meritDataCache = data;
-          renderMerit(data);
-        })
-        .catch(function(){
-          meritTrack.innerHTML = '<div style="opacity:.75;padding:8px;">' + (getLang() === 'en' ? 'Merit data not found: /data/merit.json' : '未找到功德数据：/data/merit.json') + '</div>';
-          meritTrack.style.animation = 'none';
+      // Load from Supabase merit_board table
+      _sb.from('merit_board')
+        .select('display_name, merit_amount, sort_order')
+        .eq('is_visible', true)
+        .order('sort_order', { ascending: true })
+        .then(function(res){
+          if (res.error || !res.data || res.data.length === 0) {
+            meritTrack.innerHTML = '<div style="opacity:.75;padding:8px;">' + (getLang() === 'en' ? 'No data yet.' : '暂无数据') + '</div>';
+            meritTrack.style.animation = 'none';
+            return;
+          }
+          // Map to the format renderMerit expects
+          var list = res.data.map(function(row){
+            return { name: row.display_name, merit: row.merit_amount };
+          });
+          meritDataCache = list;
+          renderMerit(list);
         });
     }
 

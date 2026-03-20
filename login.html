@@ -5,17 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Login</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    .auth-shell{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .auth-tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .auth-tab{
+      appearance:none;
+      border:1px solid rgba(255,213,122,.18);
+      background:rgba(255,255,255,.03);
+      color:var(--gold2);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .auth-tab:hover{
+      transform:translateY(-1px);
+    }
+    .auth-tab.active{
+      color:var(--gold);
+      background:rgba(255,213,122,.14);
+      border-color:rgba(255,213,122,.32);
+      box-shadow:0 12px 28px rgba(0,0,0,.18);
+    }
+    .auth-panel{
+      display:none;
+    }
+    .auth-panel.active{
+      display:block;
+    }
+    .auth-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .auth-span-2{
+      grid-column:1 / -1;
+    }
+    .auth-mini-note{
+      opacity:.74;
+      font-size:13px;
+      line-height:1.7;
+    }
+    .auth-toast{
+      display:none;
+      margin-top:14px;
+      border:1px solid rgba(255,213,122,.18);
+      border-radius:16px;
+      padding:14px;
+      background:rgba(255,255,255,.03);
+      animation:fadeUp .28s ease;
+    }
+    .auth-toast.show{
+      display:block;
+    }
+    .feature-card{
+      position:relative;
+      overflow:hidden;
+    }
+    .feature-card::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:
+              radial-gradient(circle at 20% 20%, rgba(255,213,122,.14), transparent 45%),
+              radial-gradient(circle at 80% 35%, rgba(245,230,179,.10), transparent 55%);
+      filter:blur(18px);
+      pointer-events:none;
+    }
+    .feature-card > *{
+      position:relative;
+    }
+    .floating-orb{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,213,122,.18);
+      animation:floatOrb 3.2s ease-in-out infinite;
+    }
+    .feature-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
+    .feature-item{
+      border:1px solid rgba(255,213,122,.14);
+      border-radius:16px;
+      padding:14px;
+      background:rgba(255,255,255,.03);
+    }
+    .btn:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+    @keyframes fadeUp{
+      from{ opacity:0; transform:translateY(6px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+    @keyframes floatOrb{
+      0%,100%{ transform:translateY(0); }
+      50%{ transform:translateY(-4px); }
+    }
+    @media (max-width: 980px){
+      .auth-shell{
+        grid-template-columns:1fr;
+      }
+    }
+    @media (max-width: 640px){
+      .auth-grid{
+        grid-template-columns:1fr;
+      }
+      .feature-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
 </head>
 <body class="page-login">
-
 <div class="bg-ornament"></div>
+
 <header class="topbar">
-  <div class="topbar-inner">
+  <div class="topbar-inner" style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;">
     <a class="brand" href="index.html">
       <div class="brand-mark brand-logo-wrap" aria-hidden="true">
         <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
       </div>
-
       <div class="brand-text">
         <div class="brand-title">
           <span class="lang-en">New Zealand God of Wealth Temple</span>
@@ -28,20 +159,20 @@
       </div>
     </a>
 
-    <nav class="navlinks" aria-label="Primary">
+    <nav class="navlinks" aria-label="Primary" style="display:flex;flex-wrap:wrap;justify-content:center;gap:18px;flex:1 1 420px;min-width:260px;">
       <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
       <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
     </nav>
 
-    <div class="topbar-actions">
+    <div class="topbar-actions" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
         <span class="lang-en">中文</span>
         <span class="lang-zh">EN</span>
       </button>
-
-      <a class="btn btn-ghost" href="login.html">
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
         <span class="lang-en">Login</span><span class="lang-zh">登录</span>
       </a>
     </div>
@@ -51,15 +182,11 @@
     (function () {
       var key = 'lang';
       var root = document.documentElement;
-
-      // Default language: zh (persisted across all pages)
       var saved = localStorage.getItem(key);
       var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
       root.setAttribute('data-lang', lang);
-
       var btn = document.getElementById('langToggle');
       if (!btn) return;
-
       btn.addEventListener('click', function () {
         var cur = root.getAttribute('data-lang') || 'zh';
         var next = (cur === 'zh') ? 'en' : 'zh';
@@ -72,188 +199,246 @@
 </header>
 
 <main class="container">
-  <!-- Page Header -->
   <section style="padding:14px 0 10px;">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
       <div>
-        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;text-transform:capitalize;">
+        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;">
           <span class="lang-en">Login</span>
           <span class="lang-zh">登录</span>
         </h1>
         <p style="opacity:.82;line-height:1.7;max-width:760px;">
-          <span class="lang-en">Sign in to manage your bookings, view updates, and access member-only guidance.</span>
-          <span class="lang-zh">登录后可管理预约、查看更新，并获得会员专属指引。</span>
+          <span class="lang-en">Sign in or create your account. Personal information, merit records, and certificates are managed on the profile page after login.</span>
+          <span class="lang-zh">登录或创建账号。个人资料、功德记录和证书均在登录后的资料页管理。</span>
         </p>
       </div>
-
-      <a class="btn btn-gold" href="booking.html" style="white-space:nowrap;">
-        <span class="lang-en">Go to Booking</span>
-        <span class="lang-zh">前往预约</span>
+      <a class="btn btn-gold" href="profile.html" style="white-space:nowrap;">
+        <span class="lang-en">Go to Profile</span>
+        <span class="lang-zh">前往资料页</span>
       </a>
     </div>
   </section>
 
-  <!-- Content -->
-  <section class="hero" style="padding-top:10px;">
-    <!-- Left: benefits / trust -->
-    <div>
-      <div class="glass-card" style="padding:18px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-          <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
-            <span class="lang-en">Member Benefits</span>
-            <span class="lang-zh">会员权益</span>
-          </div>
-          <div style="opacity:.72;font-size:13px;">
-            <span class="lang-en">Private · Secure · Fast</span>
-            <span class="lang-zh">私密 · 安全 · 便捷</span>
-          </div>
-        </div>
-
-        <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
-
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-            <div style="font-weight:900;color:var(--gold2);">01</div>
-            <div style="margin-top:6px;font-weight:900;color:var(--gold);">
-              <span class="lang-en">Manage Bookings</span>
-              <span class="lang-zh">管理预约</span>
+  <section class="auth-shell" style="padding-top:10px;padding-bottom:26px;">
+    <!-- Left: info card -->
+    <div class="glass-card feature-card" style="padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="floating-orb">✦</div>
+          <div>
+            <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+              <span class="lang-en">Account Access</span>
+              <span class="lang-zh">账号入口</span>
             </div>
-            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
-              <span class="lang-en">Review your requests and confirmations.</span>
-              <span class="lang-zh">查看提交记录与确认信息。</span>
+            <div class="auth-mini-note">
+              <span class="lang-en">Login, register, and reset password. Member details are on the profile page.</span>
+              <span class="lang-zh">登录、注册和重设密码。会员详细信息在资料页。</span>
             </div>
           </div>
-
-          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-            <div style="font-weight:900;color:var(--gold2);">02</div>
-            <div style="margin-top:6px;font-weight:900;color:var(--gold);">
-              <span class="lang-en">Saved Details</span>
-              <span class="lang-zh">快速填写</span>
-            </div>
-            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
-              <span class="lang-en">Auto-fill your contact info for next time.</span>
-              <span class="lang-zh">下次预约自动填入信息。</span>
-            </div>
-          </div>
-
-          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-            <div style="font-weight:900;color:var(--gold2);">03</div>
-            <div style="margin-top:6px;font-weight:900;color:var(--gold);">
-              <span class="lang-en">Member Guidance</span>
-              <span class="lang-zh">专属指引</span>
-            </div>
-            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
-              <span class="lang-en">Access extra notes and updates.</span>
-              <span class="lang-zh">查看会员专属更新与备注。</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;opacity:.7;font-size:13px;line-height:1.6;">
-          <span class="lang-en">Tip: This page is UI-ready. You can later connect it to Spring Security or your own login endpoint.</span>
-          <span class="lang-zh">提示：此页面已完成UI。后续可接入 Spring Security 或自定义登录接口。</span>
-        </div>
-      </div>
-
-      <div class="glass-card" style="padding:18px;margin-top:14px;">
-        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
-          <span class="lang-en">Need help?</span>
-          <span class="lang-zh">需要帮助？</span>
-        </div>
-        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
-        <div style="display:grid;gap:10px;">
-          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
-            <div style="opacity:.75;font-size:12px;">
-              <span class="lang-en">Support</span>
-              <span class="lang-zh">客服</span>
-            </div>
-            <div style="margin-top:6px;font-weight:900;color:var(--gold2);">
-              <span class="lang-en">Reply within 24 hours</span>
-              <span class="lang-zh">24小时内回复</span>
-            </div>
-            <div style="margin-top:8px;opacity:.8;line-height:1.6;">
-              <span class="lang-en">If you cannot sign in, please send your name + contact via the booking page.</span>
-              <span class="lang-zh">若暂时无法登录，可先通过预约页提交姓名与联系方式。</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: login form -->
-    <div class="glass-card" style="padding:18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
-          <span class="lang-en">Sign in</span>
-          <span class="lang-zh">登录账号</span>
-        </div>
-        <div style="opacity:.72;font-size:13px;">
-          <span class="lang-en">Demo (no backend)</span>
-          <span class="lang-zh">演示（未接后端）</span>
         </div>
       </div>
 
       <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
 
-      <form id="loginForm" action="#" method="post" style="display:grid;gap:12px;">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label for="loginId" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Email or Phone</span>
-            <span class="lang-zh">邮箱或电话</span>
-          </label>
-          <input id="loginId" name="loginId" type="text" class="form-control" required placeholder="" autocomplete="username" />
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label for="password" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Password</span>
-            <span class="lang-zh">密码</span>
-          </label>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <input id="password" name="password" type="password" class="form-control" required placeholder="" autocomplete="current-password" style="flex:1;" />
-            <button class="btn btn-ghost" type="button" id="togglePwd" style="padding:10px 14px;white-space:nowrap;">
-              <span class="lang-en">Show</span>
-              <span class="lang-zh">显示</span>
-            </button>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div style="font-weight:900;color:var(--gold2);">01</div>
+          <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+            <span class="lang-en">Register</span>
+            <span class="lang-zh">注册</span>
+          </div>
+          <div class="auth-mini-note" style="margin-top:6px;">
+            <span class="lang-en">Create your account with name, phone, email, and password.</span>
+            <span class="lang-zh">使用姓名、电话、邮箱和密码创建账号。</span>
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;opacity:.9;">
-            <input id="remember" type="checkbox" style="accent-color: var(--gold2);" />
-            <span class="lang-en">Remember me</span>
-            <span class="lang-zh">记住我</span>
-          </label>
-
-          <a href="booking.html" style="text-decoration:none;color:var(--gold2);font-weight:800;">
-            <span class="lang-en">Forgot password?</span>
-            <span class="lang-zh">忘记密码？</span>
-          </a>
+        <div class="feature-item">
+          <div style="font-weight:900;color:var(--gold2);">02</div>
+          <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+            <span class="lang-en">Login</span>
+            <span class="lang-zh">登录</span>
+          </div>
+          <div class="auth-mini-note" style="margin-top:6px;">
+            <span class="lang-en">Sign in with email, phone, or full name.</span>
+            <span class="lang-zh">支持邮箱、电话或姓名登录。</span>
+          </div>
         </div>
 
-        <button class="btn btn-gold" type="submit" id="loginBtn" style="width:100%;">
+        <div class="feature-item">
+          <div style="font-weight:900;color:var(--gold2);">03</div>
+          <div style="margin-top:6px;font-weight:900;color:var(--gold);">
+            <span class="lang-en">Profile</span>
+            <span class="lang-zh">资料页</span>
+          </div>
+          <div class="auth-mini-note" style="margin-top:6px;">
+            <span class="lang-en">After login, view your level, merit points, Bazi, certificates, and more.</span>
+            <span class="lang-zh">登录后查看等级、功德分、八字、证书等。</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
+        <div style="opacity:.75;font-size:12px;">
+          <span class="lang-en">Support</span>
+          <span class="lang-zh">客服</span>
+        </div>
+        <div style="margin-top:6px;font-weight:900;color:var(--gold2);">
+          <span class="lang-en">Reply within 24 hours</span>
+          <span class="lang-zh">24小时内回复</span>
+        </div>
+        <div class="auth-mini-note" style="margin-top:8px;">
+          <span class="lang-en">Your account data is securely stored and linked to your email address.</span>
+          <span class="lang-zh">你的账号数据安全存储，与你的邮箱绑定。</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: forms -->
+    <div class="glass-card" style="padding:18px;">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+        <span class="lang-en">Login / Register / Reset Password</span>
+        <span class="lang-zh">登录 / 注册 / 重设密码</span>
+      </div>
+
+      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabLogin">
           <span class="lang-en">Login</span>
           <span class="lang-zh">登录</span>
         </button>
+        <button type="button" class="auth-tab" id="tabRegister">
+          <span class="lang-en">Register</span>
+          <span class="lang-zh">注册</span>
+        </button>
+        <button type="button" class="auth-tab" id="tabReset">
+          <span class="lang-en">Forgot Password</span>
+          <span class="lang-zh">忘记密码</span>
+        </button>
+      </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-          <div style="opacity:.75;font-size:13px;line-height:1.6;">
-            <span class="lang-en">No account yet?</span>
-            <span class="lang-zh">还没有账号？</span>
+      <!-- Login panel -->
+      <div class="auth-panel active" id="panelLogin">
+        <form id="loginForm" action="#" method="post" style="display:grid;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label for="loginId" style="font-weight:700;opacity:.9;">
+              <span class="lang-en">Email / Phone / Full Name</span>
+              <span class="lang-zh">邮箱 / 电话 / 姓名</span>
+            </label>
+            <input id="loginId" name="loginId" type="text" class="form-control" required autocomplete="username" />
           </div>
-          <a class="btn btn-ghost" href="booking.html" style="padding:8px 12px;">
-            <span class="lang-en">Create request</span>
-            <span class="lang-zh">先提交预约</span>
-          </a>
-        </div>
-      </form>
 
-      <div id="loginResult" style="display:none;margin-top:14px;border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-        <div style="font-weight:900;color:var(--gold2);margin-bottom:6px;">
-          <span class="lang-en">Login received</span>
-          <span class="lang-zh">已收到登录请求</span>
-        </div>
-        <div id="loginResultText" style="opacity:.85;line-height:1.7;"></div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label for="password" style="font-weight:700;opacity:.9;">
+              <span class="lang-en">Password</span>
+              <span class="lang-zh">密码</span>
+            </label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input id="password" name="password" type="password" class="form-control" required autocomplete="current-password" style="flex:1;" />
+              <button class="btn btn-ghost" type="button" id="togglePwd" style="padding:10px 14px;white-space:nowrap;">
+                <span class="lang-en">Show</span>
+                <span class="lang-zh">显示</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:flex-end;">
+            <button type="button" id="goResetTab" style="color:var(--gold2);font-weight:800;background:none;border:none;cursor:pointer;padding:0;font-size:13px;">
+              <span class="lang-en">Forgot password?</span>
+              <span class="lang-zh">忘记密码？</span>
+            </button>
+          </div>
+
+          <button class="btn btn-gold" type="submit" id="loginBtn" style="width:100%;">
+            <span class="lang-en">Login</span>
+            <span class="lang-zh">登录</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Register panel -->
+      <div class="auth-panel" id="panelRegister">
+        <form id="registerForm" action="#" method="post" class="auth-grid">
+          <div>
+            <label for="registerName" style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Full Name</span>
+              <span class="lang-zh">姓名</span>
+            </label>
+            <input id="registerName" type="text" class="form-control" required />
+          </div>
+
+          <div>
+            <label for="registerPhone" style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Phone</span>
+              <span class="lang-zh">电话</span>
+            </label>
+            <input id="registerPhone" type="text" class="form-control" required />
+          </div>
+
+          <div class="auth-span-2">
+            <label for="registerEmail" style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Email</span>
+              <span class="lang-zh">邮箱</span>
+            </label>
+            <input id="registerEmail" type="email" class="form-control" required />
+          </div>
+
+          <div>
+            <label for="registerPassword" style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Password</span>
+              <span class="lang-zh">密码</span>
+            </label>
+            <input id="registerPassword" type="password" class="form-control" required />
+          </div>
+
+          <div>
+            <label for="registerConfirm" style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Confirm Password</span>
+              <span class="lang-zh">确认密码</span>
+            </label>
+            <input id="registerConfirm" type="password" class="form-control" required />
+          </div>
+
+          <div class="auth-span-2 auth-mini-note">
+            <span class="lang-en">After registration, log in and complete your profile information on the profile page.</span>
+            <span class="lang-zh">注册后登录，在资料页完善你的个人信息。</span>
+          </div>
+
+          <div class="auth-span-2">
+            <button class="btn btn-gold" type="submit" style="width:100%;">
+              <span class="lang-en">Create Account</span>
+              <span class="lang-zh">创建账号</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Reset panel -->
+      <div class="auth-panel" id="panelReset">
+        <form id="resetForm" action="#" method="post" style="display:grid;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label for="resetId" style="font-weight:700;opacity:.9;">
+              <span class="lang-en">Email / Phone / Full Name</span>
+              <span class="lang-zh">邮箱 / 电话 / 姓名</span>
+            </label>
+            <input id="resetId" type="text" class="form-control" required />
+          </div>
+
+          <div class="auth-mini-note">
+            <span class="lang-en">A password reset link will be sent to your registered email address.</span>
+            <span class="lang-zh">重设密码链接将发送到你注册时使用的邮箱。</span>
+          </div>
+
+          <button class="btn btn-gold" type="submit" style="width:100%;">
+            <span class="lang-en">Send Reset Link</span>
+            <span class="lang-zh">发送重设链接</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="auth-toast" id="authToast">
+        <div style="font-weight:900;color:var(--gold2);margin-bottom:6px;" id="authToastTitle"></div>
+        <div id="authToastText" style="opacity:.86;line-height:1.7;"></div>
       </div>
     </div>
   </section>
@@ -268,34 +453,204 @@
       return (cur === 'en' || cur === 'zh') ? cur : 'zh';
     }
 
-    var toggleBtn = document.getElementById('togglePwd');
-    var pwd = document.getElementById('password');
-    if (toggleBtn && pwd) {
+    function showToast(titleEn, titleZh, textEn, textZh) {
+      var box = document.getElementById('authToast');
+      var t1  = document.getElementById('authToastTitle');
+      var t2  = document.getElementById('authToastText');
+      if (!box || !t1 || !t2) return;
+      var l = getLang();
+      t1.textContent = l === 'en' ? titleEn : titleZh;
+      t2.textContent = l === 'en' ? textEn  : textZh;
+      box.classList.add('show');
+      clearTimeout(box.__timer);
+      box.__timer = setTimeout(function () { box.classList.remove('show'); }, 3200);
+    }
+
+    function switchTab(name) {
+      ['login','register','reset'].forEach(function (k) {
+        var tab   = document.getElementById('tab'   + k.charAt(0).toUpperCase() + k.slice(1));
+        var panel = document.getElementById('panel' + k.charAt(0).toUpperCase() + k.slice(1));
+        if (tab)   tab.classList.remove('active');
+        if (panel) panel.classList.remove('active');
+      });
+      var activeTab   = document.getElementById('tab'   + name.charAt(0).toUpperCase() + name.slice(1));
+      var activePanel = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
+      if (activeTab)   activeTab.classList.add('active');
+      if (activePanel) activePanel.classList.add('active');
+    }
+
+    function attachTogglePassword() {
+      var toggleBtn = document.getElementById('togglePwd');
+      var pwd = document.getElementById('password');
+      if (!toggleBtn || !pwd) return;
       toggleBtn.addEventListener('click', function () {
         var isPwd = pwd.type === 'password';
         pwd.type = isPwd ? 'text' : 'password';
-        var l = getLang();
         toggleBtn.querySelector('.lang-en').textContent = isPwd ? 'Hide' : 'Show';
         toggleBtn.querySelector('.lang-zh').textContent = isPwd ? '隐藏' : '显示';
       });
     }
 
+    // ── 已登录则直接跳 profile ───────────────────────────────
+    async function checkAuthOnLoad() {
+      var session = await getSession();
+      if (session) {
+        window.location.href = 'profile.html';
+        return;
+      }
+      renderNavAuthBtn();
+    }
 
-    var form = document.getElementById('loginForm');
-    var box = document.getElementById('loginResult');
-    var text = document.getElementById('loginResultText');
-    if (form && box && text) {
-      form.addEventListener('submit', function (e) {
+    // ── 注册 ────────────────────────────────────────────────
+    function handleRegister() {
+      var form = document.getElementById('registerForm');
+      if (!form) return;
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
-        var id = (document.getElementById('loginId') || {}).value || '';
-        var l = getLang();
-        var msgEn = 'Thanks. We received your sign-in attempt for: ' + id + '. (Demo mode)';
-        var msgZh = '已收到你的登录尝试：' + id + '。（演示模式）';
-        text.textContent = (l === 'en') ? msgEn : msgZh;
-        box.style.display = 'block';
-        box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var name     = (document.getElementById('registerName').value     || '').trim();
+        var phone    = (document.getElementById('registerPhone').value    || '').trim();
+        var email    = (document.getElementById('registerEmail').value    || '').trim().toLowerCase();
+        var password = (document.getElementById('registerPassword').value || '');
+        var confirm  = (document.getElementById('registerConfirm').value  || '');
+
+        if (!name || !phone || !email || !password || !confirm) {
+          showToast('Incomplete form','表单未完成','Please fill in all fields.','请填写所有必填项。');
+          return;
+        }
+        if (password.length < 6) {
+          showToast('Password too short','密码太短','At least 6 characters required.','密码至少需要6位。');
+          return;
+        }
+        if (password !== confirm) {
+          showToast('Password mismatch','密码不一致','The two passwords do not match.','两次密码不一致。');
+          return;
+        }
+
+        var btn = form.querySelector('[type=submit]');
+        if (btn) btn.disabled = true;
+
+        var result = await _sb.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { full_name: name, phone: phone } }
+        });
+
+        if (btn) btn.disabled = false;
+
+        if (result.error) {
+          showToast('Registration failed','注册失败', result.error.message, result.error.message);
+          return;
+        }
+
+        showToast('Success','注册成功','Account created. Please log in.','账号已创建，请登录。');
+        form.reset();
+        document.getElementById('loginId').value = email;
+        switchTab('login');
       });
     }
+
+    // ── 登录 ────────────────────────────────────────────────
+    function handleLogin() {
+      var form = document.getElementById('loginForm');
+      if (!form) return;
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var identifier = (document.getElementById('loginId').value || '').trim().toLowerCase();
+        var pwd        = (document.getElementById('password').value || '');
+
+        if (!identifier || !pwd) {
+          showToast('Incomplete','请填写完整','Enter your credentials.','请填写账号和密码。');
+          return;
+        }
+
+        var btn = form.querySelector('[type=submit]');
+        if (btn) btn.disabled = true;
+
+        var email = identifier;
+
+        // 非邮箱格式 → 通过 RPC 查找对应邮箱
+        if (!identifier.includes('@')) {
+          var lookup = await _sb.rpc('get_email_by_identifier', { p_identifier: identifier });
+          if (lookup.error || !lookup.data) {
+            showToast('Not found','未找到账号','No account with that email / phone / name.','找不到对应账号，请先注册。');
+            if (btn) btn.disabled = false;
+            return;
+          }
+          email = lookup.data;
+        }
+
+        var result = await _sb.auth.signInWithPassword({ email: email, password: pwd });
+        if (btn) btn.disabled = false;
+
+        if (result.error) {
+          showToast('Login failed','登录失败','Wrong email or password.','邮箱或密码错误。');
+          return;
+        }
+
+        showToast('Login successful','登录成功','Redirecting to profile…','正在跳转到资料页。');
+        setTimeout(function () { window.location.href = 'profile.html'; }, 800);
+      });
+    }
+
+    // ── 重设密码（发邮件）──────────────────────────────────
+    function handleReset() {
+      var form = document.getElementById('resetForm');
+      if (!form) return;
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var identifier = (document.getElementById('resetId').value || '').trim().toLowerCase();
+        if (!identifier) {
+          showToast('Incomplete','请填写完整','Enter your email / phone / name.','请填写邮箱 / 电话 / 姓名。');
+          return;
+        }
+
+        var btn = form.querySelector('[type=submit]');
+        if (btn) btn.disabled = true;
+
+        var email = identifier;
+        if (!identifier.includes('@')) {
+          var lookup = await _sb.rpc('get_email_by_identifier', { p_identifier: identifier });
+          if (lookup.error || !lookup.data) {
+            showToast('Not found','未找到账号','No account found.','找不到对应账号。');
+            if (btn) btn.disabled = false;
+            return;
+          }
+          email = lookup.data;
+        }
+
+        var result = await _sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/login.html'
+        });
+        if (btn) btn.disabled = false;
+
+        if (result.error) {
+          showToast('Failed','发送失败', result.error.message, result.error.message);
+          return;
+        }
+
+        showToast('Email sent','邮件已发送','Check your inbox for the reset link.','重设链接已发到你的邮箱，请查收。');
+        form.reset();
+        switchTab('login');
+      });
+    }
+
+    // ── init ────────────────────────────────────────────────
+    function init() {
+      checkAuthOnLoad();
+
+      document.getElementById('tabLogin').addEventListener('click',    function () { switchTab('login');    });
+      document.getElementById('tabRegister').addEventListener('click', function () { switchTab('register'); });
+      document.getElementById('tabReset').addEventListener('click',    function () { switchTab('reset');    });
+      document.getElementById('goResetTab').addEventListener('click',  function () { switchTab('reset');    });
+
+      attachTogglePassword();
+      handleRegister();
+      handleLogin();
+      handleReset();
+      switchTab('login');
+    }
+
+    init();
   })();
 </script>
 </body>
