@@ -3,20 +3,89 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Ritual Booking</title>
+  <title>Ritual Booking · 法事预约</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="supabase.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    .service-tabs{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+    .service-tab{
+      appearance:none;border:1px solid rgba(255,213,122,.18);
+      background:rgba(255,255,255,.03);color:var(--gold2);
+      border-radius:999px;padding:10px 18px;font-weight:900;
+      cursor:pointer;transition:all .18s ease;
+    }
+    .service-tab:hover{transform:translateY(-1px);}
+    .service-tab.active{
+      color:var(--gold);background:rgba(255,213,122,.14);
+      border-color:rgba(255,213,122,.32);
+      box-shadow:0 12px 28px rgba(0,0,0,.18);
+    }
+    .service-panel{display:none;}
+    .service-panel.active{display:block;}
+
+    .stock-bar{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 14px;border-radius:999px;
+      border:1px solid rgba(255,213,122,.22);
+      background:rgba(255,213,122,.06);
+      font-weight:800;color:var(--gold2);font-size:14px;
+    }
+    .stock-bar.sold-out{
+      border-color:rgba(220,90,90,.3);
+      background:rgba(220,90,90,.08);
+      color:rgba(220,90,90,.9);
+    }
+
+    .charity-block{
+      border:1px solid rgba(255,213,122,.25);
+      border-radius:20px;
+      padding:22px;
+      background:rgba(255,213,122,.04);
+      margin-top:28px;
+    }
+    .charity-block .title{
+      font-weight:900;font-size:18px;color:var(--gold);
+      letter-spacing:.4px;margin-bottom:12px;
+    }
+    .charity-account{
+      border:1px solid rgba(255,213,122,.18);
+      border-radius:14px;padding:14px;
+      background:rgba(255,255,255,.03);
+      margin-top:12px;
+    }
+
+    .booking-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .span-2{grid-column:1 / -1;}
+    .form-msg{
+      display:none;margin-top:14px;
+      border:1px solid rgba(255,213,122,.18);
+      border-radius:16px;padding:14px;
+      background:rgba(255,255,255,.03);
+      animation:fadeUp .28s ease;
+    }
+    .form-msg.show{display:block;}
+    .form-msg.error{border-color:rgba(220,90,90,.3);background:rgba(220,90,90,.06);}
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(6px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+    @media(max-width:640px){
+      .booking-grid{grid-template-columns:1fr;}
+    }
+  </style>
 </head>
 <body class="page-booking">
 <div class="bg-ornament"></div>
+
 <header class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="index.html">
       <div class="brand-mark brand-logo-wrap" aria-hidden="true">
         <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
       </div>
-
       <div class="brand-text">
         <div class="brand-title">
           <span class="lang-en">New Zealand God of Wealth Temple</span>
@@ -42,7 +111,6 @@
         <span class="lang-en">中文</span>
         <span class="lang-zh">EN</span>
       </button>
-
       <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
         <span class="lang-en">Login</span><span class="lang-zh">登录</span>
       </a>
@@ -53,15 +121,11 @@
     (function () {
       var key = 'lang';
       var root = document.documentElement;
-
-      // Default language: zh (persisted across all pages)
       var saved = localStorage.getItem(key);
       var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
       root.setAttribute('data-lang', lang);
-
       var btn = document.getElementById('langToggle');
       if (!btn) return;
-
       btn.addEventListener('click', function () {
         var cur = root.getAttribute('data-lang') || 'zh';
         var next = (cur === 'zh') ? 'en' : 'zh';
@@ -75,499 +139,588 @@
 </header>
 
 <main class="container">
+
   <!-- Page Header -->
   <section style="padding:14px 0 10px;">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;">
-      <div>
-        <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;">
-          <span class="lang-en">Ritual Booking</span>
-          <span class="lang-zh">法事预约</span>
-        </h1>
-        <p style="opacity:.82;line-height:1.7;max-width:760px;">
-          <span class="lang-en">Book a ritual for wealth, love, protection, and daily guidance. Choose a service, pick a preferred date, and we will contact you to confirm.</span>
-          <span class="lang-zh">预约招财、姻缘、护身与日常指引等法事。选择项目、填写意向日期，我们会联系你确认细节。</span>
-        </p>
-      </div>
-
-      <a class="btn btn-gold" href="fortune.html" style="white-space:nowrap;">
-        <span class="lang-en">Check Daily Fortune</span>
-        <span class="lang-zh">查看今日运势</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- Hero + Quick facts -->
-  <section class="hero" style="padding-top:10px;">
     <div>
-      <div class="glass-card" style="padding:18px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-          <div style="font-weight:800;color:var(--gold);letter-spacing:.3px;">
-            <span class="lang-en">How it works</span>
-            <span class="lang-zh">预约流程</span>
-          </div>
-          <div style="opacity:.72;font-size:13px;">
-            <span class="lang-en">Fast · Private · Confirmed by message</span>
-            <span class="lang-zh">快速 · 私密 · 信息确认</span>
-          </div>
-        </div>
-
-        <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
-
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-            <div style="font-weight:800;color:var(--gold2);">01</div>
-            <div style="margin-top:6px;font-weight:800;color:var(--gold);">
-              <span class="lang-en">Choose a ritual</span>
-              <span class="lang-zh">选择法事</span>
-            </div>
-            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
-              <span class="lang-en">Pick the service that matches your goal.</span>
-              <span class="lang-zh">根据你的需求选择合适项目。</span>
-            </div>
-          </div>
-
-          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-            <div style="font-weight:800;color:var(--gold2);">02</div>
-            <div style="margin-top:6px;font-weight:800;color:var(--gold);">
-              <span class="lang-en">Submit your request</span>
-              <span class="lang-zh">提交预约</span>
-            </div>
-            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
-              <span class="lang-en">Fill in your name and preferred date/time.</span>
-              <span class="lang-zh">填写姓名与意向日期/时间段。</span>
-            </div>
-          </div>
-
-          <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-            <div style="font-weight:800;color:var(--gold2);">03</div>
-            <div style="margin-top:6px;font-weight:800;color:var(--gold);">
-              <span class="lang-en">We confirm with you</span>
-              <span class="lang-zh">我们确认</span>
-            </div>
-            <div style="opacity:.78;line-height:1.6;margin-top:6px;">
-              <span class="lang-en">We’ll contact you to confirm details and fees.</span>
-              <span class="lang-zh">我们会联系你确认细节与费用。</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;opacity:.7;font-size:13px;line-height:1.6;">
-          <span class="lang-en">Note: This is a demo booking page (no payment). You can later connect it to a database and real confirmation workflow.</span>
-          <span class="lang-zh">提示：这是演示预约页（暂不含支付）。后续可接数据库并实现真实确认流程。</span>
-        </div>
-      </div>
-
-      <!-- Service Cards -->
-      <div style="margin-top:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px;">
-          <div style="font-weight:800;color:var(--gold);letter-spacing:.3px;">
-            <span class="lang-en">Popular rituals</span>
-            <span class="lang-zh">热门法事</span>
-          </div>
-          <div style="opacity:.72;font-size:13px;">
-            <span class="lang-en">Tap to auto-fill the form</span>
-            <span class="lang-zh">点击可自动填入表单</span>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <button type="button" class="glass-card" style="text-align:left;cursor:pointer;" data-service="Wealth Blessing" data-service-zh="招财祈福">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-              <div style="font-weight:900;color:var(--gold2);">
-                <span class="lang-en">Wealth Blessing</span>
-                <span class="lang-zh">招财祈福</span>
-              </div>
-              <div style="opacity:.72;font-size:12px;">
-                <span class="lang-en">45–60 min</span>
-                <span class="lang-zh">45–60分钟</span>
-              </div>
-            </div>
-            <div style="opacity:.8;line-height:1.65;margin-top:8px;">
-              <span class="lang-en">For career, business, and money flow.</span>
-              <span class="lang-zh">提升事业、财运与资金流动。</span>
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">◎ <span class="lang-en">Focus</span><span class="lang-zh">重点</span></span>
-              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">★ <span class="lang-en">Popular</span><span class="lang-zh">热门</span></span>
-            </div>
-          </button>
-
-          <button type="button" class="glass-card" style="text-align:left;cursor:pointer;" data-service="Love & Relationship" data-service-zh="姻缘和合">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-              <div style="font-weight:900;color:var(--gold2);">
-                <span class="lang-en">Love & Relationship</span>
-                <span class="lang-zh">姻缘和合</span>
-              </div>
-              <div style="opacity:.72;font-size:12px;">
-                <span class="lang-en">40–60 min</span>
-                <span class="lang-zh">40–60分钟</span>
-              </div>
-            </div>
-            <div style="opacity:.8;line-height:1.65;margin-top:8px;">
-              <span class="lang-en">For harmony, connection, and communication.</span>
-              <span class="lang-zh">改善关系、沟通与情感连接。</span>
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">♥ <span class="lang-en">Harmony</span><span class="lang-zh">和合</span></span>
-              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">☾ <span class="lang-en">Calm</span><span class="lang-zh">安稳</span></span>
-            </div>
-          </button>
-
-          <button type="button" class="glass-card" style="text-align:left;cursor:pointer;" data-service="Protection & Peace" data-service-zh="护身平安">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-              <div style="font-weight:900;color:var(--gold2);">
-                <span class="lang-en">Protection & Peace</span>
-                <span class="lang-zh">护身平安</span>
-              </div>
-              <div style="opacity:.72;font-size:12px;">
-                <span class="lang-en">30–45 min</span>
-                <span class="lang-zh">30–45分钟</span>
-              </div>
-            </div>
-            <div style="opacity:.8;line-height:1.65;margin-top:8px;">
-              <span class="lang-en">For safety, clarity, and removing bad luck.</span>
-              <span class="lang-zh">祈求平安顺遂，化解不顺。</span>
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">🛡 <span class="lang-en">Protect</span><span class="lang-zh">护佑</span></span>
-              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,213,122,.14);background:rgba(255,255,255,.02);font-size:12px;">✦ <span class="lang-en">Peace</span><span class="lang-zh">平安</span></span>
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Booking Form -->
-    <div class="glass-card booking-form-card" style="padding:18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
-          <span class="lang-en">Request a booking</span>
-          <span class="lang-zh">提交预约信息</span>
-        </div>
-        <div style="opacity:.72;font-size:13px;">
-          <span class="lang-en">We reply within 24 hours</span>
-          <span class="lang-zh">24小时内回复</span>
-        </div>
-      </div>
-
-      <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
-
-      <form id="bookingForm" action="#" method="post" class="booking-form-grid">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label for="service" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Service</span>
-            <span class="lang-zh">项目</span>
-          </label>
-          <select id="service" name="service" required class="form-control">
-            <option value="" selected disabled data-en="Select a service" data-zh="请选择项目">Select a service</option>
-            <option value="Wealth Blessing" data-en="Wealth Blessing" data-zh="招财祈福">Wealth Blessing</option>
-            <option value="Love & Relationship" data-en="Love & Relationship" data-zh="姻缘和合">Love & Relationship</option>
-            <option value="Protection & Peace" data-en="Protection & Peace" data-zh="护身平安">Protection & Peace</option>
-            <option value="Requiem & Liberation" data-en="Requiem & Liberation" data-zh="往生超度">Requiem & Liberation</option>
-            <option value="Health Blessing" data-en="Health Blessing" data-zh="健康祈福">Health Blessing</option>
-            <option value="Ancestral Blessing" data-en="Ancestral Blessing" data-zh="祖先祈福">Ancestral Blessing</option>
-            <option value="Home Protection" data-en="Home Protection" data-zh="家宅平安">Home Protection</option>
-            <option value="Business Opening Blessing" data-en="Business Opening Blessing" data-zh="开业祈福">Business Opening Blessing</option>
-          </select>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label for="date" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Preferred date</span>
-            <span class="lang-zh">意向日期</span>
-          </label>
-          <input id="date" name="date" type="date" required class="form-control" />
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label for="time" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Preferred time</span>
-            <span class="lang-zh">意向时间</span>
-          </label>
-          <select id="time" name="time" required class="form-control">
-            <option value="" selected disabled data-en="Select a time" data-zh="请选择时间">Select a time</option>
-            <option value="Morning" data-en="Morning" data-zh="上午">Morning</option>
-            <option value="Afternoon" data-en="Afternoon" data-zh="下午">Afternoon</option>
-            <option value="Evening" data-en="Evening" data-zh="晚上">Evening</option>
-          </select>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label for="name" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Your name</span>
-            <span class="lang-zh">姓名</span>
-          </label>
-          <input id="name" name="name" type="text" required placeholder="" class="form-control" />
-        </div>
-
-        <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
-          <label for="contact" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Contact (email or phone)</span>
-            <span class="lang-zh">联系方式（邮箱或电话）</span>
-          </label>
-          <input id="contact" name="contact" type="text" required class="form-control" />
-        </div>
-
-        <div class="span-2" style="display:flex;flex-direction:column;gap:6px;">
-          <label for="notes" style="font-weight:700;opacity:.9;">
-            <span class="lang-en">Notes (optional)</span>
-            <span class="lang-zh">备注（可选）</span>
-          </label>
-          <textarea id="notes" name="notes" rows="4" class="form-control"></textarea>
-        </div>
-
-        <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-          <div style="opacity:.72;font-size:13px;line-height:1.6;">
-            <span class="lang-en">By submitting, you agree we may contact you to confirm the booking.</span>
-            <span class="lang-zh">提交后表示你同意我们联系你确认预约。</span>
-          </div>
-
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" type="reset">
-              <span class="lang-en">Reset</span>
-              <span class="lang-zh">重置</span>
-            </button>
-            <button class="btn btn-gold" type="submit" id="submitBtn">
-              <span class="lang-en">Submit Request</span>
-              <span class="lang-zh">提交预约</span>
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <div id="result" style="display:none;margin-top:14px;border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
-        <div style="font-weight:900;color:var(--gold2);margin-bottom:6px;">
-          <span class="lang-en">Request received</span>
-          <span class="lang-zh">已收到预约</span>
-        </div>
-        <div id="resultText" style="opacity:.85;line-height:1.7;"></div>
-      </div>
+      <h1 style="color:var(--gold);margin:10px 0 6px;letter-spacing:.4px;">
+        <span class="lang-en">Ritual Booking</span>
+        <span class="lang-zh">法事预约</span>
+      </h1>
+      <p style="opacity:.82;line-height:1.7;max-width:760px;">
+        <span class="lang-en">Book a memorial tablet or incense paper burning service. All donations go to our registered charity account.</span>
+        <span class="lang-zh">预约超度牌位或代化元宝服务。所有善款统一捐入公益账户，可开具正式捐赠收据。</span>
+      </p>
     </div>
   </section>
 
-  <!-- FAQ + Contact -->
-  <section style="padding:8px 0 26px;">
-    <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px;">
-      <div class="glass-card">
-        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
-          <span class="lang-en">FAQ</span>
-          <span class="lang-zh">常见问题</span>
-        </div>
-        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
-
-        <details style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
-          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
-            <span class="lang-en">How do I confirm the booking?</span>
-            <span class="lang-zh">预约如何确认？</span>
-          </summary>
-          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
-            <span class="lang-en">After you submit the form, we contact you to confirm the exact time, location/online option, and fee.</span>
-            <span class="lang-zh">提交表单后，我们会联系你确认具体时间、线下/线上方式以及费用。</span>
-          </div>
-        </details>
-
-        <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
-          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
-            <span class="lang-en">Can I change my date?</span>
-            <span class="lang-zh">可以改期吗？</span>
-          </summary>
-          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
-            <span class="lang-en">Yes. Reply to our confirmation message and propose a new time. We’ll help reschedule.</span>
-            <span class="lang-zh">可以。直接回复我们的确认信息并提出新的时间，我们会协助改期。</span>
-          </div>
-        </details>
-
-        <details style="margin-top:10px;border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
-          <summary style="cursor:pointer;font-weight:800;color:var(--gold2);">
-            <span class="lang-en">What information should I provide?</span>
-            <span class="lang-zh">需要提供哪些信息？</span>
-          </summary>
-          <div style="margin-top:10px;opacity:.85;line-height:1.7;">
-            <span class="lang-en">Name and contact are required. Notes can include your intention, topic, or any special concerns.</span>
-            <span class="lang-zh">姓名与联系方式必填。备注可写你的诉求、主题或特殊情况。</span>
-          </div>
-        </details>
+  <!-- How it works -->
+  <section style="padding-bottom:16px;">
+    <div class="glass-card" style="padding:18px;">
+      <div style="font-weight:800;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
+        <span class="lang-en">How it works</span>
+        <span class="lang-zh">预约流程</span>
       </div>
-
-      <div class="glass-card">
-        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:10px;">
-          <span class="lang-en">Contact</span>
-          <span class="lang-zh">联系我们</span>
+      <div style="height:1px;background:rgba(255,213,122,.14);margin-bottom:14px;"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:800;color:var(--gold2);">01</div>
+          <div style="margin-top:6px;font-weight:800;color:var(--gold);">
+            <span class="lang-en">Submit booking</span>
+            <span class="lang-zh">提交预约</span>
+          </div>
+          <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+            <span class="lang-en">Fill in the form and submit. Login required.</span>
+            <span class="lang-zh">填写表单并提交（需要登录）。</span>
+          </div>
         </div>
-        <div style="height:1px;background:rgba(255,213,122,.14);margin:12px 0;"></div>
-
-        <div style="display:grid;gap:10px;">
-          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
-            <div style="opacity:.75;font-size:12px;">
-              <span class="lang-en">Response time</span>
-              <span class="lang-zh">回复时间</span>
-            </div>
-            <div style="margin-top:6px;font-weight:900;color:var(--gold2);">
-              <span class="lang-en">Within 24 hours</span>
-              <span class="lang-zh">24小时内</span>
-            </div>
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:800;color:var(--gold2);">02</div>
+          <div style="margin-top:6px;font-weight:800;color:var(--gold);">
+            <span class="lang-en">Make a donation</span>
+            <span class="lang-zh">进行捐款</span>
           </div>
-
-          <div style="border:1px solid rgba(255,213,122,.12);border-radius:16px;padding:12px;background:rgba(255,255,255,.02);">
-            <div style="opacity:.75;font-size:12px;">
-              <span class="lang-en">Quick links</span>
-              <span class="lang-zh">快捷入口</span>
-            </div>
-            <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
-              <a class="btn btn-ghost" href="shop.html" style="padding:8px 12px;">
-                <span class="lang-en">Go to Shop</span>
-                <span class="lang-zh">前往法物</span>
-              </a>
-              <a class="btn btn-ghost" href="courses.html" style="padding:8px 12px;">
-                <span class="lang-en">View Courses</span>
-                <span class="lang-zh">查看课程</span>
-              </a>
-            </div>
+          <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+            <span class="lang-en">Transfer to our charity account and email the screenshot.</span>
+            <span class="lang-zh">转账至公益账户并将截图发至我们邮箱。</span>
           </div>
-
-          <div style="opacity:.72;font-size:13px;line-height:1.6;">
-            <span class="lang-en">Tip: Later you can connect this form to a Spring controller and save bookings into a database.</span>
-            <span class="lang-zh">提示：后续可以把表单连接到 Spring Controller，并把预约保存到数据库。</span>
+        </div>
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);">
+          <div style="font-weight:800;color:var(--gold2);">03</div>
+          <div style="margin-top:6px;font-weight:800;color:var(--gold);">
+            <span class="lang-en">We confirm</span>
+            <span class="lang-zh">我们确认</span>
+          </div>
+          <div style="opacity:.78;line-height:1.6;margin-top:6px;">
+            <span class="lang-en">We confirm and send an official donation receipt.</span>
+            <span class="lang-zh">确认后发送正式捐赠收据。</span>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Service selector + Forms -->
+  <section style="padding-bottom:16px;">
+    <div class="glass-card" style="padding:20px;">
+      <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;margin-bottom:16px;">
+        <span class="lang-en">Select a Service</span>
+        <span class="lang-zh">选择服务</span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="service-tabs">
+        <button type="button" class="service-tab active" id="tabChaodu">
+          <span class="lang-en">Memorial Tablet</span>
+          <span class="lang-zh">超度牌位</span>
+        </button>
+        <button type="button" class="service-tab" id="tabYuanbao">
+          <span class="lang-en">Incense Paper Burning</span>
+          <span class="lang-zh">代化元宝</span>
+        </button>
+      </div>
+
+      <!-- ─── 超度牌位 Panel ─── -->
+      <div class="service-panel active" id="panelChaodu">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:16px;background:rgba(255,255,255,.02);margin-bottom:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div>
+              <div style="font-weight:900;color:var(--gold);font-size:16px;">
+                <span class="lang-en">Memorial Tablet</span>
+                <span class="lang-zh">超度牌位</span>
+              </div>
+              <div style="opacity:.78;margin-top:4px;line-height:1.6;">
+                <span class="lang-en">Set up a memorial tablet for the deceased, praying for their liberation from suffering.</span>
+                <span class="lang-zh">为亡者立牌位，祈请超度离苦。</span>
+              </div>
+            </div>
+            <div>
+              <span class="stock-bar">
+                <span class="lang-en">Accepting bookings</span>
+                <span class="lang-zh">接受预约中</span>
+              </span>
+            </div>
+          </div>
+          <div style="margin-top:10px;opacity:.72;font-size:13px;">
+            <span class="lang-en">Price: Donation amount TBD (all donations to charity account)</span>
+            <span class="lang-zh">价格：待定（善款统一捐入公益账户）</span>
+          </div>
+        </div>
+
+        <form id="formChaodu" class="booking-grid">
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Deceased Name <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">亡灵姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="cd_deceased_name" type="text" class="form-control" required />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Date of Passing <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">去世时间 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="cd_deceased_time" type="date" class="form-control" required />
+          </div>
+          <div class="span-2">
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Cemetery or Family Address <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">墓地地址或亲属地址 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="cd_address" type="text" class="form-control" required />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Your Name <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">预约人姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="cd_contact_name" type="text" class="form-control" required />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Contact (phone or email) <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">联系方式（手机/邮箱）<span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="cd_contact_info" type="text" class="form-control" required />
+          </div>
+          <div class="span-2">
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Notes (optional)</span>
+              <span class="lang-zh">备注（选填）</span>
+            </label>
+            <textarea id="cd_notes" rows="3" class="form-control"></textarea>
+          </div>
+          <div class="span-2" style="display:flex;gap:10px;justify-content:flex-end;">
+            <button type="reset" class="btn btn-ghost">
+              <span class="lang-en">Reset</span><span class="lang-zh">重置</span>
+            </button>
+            <button type="submit" class="btn btn-gold" id="btnChaodu">
+              <span class="lang-en">Submit Booking</span><span class="lang-zh">提交预约</span>
+            </button>
+          </div>
+        </form>
+        <div id="msgChaodu" class="form-msg"></div>
+      </div>
+
+      <!-- ─── 代化元宝 Panel ─── -->
+      <div class="service-panel" id="panelYuanbao">
+        <div style="border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:16px;background:rgba(255,255,255,.02);margin-bottom:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div>
+              <div style="font-weight:900;color:var(--gold);font-size:16px;">
+                <span class="lang-en">Incense Paper Burning</span>
+                <span class="lang-zh">代化元宝</span>
+              </div>
+              <div style="opacity:.78;margin-top:4px;line-height:1.6;">
+                <span class="lang-en">We burn gold/silver incense paper on your behalf to convey your offerings.</span>
+                <span class="lang-zh">代为焚化金银元宝，传递供奉心意。</span>
+              </div>
+            </div>
+            <div id="yuanbaoStockDisplay">
+              <span class="stock-bar" id="stockBadge">
+                <span id="stockText">载入中…</span>
+              </span>
+            </div>
+          </div>
+          <div style="margin-top:10px;opacity:.72;font-size:13px;">
+            <span class="lang-en">Price: Donation amount TBD (all donations to charity account) · Limit 100 per batch</span>
+            <span class="lang-zh">价格：待定（善款统一捐入公益账户） · 每批限 100 个</span>
+          </div>
+        </div>
+
+        <form id="formYuanbao" class="booking-grid">
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Deceased Name <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">亡灵姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="yb_deceased_name" type="text" class="form-control" required />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Date of Passing <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">去世时间 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="yb_deceased_time" type="date" class="form-control" required />
+          </div>
+          <div class="span-2">
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Cemetery or Family Address <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">墓地地址或亲属地址 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="yb_address" type="text" class="form-control" required />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Quantity (1–10) <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">预约数量（1–10）<span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="yb_quantity" type="number" min="1" max="10" value="1" class="form-control" required />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Your Name <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">预约人姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="yb_contact_name" type="text" class="form-control" required />
+          </div>
+          <div class="span-2">
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Contact (phone or email) <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">联系方式（手机/邮箱）<span style="color:rgba(220,90,90,.8);">*</span></span>
+            </label>
+            <input id="yb_contact_info" type="text" class="form-control" required />
+          </div>
+          <div class="span-2">
+            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
+              <span class="lang-en">Notes (optional)</span>
+              <span class="lang-zh">备注（选填）</span>
+            </label>
+            <textarea id="yb_notes" rows="3" class="form-control"></textarea>
+          </div>
+          <div class="span-2" style="display:flex;gap:10px;justify-content:flex-end;">
+            <button type="reset" class="btn btn-ghost">
+              <span class="lang-en">Reset</span><span class="lang-zh">重置</span>
+            </button>
+            <button type="submit" class="btn btn-gold" id="btnYuanbao">
+              <span class="lang-en">Submit Booking</span><span class="lang-zh">提交预约</span>
+            </button>
+          </div>
+        </form>
+        <div id="msgYuanbao" class="form-msg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 公益声明区块 ─── -->
+  <section style="padding-bottom:28px;">
+    <div class="charity-block glass-card">
+      <div class="title">
+        <span class="lang-en">Charity Donation Statement</span>
+        <span class="lang-zh">公益捐款说明</span>
+      </div>
+      <p style="opacity:.88;line-height:1.8;">
+        <span class="lang-en">All donations are received by the NZ Taoist Association's registered charity account and are eligible for official tax-deductible donation receipts.</span>
+        <span class="lang-zh">所有善款将由新西兰注册的公益账户统一接收，可开具税务局认可的捐赠票据。</span>
+      </p>
+
+      <div class="charity-account">
+        <div style="font-weight:800;color:var(--gold);margin-bottom:10px;">
+          <span class="lang-en">Charity Bank Account</span>
+          <span class="lang-zh">收款账户信息</span>
+        </div>
+        <div style="display:grid;gap:8px;">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:8px 0;border-bottom:1px solid rgba(255,213,122,.1);">
+            <span style="opacity:.72;">
+              <span class="lang-en">Account Name</span>
+              <span class="lang-zh">账户名</span>
+            </span>
+            <span style="font-weight:800;color:var(--gold2);">THE NZ TAOIST ASSOCIATION CHARITABLE TRU</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:8px 0;border-bottom:1px solid rgba(255,213,122,.1);">
+            <span style="opacity:.72;">
+              <span class="lang-en">Account Number</span>
+              <span class="lang-zh">账号</span>
+            </span>
+            <span style="font-weight:800;color:var(--gold2);">06-0273-0844030-00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:8px 0;">
+            <span style="opacity:.72;">
+              <span class="lang-en">Bank</span>
+              <span class="lang-zh">银行</span>
+            </span>
+            <span style="font-weight:800;color:var(--gold2);">BNZ</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="opacity:.82;line-height:1.8;margin-top:14px;">
+        <span class="lang-en">After making the transfer, please email the screenshot along with your booking details to us. We will send you an official donation receipt upon confirmation.</span>
+        <span class="lang-zh">捐款完成后，请将转账截图连同预约信息发送至我们的邮箱，我们将为您发送正式的捐赠收据。</span>
+      </p>
+    </div>
+  </section>
+
 </main>
 
 <script>
-  (function () {
-    var root = document.documentElement;
+(function () {
+  var root = document.documentElement;
 
-    function getLang() {
-      var cur = root.getAttribute('data-lang');
-      return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+  // ─── Tabs ───────────────────────────────────────────────
+  function switchService(name) {
+    ['Chaodu','Yuanbao'].forEach(function(k){
+      var t = document.getElementById('tab'+k);
+      var p = document.getElementById('panel'+k);
+      if(t) t.classList.remove('active');
+      if(p) p.classList.remove('active');
+    });
+    var at = document.getElementById('tab'+name);
+    var ap = document.getElementById('panel'+name);
+    if(at) at.classList.add('active');
+    if(ap) ap.classList.add('active');
+  }
+  document.getElementById('tabChaodu').addEventListener('click', function(){ switchService('Chaodu'); });
+  document.getElementById('tabYuanbao').addEventListener('click', function(){ switchService('Yuanbao'); });
+
+  // ─── Show message ────────────────────────────────────────
+  function showMsg(elId, titleEn, titleZh, textEn, textZh, isError) {
+    var l = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
+    var el = document.getElementById(elId);
+    if (!el) return;
+    el.className = 'form-msg show' + (isError ? ' error' : '');
+    el.innerHTML =
+      '<div style="font-weight:900;color:' + (isError ? 'rgba(220,90,90,.9)' : 'var(--gold2)') + ';margin-bottom:6px;">' +
+        (l === 'en' ? titleEn : titleZh) +
+      '</div>' +
+      '<div style="opacity:.86;line-height:1.7;">' +
+        (l === 'en' ? textEn : textZh) +
+      '</div>';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ─── Load user profile to prefill ───────────────────────
+  async function prefillFromProfile() {
+    var profile = await getMyProfile();
+    if (!profile) return;
+    var fields = [
+      ['cd_contact_name', profile.full_name],
+      ['cd_contact_info', profile.phone || profile.email || ''],
+      ['yb_contact_name', profile.full_name],
+      ['yb_contact_info', profile.phone || profile.email || ''],
+    ];
+    fields.forEach(function(f){
+      var el = document.getElementById(f[0]);
+      if (el && !el.value && f[1]) el.value = f[1];
+    });
+  }
+  prefillFromProfile();
+
+  // ─── Load yuanbao inventory ──────────────────────────────
+  var yuanbaoStock = { remaining: 0, sold_out: false, batch: '第一批' };
+
+  async function loadInventory() {
+    var badge = document.getElementById('stockBadge');
+    var stockText = document.getElementById('stockText');
+    var btnYb = document.getElementById('btnYuanbao');
+    var qtyEl = document.getElementById('yb_quantity');
+
+    var res = await _sb
+      .from('yuanbao_inventory')
+      .select('*')
+      .eq('is_active', true)
+      .single();
+
+    if (res.error || !res.data) {
+      if (stockText) stockText.textContent = '暂无库存信息';
+      return;
     }
 
-    // Auto-fill service when clicking cards
-    function wireServiceCards() {
-      var cards = document.querySelectorAll('[data-service]');
-      var serviceSelect = document.getElementById('service');
-      if (!cards || !serviceSelect) return;
+    var row = res.data;
+    var remaining = Math.max(0, row.total - row.sold);
+    yuanbaoStock.remaining = remaining;
+    yuanbaoStock.sold_out = remaining <= 0;
+    yuanbaoStock.batch = row.batch_name || '第一批';
 
-      cards.forEach(function (card) {
-        card.addEventListener('click', function () {
-          var en = card.getAttribute('data-service') || '';
-          var zh = card.getAttribute('data-service-zh') || '';
+    var l = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
 
-          // Try match by value
-          for (var i = 0; i < serviceSelect.options.length; i++) {
-            if (serviceSelect.options[i].value === en) {
-              serviceSelect.selectedIndex = i;
-              break;
-            }
-          }
+    if (yuanbaoStock.sold_out) {
+      if (badge) badge.className = 'stock-bar sold-out';
+      if (stockText) stockText.textContent = l === 'en'
+        ? 'This batch is sold out. Please check back later.'
+        : '本批已售罄，敬请期待下一批';
+      if (btnYb) { btnYb.disabled = true; btnYb.style.opacity = '.5'; }
+    } else {
+      if (badge) badge.className = 'stock-bar';
+      if (stockText) stockText.textContent = (l === 'en' ? 'Remaining: ' : '剩余 ') + remaining + (l === 'en' ? '' : ' 个');
+      if (qtyEl) qtyEl.max = Math.min(10, remaining);
+    }
+  }
+  loadInventory();
 
-          // Focus the next field
-          var dateEl = document.getElementById('date');
-          if (dateEl) dateEl.focus();
+  // ─── EmailJS notification ───────────────────────────────
+  // 初始化 EmailJS（需在 emailjs.com 创建账号后替换以下 Public Key）
+  // 如未配置则静默跳过，不影响预约提交
+  var EMAILJS_PUBLIC_KEY  = 'YOUR_EMAILJS_PUBLIC_KEY';
+  var EMAILJS_SERVICE_ID  = 'YOUR_EMAILJS_SERVICE_ID';
+  var EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+  var emailjsReady = false;
+  try {
+    if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+      emailjsReady = true;
+    }
+  } catch(e) {}
 
-          // Small visual feedback
-          card.style.transform = 'translateY(-1px)';
-          setTimeout(function(){ card.style.transform = 'none'; }, 120);
-        });
+  function sendAdminEmail(params) {
+    if (!emailjsReady) return;
+    try {
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: 'jzc19980926@gmail.com',
+        service_type: params.service_type,
+        contact_name: params.contact_name,
+        contact_info: params.contact_info,
+        deceased_name: params.deceased_name,
+        deceased_time: params.deceased_time || '—',
+        address: params.address,
+        quantity: params.quantity || '—',
+        notes: params.notes || '（无）',
+        submit_time: new Date().toLocaleString('zh-CN')
       });
+    } catch(e) {}
+  }
+
+  // ─── Submit 超度牌位 ─────────────────────────────────────
+  document.getElementById('formChaodu').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var session = await getSession();
+    if (!session) {
+      var l = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
+      showMsg('msgChaodu',
+        'Login required', '请先登录',
+        'Please log in before submitting a booking.', '请先登录再提交预约。',
+        true
+      );
+      setTimeout(function(){ window.location.href = 'login.html?redirect=booking.html'; }, 1800);
+      return;
     }
 
-    // Simple submit (demo): show a confirmation box without backend
-    function wireForm() {
-      var form = document.getElementById('bookingForm');
-      var result = document.getElementById('result');
-      var resultText = document.getElementById('resultText');
-      if (!form || !result || !resultText) return;
+    var btn = document.getElementById('btnChaodu');
+    if (btn) btn.disabled = true;
 
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
+    var data = {
+      user_id:       session.user.id,
+      service_type:  'chaodu',
+      deceased_name: document.getElementById('cd_deceased_name').value.trim(),
+      deceased_time: document.getElementById('cd_deceased_time').value || null,
+      address:       document.getElementById('cd_address').value.trim(),
+      contact_name:  document.getElementById('cd_contact_name').value.trim(),
+      contact_info:  document.getElementById('cd_contact_info').value.trim(),
+      notes:         document.getElementById('cd_notes').value.trim() || null,
+      quantity:      1
+    };
 
-        var serviceEl = document.getElementById('service');
-        var service = (serviceEl || {}).value || '';
-        var serviceZh = service;
-        if (serviceEl && serviceEl.selectedIndex >= 0) {
-          serviceZh = serviceEl.options[serviceEl.selectedIndex].getAttribute('data-zh') || service;
-        }
-        var date = (document.getElementById('date') || {}).value || '';
-        var time = (document.getElementById('time') || {}).value || '';
-        var name = (document.getElementById('name') || {}).value || '';
-        var contact = (document.getElementById('contact') || {}).value || '';
+    var res = await _sb.from('ritual_bookings').insert(data).select().single();
 
-        var l = getLang();
-        var timeLabel = (time === 'Morning') ? (l === 'en' ? 'Morning' : '上午')
-                      : (time === 'Afternoon') ? (l === 'en' ? 'Afternoon' : '下午')
-                      : (time === 'Evening') ? (l === 'en' ? 'Evening' : '晚上')
-                      : time;
+    if (btn) btn.disabled = false;
 
-        var msgEn = 'Thank you, ' + name + '. We received your request for "' + service + '" on ' + date + ' (' + timeLabel + '). We will contact you at: ' + contact + '.';
-        var msgZh = '谢谢你，' + name + '。我们已收到你的预约：' + serviceZh + '，日期 ' + date + '（' + timeLabel + '）。我们将通过 ' + contact + ' 联系你确认。';
-
-        resultText.textContent = (l === 'en') ? msgEn : msgZh;
-        result.style.display = 'block';
-        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-
-      form.addEventListener('reset', function(){
-        if (result) result.style.display = 'none';
-      });
+    if (res.error) {
+      showMsg('msgChaodu',
+        'Submission failed', '提交失败',
+        res.error.message, res.error.message,
+        true
+      );
+      return;
     }
 
-    // Re-render small bits on language switch
-    function wireLangChange(){
-      window.addEventListener('langchange', function(){
-        applySelectLang();
-      });
+    sendAdminEmail({
+      service_type:  '超度牌位',
+      contact_name:  data.contact_name,
+      contact_info:  data.contact_info,
+      deceased_name: data.deceased_name,
+      deceased_time: data.deceased_time,
+      address:       data.address,
+      notes:         data.notes
+    });
+
+    showMsg('msgChaodu',
+      'Booking submitted!', '预约已提交！',
+      'Your memorial tablet booking has been received. Please transfer the donation to our charity account and email us the screenshot to complete your booking.',
+      '超度牌位预约已收到。请将善款转账至公益账户，并将截图发送至邮箱，我们会尽快确认。'
+    );
+    document.getElementById('formChaodu').reset();
+    prefillFromProfile();
+  });
+
+  // ─── Submit 代化元宝 ─────────────────────────────────────
+  document.getElementById('formYuanbao').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var session = await getSession();
+    if (!session) {
+      showMsg('msgYuanbao',
+        'Login required', '请先登录',
+        'Please log in before submitting a booking.', '请先登录再提交预约。',
+        true
+      );
+      setTimeout(function(){ window.location.href = 'login.html?redirect=booking.html'; }, 1800);
+      return;
     }
 
-    function applySelectLang(){
-      var l = getLang();
-
-      var serviceSelect = document.getElementById('service');
-      if (serviceSelect) {
-        for (var i = 0; i < serviceSelect.options.length; i++) {
-          var opt = serviceSelect.options[i];
-          var en = opt.getAttribute('data-en') || opt.textContent;
-          var zh = opt.getAttribute('data-zh') || en;
-          opt.textContent = (l === 'zh') ? zh : en;
-        }
-      }
-
-      var timeSelect = document.getElementById('time');
-      if (timeSelect) {
-        for (var j = 0; j < timeSelect.options.length; j++) {
-          var opt2 = timeSelect.options[j];
-          var en2 = opt2.getAttribute('data-en') || opt2.textContent;
-          var zh2 = opt2.getAttribute('data-zh') || en2;
-          opt2.textContent = (l === 'zh') ? zh2 : en2;
-        }
-      }
+    if (yuanbaoStock.sold_out) {
+      showMsg('msgYuanbao',
+        'Sold out', '已售罄',
+        'This batch is sold out. Please check back later.', '本批已售罄，敬请期待下一批。',
+        true
+      );
+      return;
     }
 
-    applySelectLang();
-    wireServiceCards();
-    wireForm();
-    wireLangChange();
-
-    // Make the layout responsive like the rest of the site
-    function responsiveTweaks(){
-      var mq = window.matchMedia('(max-width: 900px)');
-      function apply(){
-        var gridSections = document.querySelectorAll('section.hero > div:first-child .glass-card > div[style*="grid-template-columns:repeat(3,1fr)"]');
-        // We keep existing CSS; this is a safe no-op if not found.
-        if (mq.matches && gridSections) {
-          gridSections.forEach(function(el){
-            el.style.gridTemplateColumns = '1fr';
-          });
-        }
-      }
-      apply();
-      window.addEventListener('resize', apply);
+    var qty = parseInt(document.getElementById('yb_quantity').value, 10) || 1;
+    if (qty > yuanbaoStock.remaining) {
+      var l2 = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
+      showMsg('msgYuanbao',
+        'Exceeds stock', '超出库存',
+        'Only ' + yuanbaoStock.remaining + ' left in this batch.',
+        '本批仅剩 ' + yuanbaoStock.remaining + ' 个，请修改数量。',
+        true
+      );
+      return;
     }
 
-    responsiveTweaks();
-  })();
+    var btn = document.getElementById('btnYuanbao');
+    if (btn) btn.disabled = true;
+
+    var data = {
+      user_id:       session.user.id,
+      service_type:  'yuanbao',
+      deceased_name: document.getElementById('yb_deceased_name').value.trim(),
+      deceased_time: document.getElementById('yb_deceased_time').value || null,
+      address:       document.getElementById('yb_address').value.trim(),
+      quantity:      qty,
+      contact_name:  document.getElementById('yb_contact_name').value.trim(),
+      contact_info:  document.getElementById('yb_contact_info').value.trim(),
+      notes:         document.getElementById('yb_notes').value.trim() || null
+    };
+
+    var res = await _sb.from('ritual_bookings').insert(data).select().single();
+
+    if (res.error) {
+      if (btn) btn.disabled = false;
+      showMsg('msgYuanbao',
+        'Submission failed', '提交失败',
+        res.error.message, res.error.message,
+        true
+      );
+      return;
+    }
+
+    // Increment sold count
+    await _sb.rpc('increment_yuanbao_sold', { p_qty: qty });
+
+    if (btn) btn.disabled = false;
+
+    sendAdminEmail({
+      service_type:  '代化元宝 ×' + qty,
+      contact_name:  data.contact_name,
+      contact_info:  data.contact_info,
+      deceased_name: data.deceased_name,
+      deceased_time: data.deceased_time,
+      address:       data.address,
+      quantity:      qty,
+      notes:         data.notes
+    });
+
+    showMsg('msgYuanbao',
+      'Booking submitted!', '预约已提交！',
+      'Your incense paper booking (' + qty + ' pieces) has been received. Please transfer the donation to our charity account and email us the screenshot.',
+      '代化元宝预约（' + qty + '个）已收到。请将善款转账至公益账户，并将截图发至邮箱，我们会尽快确认。'
+    );
+    document.getElementById('formYuanbao').reset();
+    prefillFromProfile();
+    loadInventory();
+  });
+
+})();
 </script>
 </body>
 </html>

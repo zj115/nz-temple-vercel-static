@@ -68,7 +68,7 @@ async function getMyProfile() {
 async function updateMyProfile(updates) {
   const session = await getSession();
   if (!session) return { error: { message: 'Not logged in' } };
-  // 防止前端误传敏感字段
+  //
   const safe = { ...updates };
   delete safe.level;
   delete safe.merit_points;
