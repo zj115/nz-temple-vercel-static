@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin · 管理后台</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    .admin-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;border-bottom:1px solid rgba(255,213,122,.14);padding-bottom:14px;}
+    .admin-tab{
+      appearance:none;border:1px solid rgba(255,213,122,.16);
+      background:rgba(255,255,255,.03);color:var(--gold2);
+      border-radius:999px;padding:8px 16px;font-weight:800;
+      cursor:pointer;transition:all .18s ease;
+    }
+    .admin-tab.active{color:var(--gold);background:rgba(255,213,122,.14);border-color:rgba(255,213,122,.3);}
+    .admin-panel{display:none;}
+    .admin-panel.active{display:block;}
+
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{text-align:left;padding:8px 10px;font-weight:800;color:var(--gold2);border-bottom:1px solid rgba(255,213,122,.18);white-space:nowrap;}
+    td{padding:8px 10px;border-bottom:1px solid rgba(255,213,122,.08);line-height:1.5;vertical-align:top;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,213,122,.04);}
+
+    .badge{
+      display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;
+    }
+    .badge-pending{background:rgba(255,200,60,.14);border:1px solid rgba(255,200,60,.3);color:rgba(255,200,60,.9);}
+    .badge-confirmed{background:rgba(70,200,120,.14);border:1px solid rgba(70,200,120,.3);color:rgba(70,200,120,.9);}
+    .badge-completed{background:rgba(100,160,255,.14);border:1px solid rgba(100,160,255,.3);color:rgba(100,160,255,.9);}
+    .badge-cancelled{background:rgba(220,90,90,.14);border:1px solid rgba(220,90,90,.3);color:rgba(220,90,90,.9);}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+    .stat-card{
+      border:1px solid rgba(255,213,122,.14);border-radius:16px;
+      padding:16px;background:rgba(255,255,255,.03);
+    }
+    .stat-num{font-size:28px;font-weight:900;color:var(--gold2);}
+    .stat-label{opacity:.72;font-size:13px;margin-top:4px;}
+
+    .setting-row{
+      display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+      padding:12px 0;border-bottom:1px solid rgba(255,213,122,.1);
+    }
+    .setting-row:last-child{border-bottom:none;}
+    .setting-label{flex:0 0 160px;font-weight:700;color:var(--gold2);}
+    .setting-value{flex:1 1 200px;}
+    .setting-value input{width:100%;max-width:320px;}
+
+    .access-denied{text-align:center;padding:60px 20px;}
+
+    @media(max-width:640px){
+      .stat-grid{grid-template-columns:1fr 1fr;}
+      .setting-label{flex:0 0 100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bg-ornament"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">Admin Panel · 管理后台</div>
+      </div>
+    </a>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle">
+        <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+      </button>
+      <a class="btn btn-ghost" href="index.html">
+        <span class="lang-en">Back to site</span><span class="lang-zh">返回主站</span>
+      </a>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var root = document.documentElement;
+      var saved = localStorage.getItem('lang');
+      root.setAttribute('data-lang', (saved === 'zh' || saved === 'en') ? saved : 'zh');
+      var btn = document.getElementById('langToggle');
+      if(btn) btn.addEventListener('click', function(){
+        var next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem('lang', next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+  </script>
+</header>
+
+<main class="container">
+
+  <!-- Access denied state (shown while checking, or if not admin) -->
+  <div id="accessDenied" class="access-denied glass-card" style="display:none;">
+    <div style="font-size:36px;margin-bottom:12px;">🔒</div>
+    <div style="font-weight:900;color:var(--gold);font-size:20px;margin-bottom:8px;">
+      <span class="lang-en">Access Denied</span>
+      <span class="lang-zh">无访问权限</span>
+    </div>
+    <p style="opacity:.8;line-height:1.7;">
+      <span class="lang-en">This page requires admin role. Please log in with an admin account.</span>
+      <span class="lang-zh">本页面需要管理员权限。请使用管理员账号登录。</span>
+    </p>
+    <a class="btn btn-gold" href="login.html" style="margin-top:16px;display:inline-block;">
+      <span class="lang-en">Go to Login</span><span class="lang-zh">前往登录</span>
+    </a>
+  </div>
+
+  <!-- Main admin content -->
+  <div id="adminContent" style="display:none;">
+    <section style="padding:14px 0 10px;">
+      <h1 style="color:var(--gold);margin:10px 0 6px;">
+        <span class="lang-en">Admin Panel</span>
+        <span class="lang-zh">管理后台</span>
+      </h1>
+    </section>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="bookings">
+        <span class="lang-en">Bookings</span><span class="lang-zh">预约管理</span>
+      </button>
+      <button class="admin-tab" data-tab="inventory">
+        <span class="lang-en">Inventory</span><span class="lang-zh">库存管理</span>
+      </button>
+      <button class="admin-tab" data-tab="stats">
+        <span class="lang-en">Statistics</span><span class="lang-zh">统计</span>
+      </button>
+      <button class="admin-tab" data-tab="settings">
+        <span class="lang-en">Settings</span><span class="lang-zh">设置</span>
+      </button>
+    </div>
+
+    <!-- ─── Bookings Panel ─── -->
+    <div class="admin-panel active glass-card" id="panel-bookings" style="padding:18px;">
+      <!-- Filters -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <select id="filterType" class="form-control" style="width:auto;padding:8px 12px;">
+          <option value="">All types · 全部类型</option>
+          <option value="chaodu">超度牌位</option>
+          <option value="yuanbao">代化元宝</option>
+        </select>
+        <select id="filterStatus" class="form-control" style="width:auto;padding:8px 12px;">
+          <option value="">All status · 全部状态</option>
+          <option value="pending">待确认</option>
+          <option value="confirmed">已确认</option>
+          <option value="completed">已完成</option>
+          <option value="cancelled">已取消</option>
+        </select>
+        <button class="btn btn-ghost" id="btnRefresh" style="padding:8px 14px;">
+          <span class="lang-en">Refresh</span><span class="lang-zh">刷新</span>
+        </button>
+        <button class="btn btn-ghost" id="btnExportCSV" style="padding:8px 14px;">
+          <span class="lang-en">Export CSV</span><span class="lang-zh">导出 CSV</span>
+        </button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="bookingsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th><span class="lang-en">Type</span><span class="lang-zh">类型</span></th>
+              <th><span class="lang-en">Deceased</span><span class="lang-zh">亡者</span></th>
+              <th><span class="lang-en">Contact</span><span class="lang-zh">预约人</span></th>
+              <th><span class="lang-en">Qty</span><span class="lang-zh">数量</span></th>
+              <th><span class="lang-en">Status</span><span class="lang-zh">状态</span></th>
+              <th><span class="lang-en">Date</span><span class="lang-zh">时间</span></th>
+              <th><span class="lang-en">Action</span><span class="lang-zh">操作</span></th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTbody">
+            <tr><td colspan="8" style="text-align:center;opacity:.6;padding:20px;">
+              <span class="lang-en">Loading…</span><span class="lang-zh">加载中…</span>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Inventory Panel ─── -->
+    <div class="admin-panel glass-card" id="panel-inventory" style="padding:18px;">
+      <div style="font-weight:900;color:var(--gold);margin-bottom:14px;">
+        <span class="lang-en">Incense Paper Inventory</span>
+        <span class="lang-zh">代化元宝库存</span>
+      </div>
+
+      <div id="inventoryInfo" style="border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:16px;background:rgba(255,255,255,.02);margin-bottom:18px;">
+        <span style="opacity:.6;">加载中…</span>
+      </div>
+
+      <div class="glass-card" style="padding:16px;margin-bottom:16px;">
+        <div style="font-weight:800;color:var(--gold2);margin-bottom:12px;">
+          <span class="lang-en">Adjust Sold Count</span>
+          <span class="lang-zh">手动调整已售数量</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input id="adjustSold" type="number" min="0" class="form-control" style="width:120px;" placeholder="新的已售数" />
+          <button class="btn btn-ghost" id="btnAdjustSold">
+            <span class="lang-en">Update</span><span class="lang-zh">更新</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card" style="padding:16px;">
+        <div style="font-weight:800;color:var(--gold2);margin-bottom:12px;">
+          <span class="lang-en">Reset: Start New Batch</span>
+          <span class="lang-zh">重置：开启新一批</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;flex-wrap:wrap;">
+          <div>
+            <label style="font-weight:700;opacity:.8;display:block;margin-bottom:6px;font-size:13px;">
+              <span class="lang-en">Batch Name</span><span class="lang-zh">批次名称</span>
+            </label>
+            <input id="newBatchName" type="text" class="form-control" placeholder="如：第二批" />
+          </div>
+          <div>
+            <label style="font-weight:700;opacity:.8;display:block;margin-bottom:6px;font-size:13px;">
+              <span class="lang-en">Total Quantity</span><span class="lang-zh">总数量</span>
+            </label>
+            <input id="newBatchTotal" type="number" min="1" value="100" class="form-control" />
+          </div>
+          <button class="btn btn-gold" id="btnNewBatch" style="height:42px;">
+            <span class="lang-en">Create</span><span class="lang-zh">创建</span>
+          </button>
+        </div>
+        <div id="inventoryMsg" style="margin-top:10px;opacity:.8;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- ─── Statistics Panel ─── -->
+    <div class="admin-panel glass-card" id="panel-stats" style="padding:18px;">
+      <div style="font-weight:900;color:var(--gold);margin-bottom:16px;">
+        <span class="lang-en">Statistics</span>
+        <span class="lang-zh">统计概览</span>
+      </div>
+      <div class="stat-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-num" id="statTotal">—</div>
+          <div class="stat-label">
+            <span class="lang-en">Total Bookings</span><span class="lang-zh">总预约数</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statChaodu">—</div>
+          <div class="stat-label">超度牌位</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statYuanbao">—</div>
+          <div class="stat-label">
+            <span class="lang-en">Incense Paper Sold (units)</span><span class="lang-zh">代化元宝（个）</span>
+          </div>
+        </div>
+      </div>
+      <div id="monthlyStats" style="overflow-x:auto;"></div>
+    </div>
+
+    <!-- ─── Settings Panel ─── -->
+    <div class="admin-panel glass-card" id="panel-settings" style="padding:18px;">
+      <div style="font-weight:900;color:var(--gold);margin-bottom:16px;">
+        <span class="lang-en">Site Settings</span>
+        <span class="lang-zh">站点设置</span>
+      </div>
+      <div id="settingsForm">
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="lang-en">Notify Email</span><span class="lang-zh">通知邮箱</span>
+          </div>
+          <div class="setting-value">
+            <input id="set_notify_email" type="email" class="form-control" />
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="lang-en">Bank Account Name</span><span class="lang-zh">账户名</span>
+          </div>
+          <div class="setting-value">
+            <input id="set_bank_name" type="text" class="form-control" />
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="lang-en">Bank Account Number</span><span class="lang-zh">账号</span>
+          </div>
+          <div class="setting-value">
+            <input id="set_bank_account" type="text" class="form-control" />
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn btn-gold" id="btnSaveSettings">
+          <span class="lang-en">Save Settings</span><span class="lang-zh">保存设置</span>
+        </button>
+        <span id="settingsMsg" style="opacity:.8;align-self:center;font-size:13px;"></span>
+      </div>
+    </div>
+  </div><!-- /adminContent -->
+
+</main>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var allBookings = [];
+
+  // ─── Auth check ──────────────────────────────────────────
+  async function init() {
+    var session = await getSession();
+    if (!session) {
+      document.getElementById('accessDenied').style.display = 'block';
+      return;
+    }
+
+    // Check admin role via member_profiles
+    var profile = await getMyProfile();
+    if (!profile || profile.role !== 'admin') {
+      document.getElementById('accessDenied').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('adminContent').style.display = 'block';
+    loadBookings();
+    loadInventory();
+    loadStats();
+    loadSettings();
+  }
+
+  // ─── Tabs ────────────────────────────────────────────────
+  document.querySelectorAll('.admin-tab').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.admin-tab').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.admin-panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      var panel = document.getElementById('panel-' + btn.dataset.tab);
+      if(panel) panel.classList.add('active');
+    });
+  });
+
+  // ─── Bookings ────────────────────────────────────────────
+  function badgeHtml(status) {
+    var map = {
+      pending:   ['待确认','Pending',   'badge-pending'],
+      confirmed: ['已确认','Confirmed', 'badge-confirmed'],
+      completed: ['已完成','Completed', 'badge-completed'],
+      cancelled: ['已取消','Cancelled', 'badge-cancelled']
+    };
+    var info = map[status] || [status, status, ''];
+    var l = root.getAttribute('data-lang') === 'en' ? info[1] : info[0];
+    return '<span class="badge ' + info[2] + '">' + l + '</span>';
+  }
+
+  function typeLabel(t) {
+    if(t === 'chaodu') return '<span class="lang-en">Memorial Tablet</span><span class="lang-zh">超度牌位</span>';
+    if(t === 'yuanbao') return '<span class="lang-en">Incense Paper</span><span class="lang-zh">代化元宝</span>';
+    return t;
+  }
+
+  function renderBookings(list) {
+    var tbody = document.getElementById('bookingsTbody');
+    if(!tbody) return;
+    if(!list || list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;opacity:.6;padding:20px;">无数据</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(function(row, i){
+      var shortId = (row.id || '').substring(0, 8);
+      return '<tr>' +
+        '<td style="opacity:.6;font-size:12px;">' + shortId + '</td>' +
+        '<td>' + typeLabel(row.service_type) + '</td>' +
+        '<td>' +
+          '<div style="font-weight:700;">' + esc(row.deceased_name) + '</div>' +
+          '<div style="opacity:.65;font-size:12px;">' + (row.deceased_time || '—') + '</div>' +
+          '<div style="opacity:.65;font-size:12px;">' + esc(row.address || '') + '</div>' +
+        '</td>' +
+        '<td>' +
+          '<div style="font-weight:700;">' + esc(row.contact_name) + '</div>' +
+          '<div style="opacity:.65;font-size:12px;">' + esc(row.contact_info || '') + '</div>' +
+        '</td>' +
+        '<td>' + (row.quantity || 1) + '</td>' +
+        '<td>' + badgeHtml(row.status) + '</td>' +
+        '<td style="opacity:.7;font-size:12px;">' + (row.created_at ? row.created_at.replace('T',' ').substring(0,16) : '—') + '</td>' +
+        '<td>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            (row.status !== 'confirmed'  ? '<button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="updateStatus(\'' + row.id + '\',\'confirmed\')">确认</button>' : '') +
+            (row.status !== 'completed'  ? '<button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="updateStatus(\'' + row.id + '\',\'completed\')">完成</button>' : '') +
+            (row.status !== 'cancelled'  ? '<button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;color:rgba(220,90,90,.8);" onclick="updateStatus(\'' + row.id + '\',\'cancelled\')">取消</button>' : '') +
+          '</div>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function applyFilters() {
+    var type   = document.getElementById('filterType').value;
+    var status = document.getElementById('filterStatus').value;
+    var filtered = allBookings.filter(function(row){
+      return (!type   || row.service_type === type) &&
+             (!status || row.status       === status);
+    });
+    renderBookings(filtered);
+  }
+
+  async function loadBookings() {
+    var res = await _sb
+      .from('ritual_bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (res.error) { console.error(res.error); return; }
+    allBookings = res.data || [];
+    applyFilters();
+  }
+
+  document.getElementById('filterType').addEventListener('change', applyFilters);
+  document.getElementById('filterStatus').addEventListener('change', applyFilters);
+  document.getElementById('btnRefresh').addEventListener('click', loadBookings);
+
+  window.updateStatus = async function(id, newStatus) {
+    await _sb.from('ritual_bookings').update({ status: newStatus }).eq('id', id);
+    loadBookings();
+  };
+
+  // CSV export
+  document.getElementById('btnExportCSV').addEventListener('click', function(){
+    var headers = ['id','service_type','deceased_name','deceased_time','address','quantity','contact_name','contact_info','notes','status','created_at'];
+    var rows = [headers.join(',')];
+    allBookings.forEach(function(r){
+      rows.push(headers.map(function(h){
+        var v = (r[h] == null ? '' : String(r[h])).replace(/"/g,'""');
+        return '"' + v + '"';
+      }).join(','));
+    });
+    var blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'bookings_' + new Date().toISOString().substring(0,10) + '.csv';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  });
+
+  // ─── Inventory ───────────────────────────────────────────
+  var currentInventoryId = null;
+
+  async function loadInventory() {
+    var el = document.getElementById('inventoryInfo');
+    var res = await _sb.from('yuanbao_inventory').select('*').eq('is_active', true).single();
+    if (res.error || !res.data) {
+      if(el) el.innerHTML = '<span style="opacity:.6;">无有效批次</span>';
+      return;
+    }
+    var row = res.data;
+    currentInventoryId = row.id;
+    var remaining = Math.max(0, row.total - row.sold);
+    if(el) el.innerHTML =
+      '<div style="display:flex;gap:20px;flex-wrap:wrap;">' +
+        '<div><div style="opacity:.65;font-size:12px;">批次</div><div style="font-weight:800;color:var(--gold2);">' + esc(row.batch_name) + '</div></div>' +
+        '<div><div style="opacity:.65;font-size:12px;">总量</div><div style="font-weight:800;color:var(--gold2);">' + row.total + '</div></div>' +
+        '<div><div style="opacity:.65;font-size:12px;">已售</div><div style="font-weight:800;color:var(--gold2);">' + row.sold + '</div></div>' +
+        '<div><div style="opacity:.65;font-size:12px;">剩余</div><div style="font-weight:800;color:' + (remaining > 0 ? 'rgba(70,200,120,.9)' : 'rgba(220,90,90,.9)') + ';">' + remaining + '</div></div>' +
+      '</div>';
+    var adjEl = document.getElementById('adjustSold');
+    if(adjEl) adjEl.value = row.sold;
+  }
+
+  document.getElementById('btnAdjustSold').addEventListener('click', async function(){
+    if(!currentInventoryId) return;
+    var sold = parseInt(document.getElementById('adjustSold').value, 10);
+    if(isNaN(sold) || sold < 0) return;
+    var msgEl = document.getElementById('inventoryMsg');
+    await _sb.from('yuanbao_inventory').update({ sold: sold }).eq('id', currentInventoryId);
+    if(msgEl) msgEl.textContent = '已更新 ✓';
+    loadInventory();
+  });
+
+  document.getElementById('btnNewBatch').addEventListener('click', async function(){
+    var name  = (document.getElementById('newBatchName').value || '').trim();
+    var total = parseInt(document.getElementById('newBatchTotal').value, 10) || 100;
+    if(!name) { alert('请输入批次名称'); return; }
+    var msgEl = document.getElementById('inventoryMsg');
+    // Deactivate current
+    await _sb.from('yuanbao_inventory').update({ is_active: false }).eq('is_active', true);
+    // Insert new
+    await _sb.from('yuanbao_inventory').insert({ batch_name: name, total: total, sold: 0, is_active: true });
+    if(msgEl) msgEl.textContent = '新批次已创建 ✓';
+    loadInventory();
+  });
+
+  // ─── Statistics ──────────────────────────────────────────
+  async function loadStats() {
+    var res = await _sb.from('ritual_bookings').select('service_type,quantity,created_at,status');
+    if(res.error || !res.data) return;
+    var data = res.data;
+    var total = data.length;
+    var chaodu = data.filter(function(r){ return r.service_type === 'chaodu'; }).length;
+    var yuanbaoUnits = data
+      .filter(function(r){ return r.service_type === 'yuanbao'; })
+      .reduce(function(sum, r){ return sum + (r.quantity || 1); }, 0);
+
+    var sTotal = document.getElementById('statTotal');
+    var sChaodu = document.getElementById('statChaodu');
+    var sYuanbao = document.getElementById('statYuanbao');
+    if(sTotal) sTotal.textContent = total;
+    if(sChaodu) sChaodu.textContent = chaodu;
+    if(sYuanbao) sYuanbao.textContent = yuanbaoUnits;
+
+    // Monthly breakdown
+    var monthly = {};
+    data.forEach(function(r){
+      var month = (r.created_at || '').substring(0,7);
+      if(!monthly[month]) monthly[month] = { chaodu: 0, yuanbao: 0, units: 0 };
+      if(r.service_type === 'chaodu') monthly[month].chaodu++;
+      if(r.service_type === 'yuanbao') { monthly[month].yuanbao++; monthly[month].units += (r.quantity || 1); }
+    });
+    var months = Object.keys(monthly).sort().reverse();
+    var el = document.getElementById('monthlyStats');
+    if(!el || months.length === 0) return;
+    el.innerHTML =
+      '<div style="font-weight:800;color:var(--gold2);margin-bottom:10px;">按月统计</div>' +
+      '<table><thead><tr><th>月份</th><th>超度牌位</th><th>代化元宝（单）</th><th>元宝（个）</th></tr></thead>' +
+      '<tbody>' +
+        months.map(function(m){
+          var mo = monthly[m];
+          return '<tr><td>' + m + '</td><td>' + mo.chaodu + '</td><td>' + mo.yuanbao + '</td><td>' + mo.units + '</td></tr>';
+        }).join('') +
+      '</tbody></table>';
+  }
+
+  // ─── Settings ────────────────────────────────────────────
+  async function loadSettings() {
+    var res = await _sb.from('site_settings').select('key,value');
+    if(res.error || !res.data) return;
+    res.data.forEach(function(row){
+      var el = document.getElementById('set_' + row.key);
+      if(el) el.value = row.value;
+    });
+  }
+
+  document.getElementById('btnSaveSettings').addEventListener('click', async function(){
+    var msgEl = document.getElementById('settingsMsg');
+    var pairs = [
+      ['notify_email',  document.getElementById('set_notify_email').value.trim()],
+      ['bank_name',     document.getElementById('set_bank_name').value.trim()],
+      ['bank_account',  document.getElementById('set_bank_account').value.trim()],
+    ];
+    for(var i = 0; i < pairs.length; i++){
+      await _sb.from('site_settings')
+        .upsert({ key: pairs[i][0], value: pairs[i][1], updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    }
+    if(msgEl) { msgEl.textContent = '已保存 ✓'; setTimeout(function(){ msgEl.textContent = ''; }, 2500); }
+  });
+
+  // ─── Utils ──────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
