@@ -341,10 +341,10 @@ def calc_bazi_from_birth(birth_iso):
         return {"gz": gz, "gan": g, "zhi": z, "nayin": nayin_of(gz), "wuxing": wuxing_of_gan(g)}
     return {
         "mode": "birth", "birth_iso": birth_iso,
-        "year":  pillar_info(eightChar.getYearInGanZhi()),
-        "month": pillar_info(eightChar.getMonthInGanZhi()),
-        "day":   pillar_info(eightChar.getDayInGanZhi()),
-        "time":  pillar_info(eightChar.getTimeInGanZhi()),
+        "year":  pillar_info(eightChar.getYearGan()  + eightChar.getYearZhi()),
+        "month": pillar_info(eightChar.getMonthGan() + eightChar.getMonthZhi()),
+        "day":   pillar_info(eightChar.getDayGan()   + eightChar.getDayZhi()),
+        "time":  pillar_info(eightChar.getTimeGan()  + eightChar.getTimeZhi()),
     }
 
 def build_bazi_manual(year_gz, month_gz, day_gz, time_gz):

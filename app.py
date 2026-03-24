@@ -433,10 +433,10 @@ def calc_bazi_from_birth(birth_iso):
         wx = wuxing_of_gan(g)
         return {"gz":gz,"gan":g,"zhi":z,"nayin":ny,"wuxing":wx}
 
-    year_gz  = eightChar.getYearInGanZhi()
-    month_gz = eightChar.getMonthInGanZhi()
-    day_gz   = eightChar.getDayInGanZhi()
-    time_gz  = eightChar.getTimeInGanZhi()
+    year_gz  = eightChar.getYearGan()  + eightChar.getYearZhi()
+    month_gz = eightChar.getMonthGan() + eightChar.getMonthZhi()
+    day_gz   = eightChar.getDayGan()   + eightChar.getDayZhi()
+    time_gz  = eightChar.getTimeGan()  + eightChar.getTimeZhi()
 
     return {
         "mode":      "birth",
