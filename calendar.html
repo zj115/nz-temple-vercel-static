@@ -953,7 +953,14 @@
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(body)
     })
-    .then(function(r){ return r.json(); })
+    .then(function(r){
+      if (!r.ok) {
+        return r.text().then(function(t){
+          throw new Error('服务器错误 ' + r.status + (t ? '：' + t.slice(0,120) : ''));
+        });
+      }
+      return r.json();
+    })
     .then(function(data){
       if(data.error){ showError(data.error); setLoading(false); return; }
       hideError();
@@ -961,7 +968,7 @@
     })
     .catch(function(e){
       setLoading(false);
-      showError('无法连接后端，请确认 Flask 已启动（python app.py）。错误：' + e.message);
+      showError('API 请求失败：' + e.message);
     });
   }
 
