@@ -73,6 +73,7 @@ body{
   padding:8px 10px;border-radius:10px;
 }
 .navlinks a:hover{background:rgba(255,255,255,.06);}
+.navlinks a.nav-active{background:rgba(255,213,122,.12);color:var(--gold);font-weight:700;}
 .topbar-actions{
   min-width:120px;
   display:flex;
