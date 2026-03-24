@@ -4,56 +4,71 @@ Vercel Serverless Function: POST /api/personal_day_birth
 """
 import sys
 import os
+import json
+from http.server import BaseHTTPRequestHandler
+
 sys.path.insert(0, os.path.dirname(__file__))
 
-from flask import Flask, request, jsonify
 from _almanac import (
     _lunar_to_day_dict, build_basic_hour_table,
     calc_bazi_from_birth, build_personal, build_personal_hour_table
 )
 from lunar_python import Solar
 
-app = Flask(__name__)
 
-@app.route('/api/personal_day_birth', methods=['POST', 'OPTIONS'])
-def handler():
-    if request.method == 'OPTIONS':
-        resp = jsonify({})
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return resp, 200
+class handler(BaseHTTPRequestHandler):
 
-    data = request.get_json(force=True) or {}
-    date_str  = data.get('date', '')
-    birth_iso = data.get('birth', '')
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
-    try:
-        yy, mm, dd = [int(x) for x in date_str.split('-')]
-        solar = Solar.fromYmd(yy, mm, dd)
-        lunar = solar.getLunar()
-    except Exception as e:
-        resp = jsonify({'error': f'日期解析失败: {e}'})
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        return resp, 400
+    def do_POST(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length)) if length else {}
+        except Exception:
+            body = {}
 
-    try:
-        bazi = calc_bazi_from_birth(birth_iso)
-    except Exception as e:
-        resp = jsonify({'error': f'八字计算失败: {e}'})
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        return resp, 400
+        date_str  = body.get('date', '')
+        birth_iso = body.get('birth', '')
 
-    day_data    = _lunar_to_day_dict(lunar)
-    basic_table = build_basic_hour_table(lunar, day_data['day_gz'])
-    personal    = build_personal(day_data, bazi)
-    pers_table  = build_personal_hour_table(basic_table, bazi)
+        try:
+            yy, mm, dd = [int(x) for x in date_str.split('-')]
+            solar = Solar.fromYmd(yy, mm, dd)
+            lunar = solar.getLunar()
+        except Exception as e:
+            self._json({'error': f'日期解析失败: {e}'}, 400)
+            return
 
-    resp = jsonify({
-        'bazi': bazi, 'day': day_data,
-        'basic_hour_table': basic_table,
-        'personal': personal,
-        'personal_hour_table': pers_table,
-    })
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    return resp
+        try:
+            bazi = calc_bazi_from_birth(birth_iso)
+        except Exception as e:
+            self._json({'error': f'八字计算失败: {e}'}, 400)
+            return
+
+        day_data    = _lunar_to_day_dict(lunar)
+        basic_table = build_basic_hour_table(lunar, day_data['day_gz'])
+        personal    = build_personal(day_data, bazi)
+        pers_table  = build_personal_hour_table(basic_table, bazi)
+
+        self._json({
+            'bazi': bazi, 'day': day_data,
+            'basic_hour_table': basic_table,
+            'personal': personal,
+            'personal_hour_table': pers_table,
+        })
+
+    def _json(self, data, status=200):
+        body = json.dumps(data, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', len(body))
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format, *args):
+        pass
