@@ -665,22 +665,14 @@
     var row = res.data;
     var remaining = Math.max(0, row.total - row.sold);
     yuanbaoStock.remaining = remaining;
-    yuanbaoStock.sold_out = remaining <= 0;
+    yuanbaoStock.sold_out = false; // 不限制数量，始终开放预约
     yuanbaoStock.batch = row.batch_name || '第一批';
 
     var l = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
 
-    if (yuanbaoStock.sold_out) {
-      if (badge) badge.className = 'stock-bar sold-out';
-      if (stockTextEl) stockTextEl.textContent = l === 'en'
-        ? 'This batch is sold out. Please check back later.'
-        : '本批已售罄，敬请期待下一批';
-      if (btnYb) { btnYb.disabled = true; btnYb.style.opacity = '.5'; }
-    } else {
-      if (badge) badge.className = 'stock-bar';
-      if (stockTextEl) stockTextEl.textContent = (l === 'en' ? 'Remaining: ' : '剩余 ') + remaining + (l === 'en' ? '' : ' 个');
-      if (qtyEl) qtyEl.max = Math.min(10, remaining);
-    }
+    if (badge) badge.className = 'stock-bar';
+    if (stockTextEl) stockTextEl.innerHTML =
+      '<span class="lang-zh">接受预约中</span><span class="lang-en">Accepting bookings</span>';
   }
   loadInventory();
 
@@ -806,16 +798,6 @@
     }
 
     var qty = parseInt(document.getElementById('yb_quantity').value, 10) || 1;
-    if (qty > yuanbaoStock.remaining) {
-      var l2 = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
-      showMsg('msgYuanbao',
-        'Exceeds stock', '超出库存',
-        'Only ' + yuanbaoStock.remaining + ' left in this batch.',
-        '本批仅剩 ' + yuanbaoStock.remaining + ' 个，请修改数量。',
-        true
-      );
-      return;
-    }
 
     var btn = document.getElementById('btnYuanbao');
     if (btn) btn.disabled = true;

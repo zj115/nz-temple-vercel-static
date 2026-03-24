@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>财神黄历 · NZ Temple</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
+<style>
+:root{
+  --green:rgba(70,200,120,.9);
+  --red:rgba(220,90,90,.9);
+  --green-bg:rgba(70,200,120,.13);
+  --red-bg:rgba(220,90,90,.13);
+  --green-bd:rgba(70,200,120,.32);
+  --red-bd:rgba(220,90,90,.32);
+  --border:rgba(255,213,122,.14);
+  --card:rgba(255,255,255,.03);
+}
+
+/* ── 通用工具 ── */
+.hidden{display:none!important;}
+.section-title{font-weight:900;color:var(--gold);font-size:18px;letter-spacing:.5px;margin-bottom:14px;}
+.hl-card{border:1px solid var(--border);border-radius:18px;padding:18px;background:var(--card);}
+.hl-card + .hl-card{margin-top:14px;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+.tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--border);background:rgba(255,255,255,.02);margin:3px 4px 3px 0;}
+.tag-green{background:var(--green-bg);border-color:var(--green-bd);color:var(--green);}
+.tag-red{background:var(--red-bg);border-color:var(--red-bd);color:var(--red);}
+.tag-gold{background:rgba(255,213,122,.12);border-color:rgba(255,213,122,.3);color:var(--gold);}
+.tag-blue{background:rgba(100,160,255,.12);border-color:rgba(100,160,255,.3);color:rgba(160,200,255,.9);}
+.badge-yi{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);border-radius:8px;padding:2px 8px;font-size:12px;font-weight:700;margin-right:4px;}
+.badge-ji{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red);border-radius:8px;padding:2px 8px;font-size:12px;font-weight:700;margin-right:4px;}
+.hl-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hl-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.hl-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.hl-grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+.span-2{grid-column:1/-1;}
+.label-sm{font-size:12px;opacity:.65;margin-bottom:4px;}
+.val-gold{font-weight:800;color:var(--gold2);}
+
+/* ── 控制区 ── */
+.hl-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.hl-controls input[type=date]{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-size:14px;cursor:pointer;}
+.hl-controls input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7);}
+
+/* ── 八字状态条 ── */
+.bazi-status-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px;border-radius:14px;border:1px solid var(--border);background:rgba(255,213,122,.04);margin-bottom:18px;}
+.bazi-status-badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;}
+
+/* ── 八字输入区 ── */
+.bazi-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.bazi-tab{appearance:none;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--gold2);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;}
+.bazi-tab.active{background:rgba(255,213,122,.14);border-color:rgba(255,213,122,.32);color:var(--gold);}
+.bazi-panel{display:none;}.bazi-panel.active{display:block;}
+.bazi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+
+/* ── 黄历展示区 ── */
+.almanac-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.almanac-date-big{font-size:34px;font-weight:900;color:var(--gold);letter-spacing:.5px;}
+.almanac-lunar{opacity:.75;font-size:14px;margin-top:4px;}
+.almanac-gz{margin-top:6px;font-size:14px;color:var(--gold2);font-weight:700;}
+.dir-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;}
+.dir-item{border:1px solid var(--border);border-radius:12px;padding:10px;background:rgba(255,255,255,.02);text-align:center;}
+.dir-label{font-size:11px;opacity:.65;}
+.dir-val{font-weight:800;color:var(--gold2);font-size:14px;margin-top:4px;}
+
+/* ── 四柱卡片 ── */
+.pillar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.pillar-card{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.03);text-align:center;}
+.pillar-label{font-size:11px;opacity:.6;margin-bottom:6px;}
+.pillar-gz{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:6px;}
+.pillar-detail{font-size:12px;opacity:.75;line-height:1.7;}
+
+/* ── 时辰表格 ── */
+.hour-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.hour-card{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,.02);}
+.hour-card.luck-ji{border-color:var(--red-bd);background:var(--red-bg);}
+.hour-card.luck-ji .hour-gz{color:rgba(220,90,90,.9);}
+.hour-card.luck-ji .hour-label{color:rgba(220,90,90,.9);}
+.hour-label{font-weight:800;color:var(--gold2);font-size:13px;}
+.hour-range{font-size:11px;opacity:.6;margin-bottom:4px;}
+.hour-gz{font-size:15px;font-weight:800;color:var(--gold);}
+.hour-luck{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:4px;}
+.hour-luck.ji{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red);}
+.hour-luck.ji-ok{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);}
+.hour-luck.ping{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);}
+.hour-ts{font-size:11px;opacity:.7;margin-top:4px;}
+.hour-rel{margin-top:6px;font-size:11px;color:var(--gold2);}
+
+/* ── 关系标签 ── */
+.rel-item{margin-bottom:10px;padding:12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.02);}
+.rel-title{font-weight:800;color:var(--gold2);font-size:13px;}
+.rel-desc{opacity:.8;font-size:12px;margin-top:4px;line-height:1.7;}
+.rel-note{opacity:.65;font-size:11px;margin-top:4px;}
+
+/* ── 总结卡片 ── */
+.summary-text{line-height:1.9;opacity:.9;font-size:14px;}
+.action-list{margin-top:10px;display:grid;gap:8px;}
+.action-item{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.02);font-size:13px;line-height:1.7;}
+.action-item::before{content:"◆ ";color:var(--gold2);}
+
+/* ── 分享卡片（下载用，传统黄历风格） ── */
+#shareCard{
+  width:520px;
+  background:#f5f0e8;
+  font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;
+  color:#2c1a00;
+  overflow:hidden;
+  display:none;
+}
+/* 顶部深棕色标题栏 */
+.sc-topbar{
+  background:#5c3d1e;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;
+}
+.sc-topbar-title{color:#f5e6b3;font-size:20px;font-weight:900;letter-spacing:2px;}
+.sc-topbar-yin{font-size:20px;color:#f5e6b3;}
+/* 主体内容区 */
+.sc-body{
+  border:2px solid #8b6340;
+  margin:8px;
+  background:#f5f0e8;
+}
+/* 日期行 */
+.sc-date-row{
+  display:grid;grid-template-columns:1fr 2fr 1fr;
+  border-bottom:1.5px solid #8b6340;
+  font-size:15px;color:#3a2000;font-weight:700;
+}
+.sc-date-cell{
+  padding:8px 12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.sc-date-cell:not(:last-child){border-right:1.5px solid #8b6340;}
+.sc-date-year{font-size:22px;font-weight:900;color:#2c1a00;letter-spacing:4px;}
+/* 主区：农历|大数字|干支 */
+.sc-main-row{
+  display:grid;grid-template-columns:90px 1fr 110px;
+  border-bottom:1.5px solid #8b6340;
+  min-height:140px;
+}
+.sc-main-cell{display:flex;align-items:center;justify-content:center;}
+.sc-main-cell:not(:last-child){border-right:1.5px solid #8b6340;}
+/* 农历 */
+.sc-lunar-box{text-align:center;padding:10px 6px;}
+.sc-lunar-tag{
+  display:inline-block;background:#5c3d1e;color:#f5e6b3;
+  font-size:11px;padding:2px 6px;border-radius:3px;font-weight:800;margin-bottom:6px;
+}
+.sc-lunar-month{font-size:13px;color:#3a2000;font-weight:700;line-height:1.6;}
+.sc-lunar-day{font-size:13px;color:#3a2000;font-weight:700;line-height:1.6;}
+/* 大数字 */
+.sc-day-num-box{
+  position:relative;text-align:center;padding:10px;overflow:hidden;
+}
+.sc-day-watermark{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:70px;font-weight:900;color:rgba(139,99,64,.1);
+  white-space:nowrap;letter-spacing:-2px;pointer-events:none;
+  font-family:"PingFang SC","STSong",serif;
+}
+.sc-day-num{
+  position:relative;z-index:1;
+  font-size:88px;font-weight:900;color:#2c1a00;line-height:1;
+  font-family:"Georgia","Times New Roman",serif;
+}
+/* 干支四柱 */
+.sc-gz-box{padding:10px 8px;text-align:center;}
+.sc-gz-row{font-size:11px;color:#5c3d1e;line-height:1.8;font-weight:700;}
+.sc-gz-val{font-size:13px;color:#2c1a00;font-weight:900;}
+.sc-gz-year-badge{
+  display:inline-block;border:1px solid #8b6340;
+  padding:2px 6px;font-size:12px;color:#3a2000;font-weight:800;
+  border-radius:3px;margin-top:4px;
+}
+/* 方位行 */
+.sc-dir-row{
+  display:flex;align-items:stretch;
+  border-bottom:1.5px solid #8b6340;
+}
+.sc-dir-label-cell{
+  background:#5c3d1e;color:#f5e6b3;
+  font-size:11px;font-weight:900;padding:6px 8px;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;letter-spacing:2px;
+  border-right:1.5px solid #8b6340;
+  min-width:34px;
+}
+.sc-dir-items{display:flex;flex:1;}
+.sc-dir-item{
+  flex:1;text-align:center;padding:6px 4px;
+  border-right:1px solid #c4a882;font-size:12px;
+}
+.sc-dir-item:last-child{border-right:none;}
+.sc-dir-item .dn{color:#5c3d1e;font-size:10px;font-weight:700;}
+.sc-dir-item .dv{color:#2c1a00;font-weight:900;font-size:13px;margin-top:2px;}
+/* 宜忌+冲煞+时辰 三列 */
+.sc-bottom-row{
+  display:grid;grid-template-columns:72px 1fr 72px;
+}
+.sc-yi-col{
+  padding:10px 4px;
+  border-right:1.5px solid #8b6340;
+  display:flex;flex-direction:column;align-items:center;
+}
+.sc-ji-col{
+  padding:10px 4px;
+  border-left:1.5px solid #8b6340;
+  display:flex;flex-direction:column;align-items:center;
+}
+.sc-yi-badge,.sc-ji-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;
+  font-size:14px;font-weight:900;margin-bottom:10px;flex-shrink:0;
+}
+.sc-yi-badge{background:#2d6a30;color:#fff;}
+.sc-ji-badge{background:#8b1a1a;color:#fff;}
+/* 宜忌字列：每个字单独一个 span，竖向堆叠 */
+.sc-yi-list,.sc-ji-list{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  width:100%;
+}
+.sc-yi-list span,.sc-ji-list span{
+  font-size:13px;color:#2c1a00;font-weight:700;
+  line-height:1.9;text-align:center;width:100%;
+  display:block;
+}
+/* 中间列 */
+.sc-mid-col{padding:8px 8px;}
+.sc-chong{
+  text-align:center;font-size:11px;color:#3a2000;
+  margin-bottom:8px;padding-bottom:6px;
+  border-bottom:1px solid #c4a882;
+}
+.sc-chong-title{font-size:14px;font-weight:900;color:#2c1a00;margin-bottom:3px;}
+/* 时辰表格：12列竖排 */
+.sc-hours-title{text-align:center;font-size:13px;font-weight:900;color:#2c1a00;margin-bottom:6px;}
+.sc-hours-grid{
+  display:flex;width:100%;
+  border:1px solid #c4a882;
+  border-radius:4px;overflow:hidden;
+}
+.sc-hour-col{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  border-right:1px solid #c4a882;
+  padding:4px 2px;min-width:0;
+}
+.sc-hour-col:last-child{border-right:none;}
+.sc-hour-label{
+  font-size:11px;font-weight:900;color:#2c1a00;
+  writing-mode:vertical-rl;letter-spacing:1px;margin-bottom:3px;
+}
+.sc-hour-gz{
+  font-size:10px;font-weight:800;color:#5c3d1e;
+  writing-mode:vertical-rl;letter-spacing:1px;margin-bottom:3px;
+}
+.sc-hour-luck-dot{
+  width:16px;height:16px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:900;color:#fff;margin:2px 0;
+}
+.sc-hour-luck-dot.ji{background:#2d6a30;}
+.sc-hour-luck-dot.xiong{background:#8b1a1a;}
+.sc-hour-luck-dot.ping{background:#8b6340;}
+/* 页脚 */
+.sc-footer{
+  border-top:1.5px solid #8b6340;
+  padding:6px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#f0ead8;
+}
+.sc-footer-left{font-size:10px;color:#666;}
+.sc-footer-right{font-size:11px;color:#5c3d1e;font-weight:700;}
+
+/* ── 加载/错误 ── */
+.loading{text-align:center;padding:40px;opacity:.6;font-size:14px;}
+.error-msg{background:rgba(220,90,90,.08);border:1px solid rgba(220,90,90,.25);border-radius:14px;padding:14px;color:rgba(220,90,90,.9);font-size:13px;}
+
+/* ── 响应式 ── */
+@media(max-width:900px){
+  .hl-grid-6{grid-template-columns:repeat(3,1fr);}
+  .hour-grid{grid-template-columns:repeat(3,1fr);}
+  .pillar-grid{grid-template-columns:repeat(2,1fr);}
+  .bazi-grid{grid-template-columns:repeat(2,1fr);}
+  .dir-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:600px){
+  .hl-grid-3,.hl-grid-4,.hour-grid{grid-template-columns:repeat(2,1fr);}
+  .pillar-grid{grid-template-columns:repeat(2,1fr);}
+  .dir-grid{grid-template-columns:repeat(2,1fr);}
+  .bazi-grid{grid-template-columns:1fr 1fr;}
+  .almanac-date-big{font-size:26px;}
+}
+</style>
+</head>
+<body>
+<div class="bg-ornament"></div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- 标准导航栏（与主站完全一致）                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="calendar.html" class="nav-active"><span class="lang-en">Almanac</span><span class="lang-zh">财神黄历</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span>
+        <span class="lang-zh">EN</span>
+      </button>
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+      var saved = localStorage.getItem(key);
+      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
+      root.setAttribute('data-lang', lang);
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var cur = root.getAttribute('data-lang') || 'zh';
+        var next = (cur === 'zh') ? 'en' : 'zh';
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      });
+    })();
+    renderNavAuthBtn();
+  </script>
+</header>
+
+<main class="container">
+
+  <!-- ── 页面标题 ── -->
+  <div style="margin-bottom:20px;">
+    <h1 style="font-size:26px;font-weight:900;color:var(--gold);letter-spacing:.5px;">
+      <span class="lang-zh">财神黄历</span>
+      <span class="lang-en">Fortune Almanac</span>
+    </h1>
+    <p style="opacity:.72;font-size:14px;margin-top:4px;">
+      <span class="lang-zh">传统黄历 · 八字分析 · 个性化时运 · 今日建议</span>
+      <span class="lang-en">Traditional Almanac · BaZi Analysis · Personal Forecast · Daily Advice</span>
+    </p>
+  </div>
+
+  <!-- ── 控制区 ── -->
+  <div class="hl-card" style="margin-bottom:18px;">
+    <div class="hl-controls">
+      <input type="date" id="dateInput"/>
+      <button class="btn btn-ghost" id="btnToday">
+        <span class="lang-zh">今天</span><span class="lang-en">Today</span>
+      </button>
+      <button class="btn btn-ghost" id="btnGenBasic">
+        <span class="lang-zh">生成基础黄历</span><span class="lang-en">Basic Almanac</span>
+      </button>
+      <button class="btn btn-gold" id="btnGenPersonal">
+        <span class="lang-zh">生成个性化黄历 ✦</span><span class="lang-en">Personal Almanac ✦</span>
+      </button>
+      <button class="btn btn-ghost" id="btnDownloadPng" style="margin-left:auto;">
+        <span class="lang-zh">⬇ 下载黄历 PNG</span><span class="lang-en">⬇ Download PNG</span>
+      </button>
+    </div>
+
+    <!-- 八字状态条 -->
+    <div class="bazi-status-bar" id="baziStatusBar">
+      <div class="bazi-status-badge" id="baziStatusText">
+        <span style="opacity:.6;">● <span class="lang-zh">未设置八字</span><span class="lang-en">No BaZi set</span></span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" id="btnToggleBaziInput" style="padding:6px 12px;font-size:13px;">
+          <span class="lang-zh">输入八字</span><span class="lang-en">Enter BaZi</span>
+        </button>
+        <button class="btn btn-ghost" id="btnClearBazi" style="padding:6px 12px;font-size:13px;color:rgba(220,90,90,.8);">
+          <span class="lang-zh">清除八字</span><span class="lang-en">Clear BaZi</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 登录用户提示 -->
+    <div id="profileBaziHint" class="hidden" style="margin-top:8px;padding:10px 14px;border-radius:12px;border:1px solid rgba(70,200,120,.25);background:rgba(70,200,120,.06);font-size:13px;color:rgba(70,200,120,.9);">
+      ✓ <span class="lang-zh">已从您的账户资料自动读取八字</span><span class="lang-en">BaZi loaded from your profile</span>
+    </div>
+
+    <!-- 八字输入区（默认折叠） -->
+    <div id="baziInputArea" class="hidden">
+      <div class="divider"></div>
+      <div class="bazi-tabs">
+        <button class="bazi-tab active" id="bTabA">
+          <span class="lang-zh">方式 A：阳历出生时间</span><span class="lang-en">Method A: Birth Date & Time</span>
+        </button>
+        <button class="bazi-tab" id="bTabB">
+          <span class="lang-zh">方式 B：直接输入四柱</span><span class="lang-en">Method B: Enter Four Pillars</span>
+        </button>
+      </div>
+
+      <!-- 方式A -->
+      <div class="bazi-panel active" id="bPanelA">
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+          <div>
+            <div class="label-sm"><span class="lang-zh">出生日期时间</span><span class="lang-en">Birth Date & Time</span></div>
+            <input type="datetime-local" id="birthInput" class="btn btn-ghost" style="padding:8px 12px;width:220px;font-size:13px;"/>
+          </div>
+          <button class="btn btn-gold" id="btnSaveBirthA" style="padding:8px 16px;font-size:13px;">
+            <span class="lang-zh">确认并保存（方式A）</span><span class="lang-en">Save (Method A)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 方式B -->
+      <div class="bazi-panel" id="bPanelB">
+        <div class="bazi-grid" style="margin-bottom:10px;">
+          <div>
+            <div class="label-sm"><span class="lang-zh">年柱（如 甲子）</span><span class="lang-en">Year Pillar (e.g. 甲子)</span></div>
+            <input type="text" id="bYear" maxlength="2" placeholder="甲子" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
+          </div>
+          <div>
+            <div class="label-sm"><span class="lang-zh">月柱（如 丙寅）</span><span class="lang-en">Month Pillar (e.g. 丙寅)</span></div>
+            <input type="text" id="bMonth" maxlength="2" placeholder="丙寅" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
+          </div>
+          <div>
+            <div class="label-sm"><span class="lang-zh">日柱（如 丁卯）</span><span class="lang-en">Day Pillar (e.g. 丁卯)</span></div>
+            <input type="text" id="bDay" maxlength="2" placeholder="丁卯" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
+          </div>
+          <div>
+            <div class="label-sm"><span class="lang-zh">时柱（如 己酉）</span><span class="lang-en">Hour Pillar (e.g. 己酉)</span></div>
+            <input type="text" id="bTime" maxlength="2" placeholder="己酉" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
+          </div>
+        </div>
+        <button class="btn btn-gold" id="btnSaveBirthB" style="padding:8px 16px;font-size:13px;">
+          <span class="lang-zh">确认并保存（方式B）</span><span class="lang-en">Save (Method B)</span>
+        </button>
+      </div>
+
+      <div id="baziSaveMsg" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+  </div>
+
+  <!-- ── 错误提示 ── -->
+  <div id="errorBox" class="error-msg hidden" style="margin-bottom:14px;"></div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- 主内容区（加载后显示）                      -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="mainContent" class="hidden">
+
+    <!-- ── 基础黄历 ── -->
+    <div class="hl-card" id="secAlmanac">
+      <div class="section-title">
+        <span class="lang-zh">今日黄历</span><span class="lang-en">Today's Almanac</span>
+      </div>
+      <div class="almanac-header">
+        <div>
+          <div class="almanac-date-big" id="alDate"></div>
+          <div class="almanac-lunar" id="alLunar"></div>
+          <div class="almanac-gz" id="alGz"></div>
+        </div>
+        <div style="text-align:right;">
+          <div class="label-sm"><span class="lang-zh">日纳音</span><span class="lang-en">Nayin</span></div>
+          <div class="val-gold" id="alNayin"></div>
+          <div style="margin-top:8px;" class="label-sm"><span class="lang-zh">冲煞</span><span class="lang-en">Clash</span></div>
+          <div class="val-gold" id="alChong"></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="hl-grid-3" style="margin-bottom:14px;" id="alMeta"></div>
+      <div class="dir-grid" id="alDir"></div>
+      <div class="divider"></div>
+      <div class="hl-grid-2">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);border-radius:8px;padding:3px 10px;font-weight:800;">宜</span>
+            <span style="font-weight:700;color:var(--green);"><span class="lang-zh">今日宜</span><span class="lang-en">Auspicious</span></span>
+          </div>
+          <div id="alYi"></div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red);border-radius:8px;padding:3px 10px;font-weight:800;">忌</span>
+            <span style="font-weight:700;color:var(--red);"><span class="lang-zh">今日忌</span><span class="lang-en">Inauspicious</span></span>
+          </div>
+          <div id="alJi"></div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.02);">
+        <span class="label-sm"><span class="lang-zh">彭祖百忌：</span><span class="lang-en">Pengzu Taboos: </span></span>
+        <span id="alPengzu" style="font-size:13px;opacity:.8;"></span>
+      </div>
+    </div>
+
+    <!-- ── 基础 12 时辰 ── -->
+    <div class="hl-card" id="secHours">
+      <div class="section-title">
+        <span class="lang-zh">今日时运（12时辰）</span><span class="lang-en">Today's Hours (12 Periods)</span>
+      </div>
+      <div class="hour-grid" id="hourGrid"></div>
+    </div>
+
+    <!-- ── 八字区（个性化，需八字） ── -->
+    <div id="secBazi" class="hidden">
+
+      <!-- 四柱展示 -->
+      <div class="hl-card">
+        <div class="section-title">
+          <span class="lang-zh">我的八字四柱</span><span class="lang-en">My Four Pillars</span>
+        </div>
+        <div class="pillar-grid" id="pillarGrid"></div>
+      </div>
+
+      <!-- 当日总结 -->
+      <div class="hl-card" id="secSummary">
+        <div class="section-title">
+          <span class="lang-zh">当日总结</span><span class="lang-en">Daily Summary</span>
+        </div>
+        <div class="summary-text" id="summaryText"></div>
+      </div>
+
+      <!-- 行动建议 -->
+      <div class="hl-card" id="secAction">
+        <div class="section-title">
+          <span class="lang-zh">行动建议</span><span class="lang-en">Action Advice</span>
+        </div>
+        <div class="action-list" id="actionList"></div>
+      </div>
+
+      <!-- 个性化 12 时辰 -->
+      <div class="hl-card" id="secPersHours">
+        <div class="section-title">
+          <span class="lang-zh">个性化时运（12时辰）</span><span class="lang-en">Personal Forecast (12 Periods)</span>
+        </div>
+        <div class="hour-grid" id="persHourGrid"></div>
+      </div>
+
+      <!-- 详细关系分析 -->
+      <div class="hl-card" id="secDetail">
+        <div class="section-title">
+          <span class="lang-zh">详细关系分析</span><span class="lang-en">Detailed Analysis</span>
+        </div>
+
+        <div class="hl-grid-3" style="margin-bottom:16px;" id="flowGrid"></div>
+
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:800;color:var(--gold2);margin-bottom:8px;">
+            <span class="lang-zh">天干关系</span><span class="lang-en">Heavenly Stems</span>
+          </div>
+          <div id="ganRelList"></div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:800;color:var(--gold2);margin-bottom:8px;">
+            <span class="lang-zh">地支关系</span><span class="lang-en">Earthly Branches</span>
+          </div>
+          <div id="zhiRelList"></div>
+        </div>
+
+        <div>
+          <div style="font-weight:800;color:var(--gold2);margin-bottom:8px;">
+            <span class="lang-zh">藏干与十神</span><span class="lang-en">Hidden Stems & Ten Gods</span>
+          </div>
+          <div style="font-size:12px;opacity:.65;margin-bottom:10px;">
+            <span class="lang-zh">藏干是把地支内部气分层拆开，再以日主映射十神，用来了解每个地支对日主的深层影响。</span>
+            <span class="lang-en">Hidden stems break down the internal energy of earthly branches layer by layer, mapped to Ten Gods from the day master to reveal deeper influences.</span>
+          </div>
+          <div id="cangGanList"></div>
+        </div>
+      </div>
+
+    </div><!-- /secBazi -->
+
+  </div><!-- /mainContent -->
+
+  <!-- ── 分享导出卡片（隐藏，传统黄历风格，用于截图） ── -->
+  <div id="shareCard" class="hidden">
+    <!-- 顶部深棕色标题栏 -->
+    <div class="sc-topbar">
+      <span class="sc-topbar-yin">☯</span>
+      <span class="sc-topbar-title">新西兰财神庙</span>
+      <span class="sc-topbar-yin">☯</span>
+    </div>
+
+    <div class="sc-body">
+      <!-- 第一行：星期 | 年份 | 月份 -->
+      <div class="sc-date-row">
+        <div class="sc-date-cell" id="sh_weekday" style="font-size:16px;font-weight:900;"></div>
+        <div class="sc-date-cell"><span class="sc-date-year" id="sh_year"></span></div>
+        <div class="sc-date-cell" id="sh_month" style="font-size:16px;font-weight:900;"></div>
+      </div>
+
+      <!-- 第二行：农历 | 大数字日 | 干支 -->
+      <div class="sc-main-row">
+        <!-- 农历 -->
+        <div class="sc-main-cell">
+          <div class="sc-lunar-box">
+            <div class="sc-lunar-tag">农历</div>
+            <div class="sc-lunar-month" id="sh_lunar_month"></div>
+            <div class="sc-lunar-day" id="sh_lunar_day"></div>
+          </div>
+        </div>
+        <!-- 大数字 -->
+        <div class="sc-main-cell">
+          <div class="sc-day-num-box">
+            <div class="sc-day-watermark">财神日历</div>
+            <div class="sc-day-num" id="sh_day_num"></div>
+          </div>
+        </div>
+        <!-- 干支四柱 -->
+        <div class="sc-main-cell">
+          <div class="sc-gz-box">
+            <div class="sc-gz-row">年柱</div>
+            <div class="sc-gz-val" id="sh_year_gz"></div>
+            <div class="sc-gz-row" style="margin-top:4px;">月柱</div>
+            <div class="sc-gz-val" id="sh_month_gz"></div>
+            <div class="sc-gz-row" style="margin-top:4px;">日柱</div>
+            <div class="sc-gz-val" id="sh_day_gz"></div>
+            <div class="sc-gz-year-badge" id="sh_year_badge"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第三行：诸神方位 -->
+      <div class="sc-dir-row">
+        <div class="sc-dir-label-cell">方位</div>
+        <div class="sc-dir-items" id="sh_dirs"></div>
+      </div>
+
+      <!-- 第四行：宜 | 冲煞+时辰 | 忌 -->
+      <div class="sc-bottom-row">
+        <!-- 宜 -->
+        <div class="sc-yi-col" style="text-align:center;">
+          <div class="sc-yi-badge">宜</div>
+          <div class="sc-yi-list" id="sh_yi"></div>
+        </div>
+        <!-- 中间：冲煞 + 时辰 -->
+        <div class="sc-mid-col">
+          <div class="sc-chong">
+            <div class="sc-chong-title">冲煞</div>
+            <div id="sh_chong" style="font-size:12px;color:#3a2000;"></div>
+          </div>
+          <div class="sc-hours-title">今日时运</div>
+          <div class="sc-hours-grid" id="sh_hours"></div>
+        </div>
+        <!-- 忌 -->
+        <div class="sc-ji-col" style="text-align:center;">
+          <div class="sc-ji-badge">忌</div>
+          <div class="sc-ji-list" id="sh_ji"></div>
+        </div>
+      </div>
+
+      <!-- 页脚 -->
+      <div class="sc-footer">
+        <span class="sc-footer-left" id="sh_time"></span>
+        <span class="sc-footer-right">新西兰财神庙 · 财神黄历</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  // ── 常量 ──────────────────────────────────────
+  // 本地 Flask 开发：port 5001 → 用空字符串（相对路径）
+  // Vercel 生产部署：用相对路径（api/ 目录下的 Serverless Function）
+  var API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+    && (window.location.port === '5001' || window.location.port === '5000' || window.location.port === '8000')
+    ? ''
+    : '';
+
+  var STORAGE_KEY = 'nztemple_bazi_v1';
+  var savedBazi = null;
+
+  // 缓存当前渲染数据（用于下载卡片）
+  var currentDay = null;
+  var currentHours = null;
+  var currentBazi = null;
+  var currentPersonal = null;
+  var currentPersonalHours = null;
+
+  // ── DOM 引用 ─────────────────────────────────
+  var dateInput       = document.getElementById('dateInput');
+  var btnToday        = document.getElementById('btnToday');
+  var btnGenBasic     = document.getElementById('btnGenBasic');
+  var btnGenPersonal  = document.getElementById('btnGenPersonal');
+  var btnToggleBazi   = document.getElementById('btnToggleBaziInput');
+  var btnClearBazi    = document.getElementById('btnClearBazi');
+  var baziInputArea   = document.getElementById('baziInputArea');
+  var baziStatusText  = document.getElementById('baziStatusText');
+  var errorBox        = document.getElementById('errorBox');
+  var mainContent     = document.getElementById('mainContent');
+  var secBazi         = document.getElementById('secBazi');
+  var baziSaveMsg     = document.getElementById('baziSaveMsg');
+  var profileBaziHint = document.getElementById('profileBaziHint');
+
+  // ── 初始化日期 ────────────────────────────────
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' +
+    String(today.getMonth()+1).padStart(2,'0') + '-' +
+    String(today.getDate()).padStart(2,'0');
+  dateInput.value = todayStr;
+
+  // ── 八字 localStorage ─────────────────────────
+  function loadSavedBazi(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) savedBazi = JSON.parse(raw);
+    } catch(e){}
+    updateBaziStatus();
+  }
+  function saveBazi(obj){
+    savedBazi = obj;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+    updateBaziStatus();
+  }
+  function clearBazi(){
+    savedBazi = null;
+    localStorage.removeItem(STORAGE_KEY);
+    updateBaziStatus();
+    secBazi.classList.add('hidden');
+    profileBaziHint.classList.add('hidden');
+    showMsg(baziSaveMsg, '已清除八字', false);
+  }
+  function updateBaziStatus(){
+    if(!savedBazi){
+      baziStatusText.innerHTML = '<span style="opacity:.55;">● 未设置八字（个性化功能需要八字）</span>';
+      return;
+    }
+    var mode = savedBazi.mode === 'birth' ? '方式A（阳历）' : (savedBazi.mode === 'profile' ? '账户资料' : '方式B（手动）');
+    var gz = savedBazi.year.gz + ' ' + savedBazi.month.gz + ' ' + savedBazi.day.gz + ' ' + savedBazi.time.gz;
+    baziStatusText.innerHTML =
+      '<span style="color:var(--green);">✓ 已保存（' + mode + '）</span>' +
+      '<span style="opacity:.65;font-size:12px;margin-left:10px;">' + gz + '</span>';
+  }
+
+  function showMsg(el, text, isError){
+    el.style.color = isError ? 'rgba(220,90,90,.9)' : 'rgba(70,200,120,.9)';
+    el.textContent = text;
+    setTimeout(function(){ el.textContent = ''; }, 3000);
+  }
+
+  // ── 从登录用户账户读取八字 ───────────────────────
+  function tryLoadProfileBazi(){
+    if(typeof getMyProfile !== 'function') return;
+    getMyProfile().then(function(profile){
+      if(!profile) return;
+      // 如果账户有四柱数据
+      if(profile.bazi_year && profile.bazi_month && profile.bazi_day && profile.bazi_hour){
+        // 只有在 localStorage 没有八字，或者 localStorage 里的是旧数据时才用账户数据
+        // （用户手动清除后不强制覆盖）
+        var raw = localStorage.getItem(STORAGE_KEY);
+        var existing = null;
+        try{ existing = raw ? JSON.parse(raw) : null; }catch(e){}
+
+        var profileBazi = {
+          mode: 'profile',
+          year:  { gz: profile.bazi_year },
+          month: { gz: profile.bazi_month },
+          day:   { gz: profile.bazi_day },
+          time:  { gz: profile.bazi_hour },
+        };
+
+        if(!existing){
+          // 没有本地保存，自动用账户数据
+          saveBazi(profileBazi);
+          profileBaziHint.classList.remove('hidden');
+        } else if(existing.mode === 'profile'){
+          // 上次也是从账户读的，更新
+          saveBazi(profileBazi);
+          profileBaziHint.classList.remove('hidden');
+        }
+        // 如果用户手动输入了八字（mode=birth/manual），不覆盖
+      }
+    }).catch(function(){});
+  }
+
+  // ── 八字Tab切换 ──────────────────────────────
+  document.getElementById('bTabA').addEventListener('click', function(){
+    this.classList.add('active');
+    document.getElementById('bTabB').classList.remove('active');
+    document.getElementById('bPanelA').classList.add('active');
+    document.getElementById('bPanelB').classList.remove('active');
+  });
+  document.getElementById('bTabB').addEventListener('click', function(){
+    this.classList.add('active');
+    document.getElementById('bTabA').classList.remove('active');
+    document.getElementById('bPanelB').classList.add('active');
+    document.getElementById('bPanelA').classList.remove('active');
+  });
+
+  btnToggleBazi.addEventListener('click', function(){
+    baziInputArea.classList.toggle('hidden');
+  });
+  btnClearBazi.addEventListener('click', clearBazi);
+
+  // ── 保存方式A ─────────────────────────────────
+  document.getElementById('btnSaveBirthA').addEventListener('click', function(){
+    var birth = document.getElementById('birthInput').value;
+    if(!birth){ showMsg(baziSaveMsg, '请选择出生时间', true); return; }
+    fetchAPI('/api/personal_day_birth', {
+      date: dateInput.value,
+      birth: birth
+    }, function(res){
+      if(res.bazi){
+        res.bazi.mode = 'birth';
+        saveBazi(res.bazi);
+        showMsg(baziSaveMsg, '✓ 八字已保存（方式A）', false);
+        baziInputArea.classList.add('hidden');
+      }
+    });
+  });
+
+  // ── 保存方式B ─────────────────────────────────
+  document.getElementById('btnSaveBirthB').addEventListener('click', function(){
+    var GAN_LIST = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    var ZHI_LIST = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    var fields = [
+      ['年柱', document.getElementById('bYear').value.trim()],
+      ['月柱', document.getElementById('bMonth').value.trim()],
+      ['日柱', document.getElementById('bDay').value.trim()],
+      ['时柱', document.getElementById('bTime').value.trim()],
+    ];
+    for(var i=0;i<fields.length;i++){
+      var label = fields[i][0], gz = fields[i][1];
+      if(gz.length !== 2){ showMsg(baziSaveMsg, label+'必须是2个字', true); return; }
+      if(GAN_LIST.indexOf(gz[0]) < 0){ showMsg(baziSaveMsg, label+'第一字须是天干（'+GAN_LIST.join('')+'）', true); return; }
+      if(ZHI_LIST.indexOf(gz[1]) < 0){ showMsg(baziSaveMsg, label+'第二字须是地支（'+ZHI_LIST.join('')+'）', true); return; }
+    }
+    fetchAPI('/api/personal_day_manual', {
+      date: dateInput.value,
+      bazi: {
+        year_gz:  fields[0][1],
+        month_gz: fields[1][1],
+        day_gz:   fields[2][1],
+        time_gz:  fields[3][1],
+      }
+    }, function(res){
+      if(res.bazi){
+        res.bazi.mode = 'manual';
+        saveBazi(res.bazi);
+        showMsg(baziSaveMsg, '✓ 八字已保存（方式B）', false);
+        baziInputArea.classList.add('hidden');
+      }
+    });
+  });
+
+  // ── 今天 ─────────────────────────────────────
+  btnToday.addEventListener('click', function(){
+    dateInput.value = todayStr;
+    autoLoad();
+  });
+
+  // ── 日期变化自动重新加载 ──────────────────────
+  dateInput.addEventListener('change', function(){
+    autoLoad();
+  });
+
+  // ── 生成基础黄历 ─────────────────────────────
+  btnGenBasic.addEventListener('click', function(){
+    if(!dateInput.value){ showError('请选择日期'); return; }
+    setLoading(true);
+    fetchAPI('/api/day', {date: dateInput.value}, function(res){
+      setLoading(false);
+      currentDay   = res.day;
+      currentHours = res.basic_hour_table;
+      currentBazi  = null;
+      currentPersonal = null;
+      renderAlmanac(res.day);
+      renderHours(res.basic_hour_table, null);
+      secBazi.classList.add('hidden');
+      mainContent.classList.remove('hidden');
+    });
+  });
+
+  // ── 生成个性化 ───────────────────────────────
+  btnGenPersonal.addEventListener('click', function(){
+    if(!dateInput.value){ showError('请选择日期'); return; }
+    if(!savedBazi){
+      showError('请先输入并保存八字，再生成个性化黄历。');
+      baziInputArea.classList.remove('hidden');
+      return;
+    }
+    setLoading(true);
+
+    var endpoint, payload;
+    if(savedBazi.mode === 'birth'){
+      endpoint = '/api/personal_day_birth';
+      payload  = {date: dateInput.value, birth: savedBazi.birth_iso};
+    } else {
+      endpoint = '/api/personal_day_manual';
+      payload  = {
+        date: dateInput.value,
+        bazi: {
+          year_gz:  savedBazi.year.gz,
+          month_gz: savedBazi.month.gz,
+          day_gz:   savedBazi.day.gz,
+          time_gz:  savedBazi.time.gz,
+        }
+      };
+    }
+
+    fetchAPI(endpoint, payload, function(res){
+      setLoading(false);
+      currentDay          = res.day;
+      currentHours        = res.basic_hour_table;
+      currentBazi         = res.bazi;
+      currentPersonal     = res.personal;
+      currentPersonalHours= res.personal_hour_table;
+      renderAlmanac(res.day);
+      renderHours(res.basic_hour_table, null);
+      renderPillars(res.bazi);
+      renderPersonal(res.personal);
+      renderPersonalHours(res.personal_hour_table);
+      secBazi.classList.remove('hidden');
+      mainContent.classList.remove('hidden');
+    });
+  });
+
+  // ── API 调用 ─────────────────────────────────
+  function fetchAPI(path, body, onSuccess){
+    fetch(API_BASE + path, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.error){ showError(data.error); setLoading(false); return; }
+      hideError();
+      onSuccess(data);
+    })
+    .catch(function(e){
+      setLoading(false);
+      showError('无法连接后端，请确认 Flask 已启动（python app.py）。错误：' + e.message);
+    });
+  }
+
+  function showError(msg){ errorBox.textContent = msg; errorBox.classList.remove('hidden'); }
+  function hideError(){ errorBox.classList.add('hidden'); }
+  function setLoading(on){
+    btnGenBasic.disabled = on;
+    btnGenPersonal.disabled = on;
+    btnGenBasic.textContent    = on ? '加载中…' : '生成基础黄历';
+    btnGenPersonal.textContent = on ? '加载中…' : '生成个性化黄历 ✦';
+  }
+
+  // ── 渲染：黄历 ───────────────────────────────
+  function renderAlmanac(day){
+    document.getElementById('alDate').textContent   = day.date + ' ' + day.weekday;
+    document.getElementById('alLunar').textContent  = '农历 ' + day.lunar_ymd;
+    document.getElementById('alGz').textContent     = '年：'+ day.year_gz + '  月：' + day.month_gz + '  日：' + day.day_gz;
+    document.getElementById('alNayin').textContent  = day.day_nayin || '—';
+    document.getElementById('alChong').textContent  = day.chong_desc || '—';
+
+    var meta = document.getElementById('alMeta');
+    meta.innerHTML = [
+      itemCard('值神', day.tianshen || '—', day.tianshen_luck === '凶' ? 'red' : 'green'),
+      itemCard('建除', day.zhixing  || '—', ''),
+      itemCard('星宿', (day.xiu ? day.xiu + '（' + (day.xiu_luck||'') + '）' : '—'), day.xiu_luck === '凶' ? 'red' : ''),
+    ].join('');
+
+    var dirMap = [
+      ['喜', day.dir.xi],['福', day.dir.fu],['财', day.dir.cai],
+      ['阳贵', day.dir.yanggui],['阴贵', day.dir.yingui],
+    ];
+    var dirHtml = dirMap.map(function(d){
+      return '<div class="dir-item"><div class="dir-label">'+d[0]+'神</div><div class="dir-val">'+(d[1]||'—')+'</div></div>';
+    }).join('');
+    document.getElementById('alDir').innerHTML = dirHtml;
+
+    var yi = day.yi || [];
+    var ji = day.ji || [];
+    document.getElementById('alYi').innerHTML = yi.map(function(t){ return '<span class="tag tag-green">'+t+'</span>'; }).join('');
+    document.getElementById('alJi').innerHTML = ji.map(function(t){ return '<span class="tag tag-red">'+t+'</span>'; }).join('');
+    document.getElementById('alPengzu').textContent = day.pengzu || '—';
+  }
+
+  function itemCard(label, val, color){
+    var cls = color === 'red' ? 'tag-red' : color === 'green' ? 'tag-green' : '';
+    return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.02);">' +
+      '<div class="label-sm">'+label+'</div>' +
+      '<div class="val-gold '+cls+'" style="margin-top:4px;">'+val+'</div>' +
+    '</div>';
+  }
+
+  // ── 渲染：基础时辰 ───────────────────────────
+  function renderHours(table, personal){
+    var html = (table||[]).map(function(h){
+      var luckCls = h.luck === '凶' ? 'ji' : h.luck === '吉' ? 'ji-ok' : 'ping';
+      var cardCls = h.luck === '凶' ? 'luck-ji' : '';
+      var persHtml = '';
+      if(personal && personal.relations && personal.relations.length > 0){
+        persHtml = '<div class="hour-rel">' +
+          personal.relations.map(function(r){ return r.with + r.type; }).join(' · ') +
+        '</div>';
+      }
+      var pTgHtml = '';
+      if(personal && personal.ten_god){
+        pTgHtml = '<span class="tag tag-gold" style="font-size:10px;">'+personal.ten_god+'</span>';
+      }
+      return '<div class="hour-card '+cardCls+'">' +
+        '<div class="hour-range">'+h.range+'</div>' +
+        '<div style="display:flex;align-items:baseline;gap:8px;">' +
+          '<div class="hour-label">'+h.label+'</div>' +
+          '<div class="hour-gz">'+h.gz+'</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">' +
+          '<span class="hour-luck '+luckCls+'">'+h.luck+'</span>' +
+          '<span class="hour-ts">'+h.tianshen+'</span>' +
+          pTgHtml +
+        '</div>' +
+        '<div style="margin-top:6px;font-size:11px;opacity:.7;">宜：'+(h.yi||[]).join(' ')+'</div>' +
+        '<div style="font-size:11px;opacity:.7;">忌：'+(h.ji||[]).join(' ')+'</div>' +
+        (h.chong_desc ? '<div style="font-size:10px;opacity:.55;margin-top:2px;">'+h.chong_desc+'</div>' : '') +
+        persHtml +
+      '</div>';
+    }).join('');
+    document.getElementById('hourGrid').innerHTML = html;
+  }
+
+  // ── 渲染：个性化时辰 ─────────────────────────
+  function renderPersonalHours(table){
+    var html = (table||[]).map(function(h){
+      var p = h.personal || {};
+      var luckCls = h.luck === '凶' ? 'ji' : h.luck === '吉' ? 'ji-ok' : 'ping';
+      var cardCls = h.luck === '凶' ? 'luck-ji' : '';
+      var persHtml = '';
+      if(p.relations && p.relations.length > 0){
+        persHtml = '<div class="hour-rel">'+p.relations.map(function(r){ return r.with+'<b>'+r.type+'</b>'; }).join(' · ')+'</div>';
+      }
+      var pTgHtml = p.ten_god ? '<span class="tag tag-gold" style="font-size:10px;">'+p.ten_god+'</span>' : '';
+      return '<div class="hour-card '+cardCls+'">' +
+        '<div class="hour-range">'+h.range+'</div>' +
+        '<div style="display:flex;align-items:baseline;gap:8px;">' +
+          '<div class="hour-label">'+h.label+'</div>' +
+          '<div class="hour-gz">'+h.gz+'</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">' +
+          '<span class="hour-luck '+luckCls+'">'+h.luck+'</span>' +
+          pTgHtml +
+        '</div>' +
+        (p.relations && p.relations.length > 0 ? persHtml : '<div style="font-size:11px;opacity:.5;margin-top:4px;">无关系</div>') +
+        '<div style="margin-top:4px;font-size:11px;opacity:.7;">宜：'+(h.yi||[]).join(' ')+'</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('persHourGrid').innerHTML = html;
+  }
+
+  // ── 渲染：四柱 ───────────────────────────────
+  function renderPillars(bazi){
+    var pillars = [
+      {label:'年柱', data: bazi.year},
+      {label:'月柱', data: bazi.month},
+      {label:'日柱', data: bazi.day},
+      {label:'时柱', data: bazi.time},
+    ];
+    var html = pillars.map(function(p){
+      var d = p.data;
+      var detail = '';
+      if(d.nayin){
+        detail += '天干：'+d.gan+'（'+d.wuxing+'）<br>地支：'+d.zhi+'<br>纳音：'+d.nayin;
+      } else {
+        detail += '天干：'+d.gan+'<br>地支：'+d.zhi+'<br><span style="opacity:.5">方式B·无纳音五行</span>';
+      }
+      return '<div class="pillar-card">' +
+        '<div class="pillar-label">'+p.label+'</div>' +
+        '<div class="pillar-gz">'+d.gz+'</div>' +
+        '<div class="pillar-detail">'+detail+'</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('pillarGrid').innerHTML = html;
+  }
+
+  // ── 渲染：个性化分析 ─────────────────────────
+  function renderPersonal(p){
+    document.getElementById('summaryText').textContent = p.summary || '';
+
+    var actHtml = (p.action_points||[]).map(function(a){
+      return '<div class="action-item">'+a+'</div>';
+    }).join('');
+    document.getElementById('actionList').innerHTML = actHtml || '<div style="opacity:.6;">暂无建议</div>';
+
+    var flowLevels = [
+      {level:'流年', gz: ''},
+      {level:'流月', gz: ''},
+      {level:'流日', gz: ''},
+    ];
+    var ftg = p.flow_ten_gods || [];
+    ftg.forEach(function(f){
+      flowLevels.forEach(function(fl){ if(fl.level === f.level){ fl.gz = f.flow_gz; fl.tg = f.ten_god; fl.kw = f.keyword; } });
+    });
+    var flowHtml = flowLevels.map(function(f){
+      return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.02);">' +
+        '<div class="label-sm">'+f.level+'</div>' +
+        '<div style="font-size:20px;font-weight:900;color:var(--gold);margin:4px 0;">'+( f.gz||'—')+'</div>' +
+        (f.tg ? '<span class="tag tag-gold" style="font-size:11px;">'+f.tg+'</span>' : '') +
+        (f.kw ? '<div style="font-size:11px;opacity:.65;margin-top:4px;">'+f.kw+'</div>' : '') +
+      '</div>';
+    }).join('');
+    document.getElementById('flowGrid').innerHTML = flowHtml;
+
+    var ganHtml = (p.gan_relations||[]).map(function(r){
+      return '<div class="rel-item">' +
+        '<div class="rel-title">'+r.level+'天干 '+r.flow_gan+' '+'<span class="tag tag-blue">'+r.rel+'</span>'+'你的'+r.user_label+' '+r.user_gan +
+        (r.ten_god ? ' · 十神：<span class="tag tag-gold">'+r.ten_god+'</span>' : '') + '</div>' +
+        '<div class="rel-desc">'+r.desc+'</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('ganRelList').innerHTML = ganHtml || '<div style="opacity:.55;font-size:13px;">本日无明显天干关系</div>';
+
+    var zhiHtml = (p.zhi_relations||[]).map(function(r){
+      var tagCls = (['冲','刑','害','破'].indexOf(r.rel) >= 0) ? 'tag-red' : 'tag-green';
+      return '<div class="rel-item">' +
+        '<div class="rel-title">'+r.level+'地支 '+r.flow_zhi+' <span class="tag '+tagCls+'">'+r.rel+'</span>你的'+r.user_label+' '+r.user_zhi+'</div>' +
+        '<div class="rel-desc">'+r.desc+'</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('zhiRelList').innerHTML = zhiHtml || '<div style="opacity:.55;font-size:13px;">本日无明显地支关系</div>';
+
+    var cgHtml = (p.cang_gan_analysis||[]).map(function(c){
+      var cg_html = c.cang_gan.map(function(cg){
+        return '<span class="tag tag-gold" style="margin:2px;">'+cg.gan+'→'+cg.ten_god+'（'+cg.keyword+'）</span>';
+      }).join('');
+      return '<div class="rel-item">' +
+        '<div class="rel-title">'+c.level+' '+c.flow_gz+' 地支'+c.flow_zhi+'的藏干</div>' +
+        '<div style="margin-top:6px;">'+cg_html+'</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('cangGanList').innerHTML = cgHtml || '<div style="opacity:.55;font-size:13px;">无数据</div>';
+  }
+
+  // ── 当前登录用户姓名（用于个性化标题）────────
+  var currentUserName = '';
+  if(typeof getMyProfile === 'function'){
+    getMyProfile().then(function(p){ if(p && p.full_name) currentUserName = p.full_name; }).catch(function(){});
+  }
+
+  // ── 更新分享卡片（传统黄历风格）──────────────
+  function updateShareCard(){
+    if(!currentDay) return;
+    var day   = currentDay;
+    var hours = currentHours || [];
+    var bazi  = currentBazi;
+
+    // 解析日期
+    var d = new Date(day.date + 'T00:00:00');
+    var weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+    var weekday  = weekdays[d.getDay()];
+    var dayNum   = d.getDate();
+    var yearNum  = d.getFullYear();
+    var monthNum = (d.getMonth() + 1) + '月';
+
+    document.getElementById('sh_weekday').textContent = weekday;
+    document.getElementById('sh_year').textContent    = yearNum;
+    document.getElementById('sh_month').textContent   = monthNum;
+    document.getElementById('sh_day_num').textContent = dayNum;
+    document.getElementById('sh_time').textContent    = day.date;
+
+    // 农历解析（如 "七月初十一" → 月：七月，日：初十一）
+    var lunarStr = day.lunar_ymd || '';
+    // 先去掉年份部分（形如 "xxxx年"）
+    lunarStr = lunarStr.replace(/^\d+年/, '');
+    // lunar_ymd 格式通常是 "七月初十" 或类似
+    var lunarMatch = lunarStr.match(/^(.{2,4})[月](.+)$/);
+    if(lunarMatch){
+      document.getElementById('sh_lunar_month').innerHTML = lunarMatch[1]+'<br>月';
+      document.getElementById('sh_lunar_day').textContent = lunarMatch[2];
+    } else {
+      document.getElementById('sh_lunar_month').textContent = '';
+      document.getElementById('sh_lunar_day').textContent = lunarStr;
+    }
+
+    // 干支
+    document.getElementById('sh_year_gz').textContent  = day.year_gz  || '—';
+    document.getElementById('sh_month_gz').textContent = day.month_gz || '—';
+    document.getElementById('sh_day_gz').textContent   = day.day_gz   || '—';
+    // 年份标签（如"乙巳蛇年"）— 用干支年柱 + 简单生肖推算
+    var ZIRAN = {'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
+    var yearGz = day.year_gz || '';
+    var yearZhi = yearGz.length >= 2 ? yearGz[1] : '';
+    var shengxiao = ZIRAN[yearZhi] || '';
+    document.getElementById('sh_year_badge').textContent = yearGz + (shengxiao ? shengxiao+'年' : '年');
+
+    // 冲煞
+    document.getElementById('sh_chong').textContent = day.chong_desc || '—';
+
+    // 方位
+    var dirMap = [
+      ['财神', day.dir && day.dir.cai],
+      ['喜神', day.dir && day.dir.xi],
+      ['福神', day.dir && day.dir.fu],
+      ['阳贵', day.dir && day.dir.yanggui],
+      ['阴贵', day.dir && day.dir.yingui],
+    ];
+    document.getElementById('sh_dirs').innerHTML = dirMap.map(function(d){
+      return '<div class="sc-dir-item"><div class="dn">'+d[0]+'</div><div class="dv">'+(d[1]||'—')+'</div></div>';
+    }).join('');
+
+    // 宜：每字一个 span
+    var yi = day.yi || [];
+    document.getElementById('sh_yi').innerHTML =
+      yi.map(function(t){ return '<span>'+t+'</span>'; }).join('');
+
+    // 忌：每字一个 span
+    var ji = day.ji || [];
+    document.getElementById('sh_ji').innerHTML =
+      ji.map(function(t){ return '<span>'+t+'</span>'; }).join('');
+
+    // 12时辰（label=子丑寅…，gz=干支，luck=吉凶平）
+    document.getElementById('sh_hours').innerHTML = hours.map(function(h){
+      var luckCls = h.luck === '凶' ? 'xiong' : h.luck === '吉' ? 'ji' : 'ping';
+      return '<div class="sc-hour-col">' +
+        '<div class="sc-hour-label">'+h.label+'</div>' +
+        '<div class="sc-hour-gz">'+h.gz+'</div>' +
+        '<div class="sc-hour-luck-dot '+luckCls+'">'+h.luck+'</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── 下载黄历 PNG（纯 Canvas 绘制，不依赖 DOM 截图）────
+  document.getElementById('btnDownloadPng').addEventListener('click', function(){
+    if(!currentDay){ showError('请先生成黄历，再下载。'); return; }
+    try {
+      var png;
+      if(currentBazi && currentPersonal) {
+        // 个性化模式：版式与基础版完全一致，仅标题加用户名，时辰用个性化数据
+        var titleName = currentUserName ? currentUserName + '个性化黄历' : '个性化黄历';
+        png = drawHuangliCanvas(currentDay, currentPersonalHours || currentHours || [], titleName);
+      } else {
+        // 基础模式
+        png = drawHuangliCanvas(currentDay, currentHours || []);
+      }
+      var link = document.createElement('a');
+      link.download = '财神黄历_' + (dateInput.value || todayStr) + '.png';
+      link.href = png;
+      link.click();
+    } catch(e) {
+      showError('导出失败：' + e.message);
+    }
+  });
+
+  // ── Canvas 绘制黄历 ────────────────────────────
+  // titleOverride: 可选，若传入则替换顶部标题文字（用于个性化黄历）
+  function drawHuangliCanvas(day, hours, titleOverride){
+    // 尺寸（竖版）
+    var W = 800, H = 950;
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var c = cv.getContext('2d');
+
+    // 颜色常量
+    var BG      = '#f5f0e6';   // 米色底
+    var BROWN   = '#5c3d1e';   // 深棕（边框、标题栏）
+    var BROWN2  = '#8b6340';   // 中棕（细边框）
+    var DARK    = '#2c1a00';   // 正文深棕黑
+    var GOLD    = '#f5e6b3';   // 标题栏金色文字
+    var GREEN_C = '#2d6a30';   // 宜 圆
+    var RED_C   = '#8b1a1a';   // 忌 圆
+    var AMBER   = '#8b6340';   // 平 圆
+
+    // ── 辅助函数 ──
+    function rect(x,y,w,h,fill,stroke,lw){
+      c.beginPath(); c.rect(x,y,w,h);
+      if(fill){ c.fillStyle=fill; c.fill(); }
+      if(stroke){ c.strokeStyle=stroke; c.lineWidth=lw||1.5; c.stroke(); }
+    }
+    function hline(y,x1,x2,col,lw){ c.beginPath(); c.moveTo(x1,y); c.lineTo(x2,y); c.strokeStyle=col||BROWN2; c.lineWidth=lw||1; c.stroke(); }
+    function vline(x,y1,y2,col,lw){ c.beginPath(); c.moveTo(x,y1); c.lineTo(x,y2); c.strokeStyle=col||BROWN2; c.lineWidth=lw||1; c.stroke(); }
+    function txt(str,x,y,font,fill,align,baseline){
+      c.font = font; c.fillStyle = fill||DARK;
+      c.textAlign = align||'left'; c.textBaseline = baseline||'top';
+      c.fillText(str,x,y);
+    }
+    function circle(x,y,r,fill){
+      c.beginPath(); c.arc(x,y,r,0,Math.PI*2);
+      c.fillStyle=fill; c.fill();
+    }
+    // 竖向写字（逐字向下）
+    function vtxt(str,x,startY,font,fill,lineH){
+      c.font=font; c.fillStyle=fill||DARK; c.textAlign='center'; c.textBaseline='top';
+      var lh = lineH || 22;
+      for(var i=0;i<str.length;i++){
+        c.fillText(str[i], x, startY + i*lh);
+      }
+    }
+    // 太极圆（简版）
+    function yin_yang(cx,cy,r){
+      // 外圆白底
+      c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.fillStyle='#fff'; c.fill();
+      // 右半黑
+      c.beginPath(); c.arc(cx,cy,r,-Math.PI/2,Math.PI/2); c.fillStyle=BROWN; c.fill();
+      // 上小白圆
+      c.beginPath(); c.arc(cx,cy-r/2,r/2,0,Math.PI*2); c.fillStyle='#fff'; c.fill();
+      // 下小黑圆
+      c.beginPath(); c.arc(cx,cy+r/2,r/2,0,Math.PI*2); c.fillStyle=BROWN; c.fill();
+      // 上小黑点
+      circle(cx,cy-r/2,r/6,BROWN);
+      // 下小白点
+      circle(cx,cy+r/2,r/6,'#fff');
+      // 外圆边
+      c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.strokeStyle=BROWN; c.lineWidth=1.5; c.stroke();
+    }
+
+    // 解析数据
+    var d = new Date(day.date+'T00:00:00');
+    var WD = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    var YR = d.getFullYear();
+    var MO = (d.getMonth()+1)+'月';
+    var DN = d.getDate();
+    // 农历解析 —— 只取月份和日期，去掉年份
+    // lunar_ymd 可能是 "2026年二月初五" 或 "二〇二六年二月初五" 等格式
+    var lunarStr = day.lunar_ymd || '';
+    // 去掉阿拉伯数字年份（如 "2026年"）和中文数字年份（如 "二〇二六年"）
+    lunarStr = lunarStr.replace(/^[^月]+年/, '');
+    var lunarM='',lunarD='';
+    var lm = lunarStr.match(/^(.{1,4})[月](.+)$/);
+    if(lm){lunarM=lm[1]+'月';lunarD=lm[2];}else{lunarD=lunarStr;}
+    var ZIRAN={'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
+    var yZhi = (day.year_gz||'').length>=2?(day.year_gz)[1]:'';
+    var yearBadge = (day.year_gz||'')+(ZIRAN[yZhi]||'')+'年';
+    var yi  = day.yi  || [];
+    var ji  = day.ji  || [];
+    var chong = day.chong_desc || '—';
+
+    // ════════════════════════════════
+    // 1. 整体背景
+    rect(0,0,W,H,BG);
+
+    // ════════════════════════════════
+    // 2. 顶部标题栏
+    var TB_H = 64;
+    rect(0,0,W,TB_H,BROWN);
+    // 太极
+    yin_yang(44, TB_H/2, 20);
+    yin_yang(W-44, TB_H/2, 20);
+    // 标题
+    var titleText = titleOverride ? '新西兰财神庙 · ' + titleOverride : '新西兰财神庙';
+    var titleFontSize = titleOverride ? 22 : 28;
+    txt(titleText, W/2, TB_H/2, 'bold ' + titleFontSize + 'px "PingFang SC","STSong","SimSun",serif', GOLD, 'center', 'middle');
+
+    // ════════════════════════════════
+    // 3. 外框
+    var BX=14, BY=TB_H+10, BW=W-28, BH=H-TB_H-20;
+    rect(BX,BY,BW,BH,null,BROWN,2);
+
+    // ════════════════════════════════
+    // 4. 日期行（星期 | 年份 | 月份）
+    var R1Y=BY, R1H=48;
+    // 竖分割
+    vline(BX+130, R1Y, R1Y+R1H, BROWN, 1.5);
+    vline(BX+BW-130, R1Y, R1Y+R1H, BROWN, 1.5);
+    hline(R1Y+R1H, BX, BX+BW, BROWN, 1.5);
+    txt(WD, BX+65, R1Y+R1H/2, 'bold 20px "PingFang SC",serif', DARK, 'center','middle');
+    txt(String(YR), BX+BW/2, R1Y+R1H/2, 'bold 26px "PingFang SC",serif', DARK, 'center','middle');
+    txt(MO, BX+BW-65, R1Y+R1H/2, 'bold 20px "PingFang SC",serif', DARK, 'center','middle');
+
+    // ════════════════════════════════
+    // 5. 主区（农历 | 大数字 | 干支）
+    var R2Y=R1Y+R1H, R2H=180;
+    var LW=110, RW=130; // 左右列宽
+    vline(BX+LW, R2Y, R2Y+R2H, BROWN, 1.5);
+    vline(BX+BW-RW, R2Y, R2Y+R2H, BROWN, 1.5);
+    hline(R2Y+R2H, BX, BX+BW, BROWN, 1.5);
+
+    // 农历（左列）
+    var lx = BX+LW/2;
+    // "农历"标签
+    rect(lx-22, R2Y+12, 44, 22, BROWN);
+    txt('农历', lx, R2Y+12+11, 'bold 12px "PingFang SC",serif', GOLD, 'center','middle');
+    vtxt(lunarM, lx, R2Y+44, 'bold 16px "PingFang SC",serif', DARK, 24);
+    vtxt(lunarD, lx, R2Y+44+(lunarM.length*24)+8, 'bold 16px "PingFang SC",serif', DARK, 24);
+
+    // 大数字（中间列）
+    var midX = BX+LW + (BW-LW-RW)/2;
+    // 水印"财神黄历"
+    c.save();
+    c.globalAlpha=0.06;
+    txt('财神黄历', midX, R2Y+R2H/2, 'bold 56px "PingFang SC",serif', BROWN, 'center','middle');
+    c.restore();
+    // 大数字
+    txt(String(DN), midX, R2Y+R2H/2, 'bold 130px "Georgia","Times New Roman",serif', DARK, 'center','middle');
+
+    // 干支（右列）
+    var rzx = BX+BW-RW/2;
+    var rzY = R2Y+14;
+    txt('年柱', rzx, rzY, '11px "PingFang SC",serif', BROWN2, 'center','top');
+    txt(day.year_gz||'—', rzx, rzY+16, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
+    txt('月柱', rzx, rzY+40, '11px "PingFang SC",serif', BROWN2, 'center','top');
+    txt(day.month_gz||'—', rzx, rzY+56, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
+    txt('日柱', rzx, rzY+80, '11px "PingFang SC",serif', BROWN2, 'center','top');
+    txt(day.day_gz||'—', rzx, rzY+96, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
+    // 年份标签
+    var badgeW=c.measureText(yearBadge).width+16; c.font='bold 11px "PingFang SC",serif';
+    badgeW=c.measureText(yearBadge).width+16;
+    rect(rzx-badgeW/2, rzY+126, badgeW, 22, null, BROWN2, 1);
+    txt(yearBadge, rzx, rzY+126+11, 'bold 11px "PingFang SC",serif', DARK, 'center','middle');
+
+    // ════════════════════════════════
+    // 6. 方位行
+    var R3Y=R2Y+R2H, R3H=46;
+    hline(R3Y+R3H, BX, BX+BW, BROWN, 1.5);
+    // "诸神方位"标签（深棕竖块）
+    var lblW=36;
+    rect(BX, R3Y, lblW, R3H, BROWN);
+    vtxt('方位', BX+lblW/2, R3Y+4, 'bold 11px "PingFang SC",serif', GOLD, 18);
+    // 方位条目
+    var dirs=[
+      ['财神', day.dir&&day.dir.cai],
+      ['喜神', day.dir&&day.dir.xi],
+      ['福神', day.dir&&day.dir.fu],
+      ['阳贵', day.dir&&day.dir.yanggui],
+      ['阴贵', day.dir&&day.dir.yingui],
+    ];
+    var dColW=(BW-lblW)/dirs.length;
+    dirs.forEach(function(dr,i){
+      var dx=BX+lblW+i*dColW+dColW/2;
+      if(i>0) vline(BX+lblW+i*dColW, R3Y, R3Y+R3H, BROWN2, 1);
+      txt(dr[0], dx, R3Y+6, '11px "PingFang SC",serif', BROWN2, 'center','top');
+      txt(dr[1]||'—', dx, R3Y+22, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
+    });
+
+    // ════════════════════════════════
+    // 7. 底部三列（宜 | 中间 | 忌）
+    var R4Y=R3Y+R3H;
+    var R4H=BH-(R4Y-BY);
+    var YI_W=78, JI_W=78;
+    var MID_W=BW-YI_W-JI_W;
+    vline(BX+YI_W, R4Y, R4Y+R4H, BROWN, 1.5);
+    vline(BX+YI_W+MID_W, R4Y, R4Y+R4H, BROWN, 1.5);
+
+    // ── 宜列 ──
+    var yiCX=BX+YI_W/2;
+    // 宜 圆
+    circle(yiCX, R4Y+22, 14, GREEN_C);
+    txt('宜', yiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
+    // 宜内容逐行
+    var yiStartY=R4Y+46;
+    var yiLineH=24;
+    yi.forEach(function(t,i){
+      txt(t, yiCX, yiStartY+i*yiLineH, '14px "PingFang SC",serif', DARK, 'center','top');
+    });
+
+    // ── 忌列 ──
+    var jiCX=BX+YI_W+MID_W+JI_W/2;
+    circle(jiCX, R4Y+22, 14, RED_C);
+    txt('忌', jiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
+    var jiStartY=R4Y+46;
+    ji.forEach(function(t,i){
+      txt(t, jiCX, jiStartY+i*yiLineH, '14px "PingFang SC",serif', DARK, 'center','top');
+    });
+
+    // ── 中间列 ──
+    var midColX=BX+YI_W;
+    var midColW=MID_W;
+    // 冲煞
+    var chongH=52;
+    hline(R4Y+chongH, midColX, midColX+midColW, BROWN2, 1);
+    txt('冲煞', midColX+midColW/2, R4Y+6, 'bold 14px "PingFang SC",serif', DARK, 'center','top');
+    txt(chong, midColX+midColW/2, R4Y+26, '12px "PingFang SC",serif', DARK, 'center','top');
+
+    // 今日时运标题
+    var tsY=R4Y+chongH+4;
+    txt('今日时运', midColX+midColW/2, tsY, 'bold 14px "PingFang SC",serif', DARK, 'center','top');
+    tsY+=22;
+    hline(tsY, midColX, midColX+midColW, BROWN2, 1);
+    tsY+=4;
+
+    // 12时辰表格：每列 midColW/12
+    var hColW=midColW/12;
+    var hAreaH=R4H-chongH-30;
+    hours.forEach(function(h,i){
+      var hx=midColX+i*hColW+hColW/2;
+      if(i>0) vline(midColX+i*hColW, tsY, R4Y+R4H, BROWN2, 0.8);
+      // 背景（凶=淡红）
+      if(h.luck==='凶'){
+        rect(midColX+i*hColW, tsY, hColW, hAreaH, 'rgba(139,26,26,0.06)');
+      }
+      // 时辰名（子丑寅…）
+      vtxt(h.label, hx, tsY+4, 'bold 13px "PingFang SC",serif', DARK, 18);
+      // 干支
+      vtxt(h.gz, hx, tsY+4+h.label.length*18+4, '11px "PingFang SC",serif', BROWN2, 16);
+      // 吉凶圆点
+      var dotY=tsY+4+h.label.length*18+4+h.gz.length*16+6;
+      var dotCol=h.luck==='吉'?GREEN_C:h.luck==='凶'?RED_C:AMBER;
+      circle(hx, dotY+8, 8, dotCol);
+      c.font='bold 10px "PingFang SC",serif';
+      c.fillStyle='#fff'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText(h.luck, hx, dotY+8);
+      // 宜/忌小字（各1条，竖排，9px，不超出格子）
+      var yiItems = (h.yi||[]).slice(0,1);
+      var jiItems = (h.ji||[]).slice(0,1);
+      var smallY = dotY+20;
+      var smallLH = 12;
+      // 宜（绿色）
+      yiItems.forEach(function(t){
+        vtxt(t, hx, smallY, '9px "PingFang SC",serif', GREEN_C, smallLH);
+        smallY += t.length * smallLH + 3;
+      });
+      // 忌（红色）
+      jiItems.forEach(function(t){
+        vtxt(t, hx, smallY, '9px "PingFang SC",serif', RED_C, smallLH);
+      });
+    });
+
+    // ════════════════════════════════
+    // 8. 页脚
+    rect(0, H-30, W, 30, BROWN);
+    txt('nztemple.com', W/2-80, H-15, '11px "PingFang SC",serif', GOLD, 'right','middle');
+    txt('财神黄历  '+day.date, W/2+10, H-15, '11px "PingFang SC",serif', GOLD, 'left','middle');
+
+    return cv.toDataURL('image/png');
+  }
+
+  // ── 个性化黄历 Canvas（含八字四柱+十神+总结+个性化时辰）────
+  function drawHuangliCanvasPersonal(day, hours, bazi, personal){
+    var W = 800, H = 1280;
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var c = cv.getContext('2d');
+
+    var BG    = '#f5f0e6';
+    var BROWN = '#5c3d1e';
+    var BROWN2= '#8b6340';
+    var DARK  = '#2c1a00';
+    var GOLD  = '#f5e6b3';
+    var GREEN_C='#2d6a30';
+    var RED_C  ='#8b1a1a';
+    var AMBER  ='#8b6340';
+
+    function rect(x,y,w,h,fill,stroke,lw){
+      c.beginPath();c.rect(x,y,w,h);
+      if(fill){c.fillStyle=fill;c.fill();}
+      if(stroke){c.strokeStyle=stroke;c.lineWidth=lw||1.5;c.stroke();}
+    }
+    function hline(y,x1,x2,col,lw){c.beginPath();c.moveTo(x1,y);c.lineTo(x2,y);c.strokeStyle=col||BROWN2;c.lineWidth=lw||1;c.stroke();}
+    function vline(x,y1,y2,col,lw){c.beginPath();c.moveTo(x,y1);c.lineTo(x,y2);c.strokeStyle=col||BROWN2;c.lineWidth=lw||1;c.stroke();}
+    function txt(str,x,y,font,fill,align,baseline){
+      c.font=font;c.fillStyle=fill||DARK;
+      c.textAlign=align||'left';c.textBaseline=baseline||'top';
+      c.fillText(str,x,y);
+    }
+    function circle(x,y,r,fill){
+      c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=fill;c.fill();
+    }
+    function vtxt(str,x,startY,font,fill,lineH){
+      c.font=font;c.fillStyle=fill||DARK;c.textAlign='center';c.textBaseline='top';
+      var lh=lineH||22;
+      for(var i=0;i<str.length;i++) c.fillText(str[i],x,startY+i*lh);
+    }
+    function yin_yang(cx,cy,r){
+      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fillStyle='#fff';c.fill();
+      c.beginPath();c.arc(cx,cy,r,-Math.PI/2,Math.PI/2);c.fillStyle=BROWN;c.fill();
+      c.beginPath();c.arc(cx,cy-r/2,r/2,0,Math.PI*2);c.fillStyle='#fff';c.fill();
+      c.beginPath();c.arc(cx,cy+r/2,r/2,0,Math.PI*2);c.fillStyle=BROWN;c.fill();
+      circle(cx,cy-r/2,r/6,BROWN);circle(cx,cy+r/2,r/6,'#fff');
+      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.strokeStyle=BROWN;c.lineWidth=1.5;c.stroke();
+    }
+
+    // 解析日期
+    var d = new Date(day.date+'T00:00:00');
+    var WD=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    var YR=d.getFullYear(), MO=(d.getMonth()+1)+'月', DN=d.getDate();
+    var lunarStr=day.lunar_ymd||'';
+    lunarStr=lunarStr.replace(/^[^月]+年/,'');
+    var lunarM='',lunarD='';
+    var lm=lunarStr.match(/^(.{1,4})[月](.+)$/);
+    if(lm){lunarM=lm[1]+'月';lunarD=lm[2];}else{lunarD=lunarStr;}
+    var ZIRAN={'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
+    var yZhi=(day.year_gz||'').length>=2?day.year_gz[1]:'';
+    var yearBadge=(day.year_gz||'')+(ZIRAN[yZhi]||'')+'年';
+    var yi=day.yi||[], ji=day.ji||[], chong=day.chong_desc||'—';
+
+    // 1. 背景
+    rect(0,0,W,H,BG);
+
+    // 2. 顶部标题栏
+    var TB_H=64;
+    rect(0,0,W,TB_H,BROWN);
+    yin_yang(44,TB_H/2,20); yin_yang(W-44,TB_H/2,20);
+    txt('新西兰财神庙 · 个性化黄历', W/2, TB_H/2, 'bold 24px "PingFang SC","STSong",serif', GOLD, 'center','middle');
+
+    // 3. 外框
+    var BX=14, BY=TB_H+10, BW=W-28;
+
+    // 4. 日期行
+    var R1Y=BY, R1H=48;
+    vline(BX+130,R1Y,R1Y+R1H,BROWN,1.5); vline(BX+BW-130,R1Y,R1Y+R1H,BROWN,1.5);
+    hline(R1Y+R1H,BX,BX+BW,BROWN,1.5);
+    rect(BX,R1Y,BW,R1H,null,BROWN,2);
+    txt(WD,BX+65,R1Y+R1H/2,'bold 20px "PingFang SC",serif',DARK,'center','middle');
+    txt(String(YR),BX+BW/2,R1Y+R1H/2,'bold 26px "PingFang SC",serif',DARK,'center','middle');
+    txt(MO,BX+BW-65,R1Y+R1H/2,'bold 20px "PingFang SC",serif',DARK,'center','middle');
+
+    // 5. 主区（农历|大数字|干支）
+    var R2Y=R1Y+R1H, R2H=150, LW=110, RW=130;
+    rect(BX,R2Y,BW,R2H,null,BROWN,2);
+    vline(BX+LW,R2Y,R2Y+R2H,BROWN,1.5); vline(BX+BW-RW,R2Y,R2Y+R2H,BROWN,1.5);
+    hline(R2Y+R2H,BX,BX+BW,BROWN,1.5);
+    var lx=BX+LW/2;
+    rect(lx-22,R2Y+10,44,20,BROWN);
+    txt('农历',lx,R2Y+10+10,'bold 11px "PingFang SC",serif',GOLD,'center','middle');
+    vtxt(lunarM,lx,R2Y+38,'bold 15px "PingFang SC",serif',DARK,22);
+    vtxt(lunarD,lx,R2Y+38+(lunarM.length*22)+6,'bold 15px "PingFang SC",serif',DARK,22);
+    var midX=BX+LW+(BW-LW-RW)/2;
+    c.save();c.globalAlpha=0.06;
+    txt('财神黄历',midX,R2Y+R2H/2,'bold 50px "PingFang SC",serif',BROWN,'center','middle');
+    c.restore();
+    txt(String(DN),midX,R2Y+R2H/2,'bold 110px "Georgia",serif',DARK,'center','middle');
+    var rzx=BX+BW-RW/2, rzY=R2Y+12;
+    txt('年柱',rzx,rzY,'11px "PingFang SC",serif',BROWN2,'center','top');
+    txt(day.year_gz||'—',rzx,rzY+14,'bold 14px "PingFang SC",serif',DARK,'center','top');
+    txt('月柱',rzx,rzY+34,'11px "PingFang SC",serif',BROWN2,'center','top');
+    txt(day.month_gz||'—',rzx,rzY+48,'bold 14px "PingFang SC",serif',DARK,'center','top');
+    txt('日柱',rzx,rzY+68,'11px "PingFang SC",serif',BROWN2,'center','top');
+    txt(day.day_gz||'—',rzx,rzY+82,'bold 14px "PingFang SC",serif',DARK,'center','top');
+    c.font='bold 11px "PingFang SC",serif';
+    var bw=c.measureText(yearBadge).width+16;
+    rect(rzx-bw/2,rzY+104,bw,20,null,BROWN2,1);
+    txt(yearBadge,rzx,rzY+104+10,'bold 11px "PingFang SC",serif',DARK,'center','middle');
+
+    // 6. 方位行
+    var R3Y=R2Y+R2H, R3H=40;
+    rect(BX,R3Y,BW,R3H,null,BROWN,2);
+    hline(R3Y+R3H,BX,BX+BW,BROWN,1.5);
+    var lblW=36;
+    rect(BX,R3Y,lblW,R3H,BROWN);
+    vtxt('方位',BX+lblW/2,R3Y+3,'bold 11px "PingFang SC",serif',GOLD,16);
+    var dirs=[['财神',day.dir&&day.dir.cai],['喜神',day.dir&&day.dir.xi],['福神',day.dir&&day.dir.fu],['阳贵',day.dir&&day.dir.yanggui],['阴贵',day.dir&&day.dir.yingui]];
+    var dColW=(BW-lblW)/dirs.length;
+    dirs.forEach(function(dr,i){
+      var dx=BX+lblW+i*dColW+dColW/2;
+      if(i>0)vline(BX+lblW+i*dColW,R3Y,R3Y+R3H,BROWN2,1);
+      txt(dr[0],dx,R3Y+4,'11px "PingFang SC",serif',BROWN2,'center','top');
+      txt(dr[1]||'—',dx,R3Y+18,'bold 14px "PingFang SC",serif',DARK,'center','top');
+    });
+
+    // 7. 八字四柱行
+    var R4Y=R3Y+R3H, R4H=80;
+    rect(BX,R4Y,BW,R4H,null,BROWN,2);
+    hline(R4Y+R4H,BX,BX+BW,BROWN,1.5);
+    // 标题
+    rect(BX,R4Y,lblW,R4H,BROWN);
+    vtxt('八字',BX+lblW/2,R4Y+3,'bold 11px "PingFang SC",serif',GOLD,16);
+    var pillars=[
+      {l:'年柱',d:bazi.year},{l:'月柱',d:bazi.month},
+      {l:'日柱',d:bazi.day},{l:'时柱',d:bazi.time}
+    ];
+    var pColW=(BW-lblW)/4;
+    pillars.forEach(function(p,i){
+      var px=BX+lblW+i*pColW+pColW/2;
+      if(i>0)vline(BX+lblW+i*pColW,R4Y,R4Y+R4H,BROWN2,1);
+      txt(p.l,px,R4Y+6,'11px "PingFang SC",serif',BROWN2,'center','top');
+      txt(p.d.gz||'—',px,R4Y+22,'bold 22px "PingFang SC",serif','#5c3d1e','center','top');
+      if(p.d.nayin) txt(p.d.nayin,px,R4Y+52,'10px "PingFang SC",serif',BROWN2,'center','top');
+    });
+
+    // 8. 十神+总结行
+    var R5Y=R4Y+R4H, R5H=70;
+    rect(BX,R5Y,BW,R5H,null,BROWN,2);
+    hline(R5Y+R5H,BX,BX+BW,BROWN,1.5);
+    // 十神（流年/月/日）
+    var ftg=personal.flow_ten_gods||[];
+    var tgColW=BW/4;
+    // 左侧标题
+    rect(BX,R5Y,lblW,R5H,BROWN);
+    vtxt('十神',BX+lblW/2,R5Y+3,'bold 11px "PingFang SC",serif',GOLD,16);
+    ftg.forEach(function(f,i){
+      var fx=BX+lblW+i*tgColW+tgColW/2;
+      if(i>0)vline(BX+lblW+i*tgColW,R5Y,R5Y+R5H,BROWN2,1);
+      txt(f.level,fx,R5Y+6,'11px "PingFang SC",serif',BROWN2,'center','top');
+      txt(f.flow_gz||'—',fx,R5Y+20,'bold 16px "PingFang SC",serif',DARK,'center','top');
+      txt(f.ten_god||'',fx,R5Y+40,'bold 13px "PingFang SC",serif','#8b1a1a','center','top');
+      if(f.keyword) txt(f.keyword.split('与')[0],fx,R5Y+56,'9px "PingFang SC",serif',BROWN2,'center','top');
+    });
+
+    // 9. 总结行
+    var R6Y=R5Y+R5H, R6H=54;
+    rect(BX,R6Y,BW,R6H,null,BROWN,2);
+    hline(R6Y+R6H,BX,BX+BW,BROWN,1.5);
+    rect(BX,R6Y,lblW,R6H,BROWN);
+    vtxt('总结',BX+lblW/2,R6Y+6,'bold 11px "PingFang SC",serif',GOLD,16);
+    var summaryText=personal.summary||'';
+    // 自动换行
+    c.font='12px "PingFang SC",serif';
+    c.fillStyle=DARK; c.textAlign='left'; c.textBaseline='top';
+    var sw=BW-lblW-16, sx=BX+lblW+8, sy=R6Y+8, lineH2=18;
+    var words=summaryText.split(''), line='', lineY=sy;
+    for(var wi=0;wi<words.length;wi++){
+      var test=line+words[wi];
+      if(c.measureText(test).width>sw && line!==''){
+        c.fillText(line,sx,lineY);
+        line=words[wi]; lineY+=lineH2;
+        if(lineY>R6Y+R6H-lineH2) break;
+      } else { line=test; }
+    }
+    if(line) c.fillText(line,sx,lineY);
+
+    // 10. 宜忌+冲煞+个性化时辰
+    var R7Y=R6Y+R6H;
+    var R7H=H-R7Y-40;
+    rect(BX,R7Y,BW,R7H,null,BROWN,2);
+    var YI_W=72, JI_W=72, MID_W=BW-YI_W-JI_W;
+    vline(BX+YI_W,R7Y,R7Y+R7H,BROWN,1.5);
+    vline(BX+YI_W+MID_W,R7Y,R7Y+R7H,BROWN,1.5);
+
+    // 宜列
+    var yiCX=BX+YI_W/2;
+    circle(yiCX,R7Y+18,13,GREEN_C);
+    txt('宜',yiCX,R7Y+18,'bold 14px "PingFang SC",serif','#fff','center','middle');
+    yi.forEach(function(t,i){ txt(t,yiCX,R7Y+38+i*22,'13px "PingFang SC",serif',DARK,'center','top'); });
+
+    // 忌列
+    var jiCX=BX+YI_W+MID_W+JI_W/2;
+    circle(jiCX,R7Y+18,13,RED_C);
+    txt('忌',jiCX,R7Y+18,'bold 14px "PingFang SC",serif','#fff','center','middle');
+    ji.forEach(function(t,i){ txt(t,jiCX,R7Y+38+i*22,'13px "PingFang SC",serif',DARK,'center','top'); });
+
+    // 中间：冲煞 + 个性化12时辰
+    var midColX=BX+YI_W, midColW=MID_W;
+    var chongH=46;
+    hline(R7Y+chongH,midColX,midColX+midColW,BROWN2,1);
+    txt('冲煞',midColX+midColW/2,R7Y+5,'bold 13px "PingFang SC",serif',DARK,'center','top');
+    txt(chong,midColX+midColW/2,R7Y+22,'11px "PingFang SC",serif',DARK,'center','top');
+    var tsY2=R7Y+chongH+4;
+    txt('个性化时运',midColX+midColW/2,tsY2,'bold 13px "PingFang SC",serif',DARK,'center','top');
+    tsY2+=20; hline(tsY2,midColX,midColX+midColW,BROWN2,1); tsY2+=3;
+    var hColW2=midColW/12;
+    hours.forEach(function(h,i){
+      var hx=midColX+i*hColW2+hColW2/2;
+      if(i>0)vline(midColX+i*hColW2,tsY2,R7Y+R7H,BROWN2,0.8);
+      var p=h.personal||{};
+      // 个性化吉凶：有关系取关系，否则用基础吉凶
+      var luckShow=h.luck;
+      var dotCol=luckShow==='吉'?GREEN_C:luckShow==='凶'?RED_C:AMBER;
+      if(h.luck==='凶') rect(midColX+i*hColW2,tsY2,hColW2,R7Y+R7H-tsY2,'rgba(139,26,26,0.06)');
+      vtxt(h.label,hx,tsY2+3,'bold 12px "PingFang SC",serif',DARK,17);
+      vtxt(h.gz,hx,tsY2+3+h.label.length*17+3,'10px "PingFang SC",serif',BROWN2,15);
+      var dotY2=tsY2+3+h.label.length*17+3+h.gz.length*15+4;
+      circle(hx,dotY2+7,7,dotCol);
+      c.font='bold 9px "PingFang SC",serif';
+      c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';
+      c.fillText(luckShow,hx,dotY2+7);
+      // 个性化关系小字
+      if(p.relations&&p.relations.length>0){
+        var rel=p.relations[0];
+        var relStr=rel.with.slice(0,1)+rel.type;
+        vtxt(relStr,hx,dotY2+18,'8px "PingFang SC",serif','#8b1a1a',11);
+      }
+      // 十神
+      if(p.ten_god){
+        var tgY=dotY2+30;
+        vtxt(p.ten_god,hx,tgY,'8px "PingFang SC",serif','#5c3d1e',11);
+      }
+    });
+
+    // 11. 页脚
+    rect(0,H-30,W,30,BROWN);
+    txt('nztemple.com',W/2-80,H-15,'11px "PingFang SC",serif',GOLD,'right','middle');
+    txt('个性化黄历  '+day.date,W/2+10,H-15,'11px "PingFang SC",serif',GOLD,'left','middle');
+
+    return cv.toDataURL('image/png');
+  }
+  loadSavedBazi();
+
+  // 尝试从登录账户读取八字
+  tryLoadProfileBazi();
+
+  // 自动加载今日黄历
+  function autoLoad(){
+    if(savedBazi){
+      btnGenPersonal.click();
+    } else {
+      btnGenBasic.click();
+    }
+  }
+  autoLoad();
+
+})();
+</script>
+</body>
+</html>
