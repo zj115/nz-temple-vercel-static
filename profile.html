@@ -13,7 +13,7 @@
     .page-profile .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .page-profile .span-2{grid-column:1/-1;}
     .page-profile .mode-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-    .page-profile .mode-btn{appearance:none;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);color:var(--gold2);border-radius:999px;padding:10px 18px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease;}
+    .page-profile .mode-btn{appearance:none;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);color:var(--gold2);border-radius:999px;padding:10px 18px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease;white-space:normal;text-align:center;line-height:1.4;}
     .page-profile .mode-btn:hover{transform:translateY(-1px);}
     .page-profile .mode-btn.active{background:rgba(255,213,122,.14);border-color:rgba(255,213,122,.32);color:var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.18);}
     .page-profile .mode-panel{display:none;}
@@ -24,16 +24,16 @@
     .page-profile .hint{opacity:.72;font-size:13px;line-height:1.7;}
     .page-profile .kv{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,213,122,.14);}
     .page-profile .kv:last-child{border-bottom:none;}
-    .page-profile .kv .k{opacity:.75;}
-    .page-profile .kv .v{color:var(--gold2);font-weight:800;text-align:right;}
+    .page-profile .kv .k{opacity:.75;flex-shrink:0;max-width:48%;}
+    .page-profile .kv .v{color:var(--gold2);font-weight:800;text-align:right;word-break:break-word;min-width:0;}
     .page-profile .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);font-weight:800;color:var(--gold2);letter-spacing:.2px;font-size:12px;white-space:nowrap;}
     .page-profile .result-block{border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);}
     .page-profile .bazi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px;}
     .page-profile .bazi-cell{border:1px solid rgba(255,213,122,.14);border-radius:14px;padding:10px;background:rgba(255,255,255,.02);text-align:center;}
     .page-profile .bazi-cell .t{opacity:.75;font-size:12px;}
     .page-profile .bazi-cell .g{margin-top:6px;font-weight:900;color:var(--gold2);font-size:18px;letter-spacing:.4px;}
-    .page-profile .member-panel{border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);margin-bottom:12px;}
-    .page-profile .member-level-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,213,122,.28);background:rgba(255,213,122,.08);color:var(--gold);font-weight:900;font-size:13px;letter-spacing:.3px;}
+    .page-profile .member-panel{border:1px solid rgba(255,213,122,.14);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);margin-bottom:12px;min-width:0;}
+    .page-profile .member-level-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,213,122,.28);background:rgba(255,213,122,.08);color:var(--gold);font-weight:900;font-size:13px;letter-spacing:.3px;white-space:normal;text-align:center;word-break:break-word;}
     .page-profile .dao-name-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid rgba(245,230,179,.22);background:rgba(245,230,179,.06);color:var(--gold2);font-weight:800;font-size:12px;letter-spacing:.4px;margin-top:6px;}
     .page-profile .record-list{display:grid;gap:10px;margin-top:10px;}
     .page-profile .record-item{border:1px solid rgba(255,213,122,.12);border-radius:14px;padding:12px;background:rgba(255,255,255,.02);}
@@ -61,8 +61,16 @@
     /* loading overlay */
     #pageLoader{position:fixed;inset:0;background:#0b0b0f;display:flex;align-items:center;justify-content:center;z-index:9999;font-weight:900;color:var(--gold2);letter-spacing:.4px;}
     .btn:disabled{opacity:.5;cursor:not-allowed;}
-    @media(max-width:980px){.page-profile .grid-2{grid-template-columns:1fr;}}
-    @media(max-width:640px){.page-profile .form-grid{grid-template-columns:1fr;}.page-profile .bazi-grid{grid-template-columns:repeat(2,1fr);}.page-profile .friend-bazi{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:980px){
+      .page-profile .grid-2{grid-template-columns:1fr;}
+      .page-profile .grid-3{grid-template-columns:1fr;}
+    }
+    @media(max-width:640px){
+      .page-profile .form-grid{grid-template-columns:1fr;}
+      .page-profile .bazi-grid{grid-template-columns:repeat(2,1fr);}
+      .page-profile .friend-bazi{grid-template-columns:repeat(2,1fr);}
+      .page-profile .mode-btn{padding:10px 14px;font-size:13px;}
+    }
   </style>
 </head>
 <body class="page-profile">
@@ -185,32 +193,32 @@
   <!-- ── 会员信息概览 ── -->
   <section style="padding:0 0 14px;">
     <div class="glass-card" style="padding:18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-width:0;">
+        <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;min-width:0;">
           <span class="lang-en">Member Overview</span>
           <span class="lang-zh">会员概览</span>
         </div>
         <div class="member-level-badge" id="memberLevelBadge">—</div>
       </div>
       <div style="height:1px;background:rgba(255,213,122,.14);margin:14px 0;"></div>
-      <div class="grid-3" style="gap:14px;">
-        <div class="member-panel" style="margin-bottom:0;">
+      <div class="grid-3" style="gap:14px;min-width:0;">
+        <div class="member-panel" style="margin-bottom:0;min-width:0;">
           <div class="kv"><div class="k"><span class="lang-en">Name</span><span class="lang-zh">姓名</span></div><div class="v" id="ovName">—</div></div>
           <div class="kv"><div class="k"><span class="lang-en">Email</span><span class="lang-zh">邮箱</span></div><div class="v" id="ovEmail" style="font-size:12px;">—</div></div>
           <div class="kv"><div class="k"><span class="lang-en">Phone</span><span class="lang-zh">电话</span></div><div class="v" id="ovPhone">—</div></div>
           <div class="kv"><div class="k"><span class="lang-en">Dao Name</span><span class="lang-zh">道名</span></div><div class="v" id="ovDaoName" style="color:var(--gold2);">—</div></div>
         </div>
-        <div class="member-panel" style="margin-bottom:0;">
-          <div style="opacity:.72;font-size:12px;margin-bottom:8px;letter-spacing:.2px;"><span class="lang-en">Level · Admin assigned</span><span class="lang-zh">等级 · 由管理员设置</span></div>
+        <div class="member-panel" style="margin-bottom:0;min-width:0;">
+          <div style="opacity:.72;font-size:12px;margin-bottom:8px;letter-spacing:.2px;line-height:1.4;"><span class="lang-en">Level · Admin assigned</span><span class="lang-zh">等级 · 由管理员设置</span></div>
           <div style="font-size:20px;font-weight:900;color:var(--gold);letter-spacing:.4px;" id="ovLevel">—</div>
           <div style="height:1px;background:rgba(255,213,122,.12);margin:14px 0;"></div>
-          <div style="opacity:.72;font-size:12px;margin-bottom:8px;letter-spacing:.2px;"><span class="lang-en">Merit Points · Admin assigned</span><span class="lang-zh">功德分 · 由管理员设置</span></div>
-          <div style="display:flex;align-items:baseline;gap:6px;">
+          <div style="opacity:.72;font-size:12px;margin-bottom:8px;letter-spacing:.2px;line-height:1.4;"><span class="lang-en">Merit Points · Admin assigned</span><span class="lang-zh">功德分 · 由管理员设置</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
             <span style="font-size:26px;font-weight:900;color:var(--gold2);" id="ovPoints">—</span>
             <span style="opacity:.65;font-size:13px;"><span class="lang-en">pts</span><span class="lang-zh">分</span></span>
           </div>
         </div>
-        <div class="member-panel" style="margin-bottom:0;">
+        <div class="member-panel" style="margin-bottom:0;min-width:0;">
           <div class="kv"><div class="k"><span class="lang-en">Member since</span><span class="lang-zh">注册时间</span></div><div class="v" id="ovCreated" style="font-size:12px;">—</div></div>
           <div class="kv"><div class="k"><span class="lang-en">Role</span><span class="lang-zh">身份</span></div><div class="v" id="ovRole">—</div></div>
         </div>
