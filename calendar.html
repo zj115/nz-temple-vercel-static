@@ -936,6 +936,10 @@
       currentBazi         = res.bazi;
       currentPersonal     = res.personal;
       currentPersonalHours= res.personal_hour_table;
+      // 尝试获取用户名（非阻塞）
+      if(typeof getMyProfile === 'function' && !currentUserName){
+        getMyProfile().then(function(p){ if(p && p.full_name) currentUserName = p.full_name; }).catch(function(){});
+      }
       renderAlmanac(res.day, res.personal);
       renderHours(res.basic_hour_table, null);
       renderPillars(res.bazi);
@@ -1266,9 +1270,9 @@
     try {
       var png;
       if(currentBazi && currentPersonal) {
-        // 个性化模式：版式与基础版完全一致，仅标题加用户名，时辰用个性化数据
+        // 个性化模式：宜/忌和时辰吉凶用个性化数据
         var titleName = currentUserName ? currentUserName + '个性化黄历' : '个性化黄历';
-        png = drawHuangliCanvas(currentDay, currentPersonalHours || currentHours || [], titleName);
+        png = drawHuangliCanvas(currentDay, currentPersonalHours || currentHours || [], titleName, currentPersonal);
       } else {
         // 基础模式
         png = drawHuangliCanvas(currentDay, currentHours || []);
@@ -1284,7 +1288,7 @@
 
   // ── Canvas 绘制黄历 ────────────────────────────
   // titleOverride: 可选，若传入则替换顶部标题文字（用于个性化黄历）
-  function drawHuangliCanvas(day, hours, titleOverride){
+  function drawHuangliCanvas(day, hours, titleOverride, personal){
     // 尺寸（竖版）
     var W = 800, H = 950;
     var cv = document.createElement('canvas');
@@ -1361,8 +1365,8 @@
     var ZIRAN={'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
     var yZhi = (day.year_gz||'').length>=2?(day.year_gz)[1]:'';
     var yearBadge = (day.year_gz||'')+(ZIRAN[yZhi]||'')+'年';
-    var yi  = day.yi  || [];
-    var ji  = day.ji  || [];
+    var yi = (personal && personal.personal_yi && personal.personal_yi.length) ? personal.personal_yi : (day.yi || []);
+    var ji = (personal && personal.personal_ji && personal.personal_ji.length) ? personal.personal_ji : (day.ji || []);
     var chong = day.chong_desc || '—';
 
     // ════════════════════════════════
@@ -1476,20 +1480,29 @@
     // 宜 圆
     circle(yiCX, R4Y+22, 14, GREEN_C);
     txt('宜', yiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
-    // 宜内容逐行
-    var yiStartY=R4Y+46;
-    var yiLineH=24;
-    yi.forEach(function(t,i){
-      txt(t, yiCX, yiStartY+i*yiLineH, '14px "PingFang SC",serif', DARK, 'center','top');
+    // 宜内容竖排（每条取前4字，多条依次往下）
+    var yiCurY=R4Y+46;
+    var yiLineH=18;
+    var yiMaxY=R4Y+R4H-10;
+    yi.forEach(function(t){
+      if(yiCurY >= yiMaxY) return;
+      var clean = t.replace(/[·・\s]/g,'').slice(0,5);
+      vtxt(clean, yiCX, yiCurY, '13px "PingFang SC",serif', DARK, yiLineH);
+      yiCurY += clean.length * yiLineH + 6;
     });
 
     // ── 忌列 ──
     var jiCX=BX+YI_W+MID_W+JI_W/2;
     circle(jiCX, R4Y+22, 14, RED_C);
     txt('忌', jiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
-    var jiStartY=R4Y+46;
-    ji.forEach(function(t,i){
-      txt(t, jiCX, jiStartY+i*yiLineH, '14px "PingFang SC",serif', DARK, 'center','top');
+    var jiCurY=R4Y+46;
+    var jiLineH=18;
+    var jiMaxY=R4Y+R4H-10;
+    ji.forEach(function(t){
+      if(jiCurY >= jiMaxY) return;
+      var clean = t.replace(/[·・\s]/g,'').slice(0,5);
+      vtxt(clean, jiCX, jiCurY, '13px "PingFang SC",serif', DARK, jiLineH);
+      jiCurY += clean.length * jiLineH + 6;
     });
 
     // ── 中间列 ──
@@ -1514,8 +1527,9 @@
     hours.forEach(function(h,i){
       var hx=midColX+i*hColW+hColW/2;
       if(i>0) vline(midColX+i*hColW, tsY, R4Y+R4H, BROWN2, 0.8);
+      var hLuck = (personal && h.personal && h.personal.luck) ? h.personal.luck : h.luck;
       // 背景（凶=淡红）
-      if(h.luck==='凶'){
+      if(hLuck==='凶'){
         rect(midColX+i*hColW, tsY, hColW, hAreaH, 'rgba(139,26,26,0.06)');
       }
       // 时辰名（子丑寅…）
@@ -1524,14 +1538,14 @@
       vtxt(h.gz, hx, tsY+4+h.label.length*18+4, '11px "PingFang SC",serif', BROWN2, 16);
       // 吉凶圆点
       var dotY=tsY+4+h.label.length*18+4+h.gz.length*16+6;
-      var dotCol=h.luck==='吉'?GREEN_C:h.luck==='凶'?RED_C:AMBER;
+      var dotCol=hLuck==='吉'?GREEN_C:hLuck==='凶'?RED_C:AMBER;
       circle(hx, dotY+8, 8, dotCol);
       c.font='bold 10px "PingFang SC",serif';
       c.fillStyle='#fff'; c.textAlign='center'; c.textBaseline='middle';
-      c.fillText(h.luck, hx, dotY+8);
+      c.fillText(hLuck, hx, dotY+8);
       // 宜/忌小字（各1条，竖排，9px，不超出格子）
-      var yiItems = (h.yi||[]).slice(0,1);
-      var jiItems = (h.ji||[]).slice(0,1);
+      var yiItems = (personal && h.personal && h.personal.yi && h.personal.yi.length) ? h.personal.yi.slice(0,1) : (h.yi||[]).slice(0,1);
+      var jiItems = (personal && h.personal && h.personal.ji && h.personal.ji.length) ? h.personal.ji.slice(0,1) : (h.ji||[]).slice(0,1);
       var smallY = dotY+20;
       var smallLH = 12;
       // 宜（绿色）
