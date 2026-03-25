@@ -289,22 +289,59 @@
   .dir-grid{grid-template-columns:repeat(3,1fr);}
 }
 @media(max-width:600px){
+  .hl-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .hl-controls input[type="date"]{grid-column:1/-1;}
+  .hl-controls #btnDownloadPng{grid-column:1/-1;margin-left:0!important;}
   .hl-grid-3,.hl-grid-4,.hour-grid{grid-template-columns:repeat(2,1fr);}
   .pillar-grid{grid-template-columns:repeat(2,1fr);}
   .dir-grid{grid-template-columns:repeat(2,1fr);}
   .bazi-grid{grid-template-columns:1fr 1fr;}
   .almanac-date-big{font-size:26px;}
+  .hl-grid-2{grid-template-columns:1fr;}
+  .almanac-header{flex-direction:column;gap:10px;}
+  .bazi-status-bar{flex-direction:column;align-items:flex-start;gap:8px;}
+  .hl-card{padding:12px;}
+  .section-title{font-size:14px;}
 }
 </style>
 </head>
 <body>
 <div class="bg-ornament"></div>
 
-<!-- ══════════════════════════════════════════════════ -->
-<!-- 标准导航栏（与主站完全一致）                         -->
-<!-- ══════════════════════════════════════════════════ -->
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- Sidebar panel -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <a class="sidebar-brand" href="index.html">
+      <img src="images/logo.jpg" alt="NZ Temple Logo"/>
+      <div class="sidebar-brand-text">
+        <span class="lang-zh">新西兰财神庙</span><span class="lang-en">NZ Temple</span>
+      </div>
+    </a>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span><span class="lang-zh">主页</span><span class="lang-en">Home</span></a>
+    <a href="calendar.html" class="nav-active"><span class="nav-icon">📅</span><span class="lang-zh">财神黄历</span><span class="lang-en">Almanac</span></a>
+    <a href="courses.html"><span class="nav-icon">📖</span><span class="lang-zh">课程</span><span class="lang-en">Courses</span></a>
+    <a href="booking.html"><span class="nav-icon">🙏</span><span class="lang-zh">法事预约</span><span class="lang-en">Ritual Booking</span></a>
+    <a href="shop.html"><span class="nav-icon">🛍</span><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
+    <a href="profile.html"><span class="nav-icon">👤</span><span class="lang-zh">资料</span><span class="lang-en">Profile</span></a>
+    <a href="login.html" id="sidebarLoginLink"><span class="nav-icon">🔑</span><span class="lang-zh">登录</span><span class="lang-en">Login</span></a>
+  </nav>
+  <div class="sidebar-foot">
+    <button class="btn btn-ghost btn-lang" type="button" id="langToggleSidebar">
+      <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+    </button>
+  </div>
+</aside>
+
 <header class="topbar">
   <div class="topbar-inner">
+    <button class="nav-hamburger" id="navHamburger" aria-label="Open menu">
+      <img src="images/logo.jpg" alt="Menu"/>
+    </button>
     <a class="brand" href="index.html">
       <div class="brand-mark brand-logo-wrap" aria-hidden="true">
         <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
@@ -320,7 +357,6 @@
         </div>
       </div>
     </a>
-
     <nav class="navlinks" aria-label="Primary">
       <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
       <a href="calendar.html" class="nav-active"><span class="lang-en">Almanac</span><span class="lang-zh">财神黄历</span></a>
@@ -329,34 +365,37 @@
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
       <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
     </nav>
-
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
-        <span class="lang-en">中文</span>
-        <span class="lang-zh">EN</span>
+        <span class="lang-en">中文</span><span class="lang-zh">EN</span>
       </button>
       <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
         <span class="lang-en">Login</span><span class="lang-zh">登录</span>
       </a>
     </div>
   </div>
-
   <script>
     (function () {
       var key = 'lang';
       var root = document.documentElement;
       var saved = localStorage.getItem(key);
-      var lang = (saved === 'zh' || saved === 'en') ? saved : 'zh';
-      root.setAttribute('data-lang', lang);
-      var btn = document.getElementById('langToggle');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        var cur = root.getAttribute('data-lang') || 'zh';
-        var next = (cur === 'zh') ? 'en' : 'zh';
+      root.setAttribute('data-lang', (saved === 'zh' || saved === 'en') ? saved : 'zh');
+      function setLang(next) {
         root.setAttribute('data-lang', next);
         localStorage.setItem(key, next);
         window.dispatchEvent(new Event('langchange'));
-      });
+      }
+      var btn = document.getElementById('langToggle');
+      if (btn) btn.addEventListener('click', function(){ setLang(root.getAttribute('data-lang')==='zh'?'en':'zh'); });
+      var btnSb = document.getElementById('langToggleSidebar');
+      if (btnSb) btnSb.addEventListener('click', function(){ setLang(root.getAttribute('data-lang')==='zh'?'en':'zh'); });
+      var sidebar=document.getElementById('sidebar'), overlay=document.getElementById('sidebarOverlay'),
+          hamburger=document.getElementById('navHamburger'), closeBtn=document.getElementById('sidebarClose');
+      function openSidebar(){ sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+      function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+      if(hamburger) hamburger.addEventListener('click', openSidebar);
+      if(closeBtn)  closeBtn.addEventListener('click', closeSidebar);
+      if(overlay)   overlay.addEventListener('click', closeSidebar);
     })();
     renderNavAuthBtn();
   </script>
@@ -394,77 +433,33 @@
       </button>
     </div>
 
-    <!-- 八字状态条 -->
+    <!-- 八字状态条（只读，不再有输入/清除按钮） -->
     <div class="bazi-status-bar" id="baziStatusBar">
       <div class="bazi-status-badge" id="baziStatusText">
         <span style="opacity:.6;">● <span class="lang-zh">未设置八字</span><span class="lang-en">No BaZi set</span></span>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" id="btnToggleBaziInput" style="padding:6px 12px;font-size:13px;">
-          <span class="lang-zh">输入八字</span><span class="lang-en">Enter BaZi</span>
-        </button>
-        <button class="btn btn-ghost" id="btnClearBazi" style="padding:6px 12px;font-size:13px;color:rgba(220,90,90,.8);">
-          <span class="lang-zh">清除八字</span><span class="lang-en">Clear BaZi</span>
-        </button>
-      </div>
     </div>
 
-    <!-- 登录用户提示 -->
+    <!-- 未登录提示 -->
+    <div id="notLoginHint" class="hidden" style="margin-top:10px;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,213,122,.22);background:rgba(255,213,122,.05);font-size:13px;color:var(--gold2);">
+      <span class="lang-zh">💡 如需查看个性化八字黄历，请先 <a href="login.html" style="color:var(--gold);text-decoration:underline;">登录</a> 并在「<a href="profile.html" style="color:var(--gold);text-decoration:underline;">资料</a>」页填写生辰八字。未填写时显示基础版黄历。</span>
+      <span class="lang-en">💡 To view your personalized almanac, please <a href="login.html" style="color:var(--gold);text-decoration:underline;">log in</a> and fill in your BaZi on the <a href="profile.html" style="color:var(--gold);text-decoration:underline;">Profile</a> page. Basic almanac shown otherwise.</span>
+    </div>
+
+    <!-- 已登录但无八字提示 -->
+    <div id="noBaziHint" class="hidden" style="margin-top:10px;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,213,122,.22);background:rgba(255,213,122,.05);font-size:13px;color:var(--gold2);">
+      <span class="lang-zh">💡 您已登录，但尚未在「<a href="profile.html" style="color:var(--gold);text-decoration:underline;">资料</a>」页填写生辰八字，当前显示基础版黄历。</span>
+      <span class="lang-en">💡 You are logged in but haven't filled in your BaZi on the <a href="profile.html" style="color:var(--gold);text-decoration:underline;">Profile</a> page. Showing basic almanac.</span>
+    </div>
+
+    <!-- 已从资料读取八字提示 -->
     <div id="profileBaziHint" class="hidden" style="margin-top:8px;padding:10px 14px;border-radius:12px;border:1px solid rgba(70,200,120,.25);background:rgba(70,200,120,.06);font-size:13px;color:rgba(70,200,120,.9);">
-      ✓ <span class="lang-zh">已从您的账户资料自动读取八字</span><span class="lang-en">BaZi loaded from your profile</span>
+      ✓ <span class="lang-zh">已从您的账户资料自动读取八字，可生成个性化黄历</span><span class="lang-en">BaZi loaded from your profile — personal almanac available</span>
     </div>
 
-    <!-- 八字输入区（默认折叠） -->
-    <div id="baziInputArea" class="hidden">
-      <div class="divider"></div>
-      <div class="bazi-tabs">
-        <button class="bazi-tab active" id="bTabA">
-          <span class="lang-zh">方式 A：阳历出生时间</span><span class="lang-en">Method A: Birth Date & Time</span>
-        </button>
-        <button class="bazi-tab" id="bTabB">
-          <span class="lang-zh">方式 B：直接输入四柱</span><span class="lang-en">Method B: Enter Four Pillars</span>
-        </button>
-      </div>
-
-      <!-- 方式A -->
-      <div class="bazi-panel active" id="bPanelA">
-        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-          <div>
-            <div class="label-sm"><span class="lang-zh">出生日期时间</span><span class="lang-en">Birth Date & Time</span></div>
-            <input type="datetime-local" id="birthInput" class="btn btn-ghost" style="padding:8px 12px;width:220px;font-size:13px;"/>
-          </div>
-          <button class="btn btn-gold" id="btnSaveBirthA" style="padding:8px 16px;font-size:13px;">
-            <span class="lang-zh">确认并保存（方式A）</span><span class="lang-en">Save (Method A)</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 方式B -->
-      <div class="bazi-panel" id="bPanelB">
-        <div class="bazi-grid" style="margin-bottom:10px;">
-          <div>
-            <div class="label-sm"><span class="lang-zh">年柱（如 甲子）</span><span class="lang-en">Year Pillar (e.g. 甲子)</span></div>
-            <input type="text" id="bYear" maxlength="2" placeholder="甲子" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
-          </div>
-          <div>
-            <div class="label-sm"><span class="lang-zh">月柱（如 丙寅）</span><span class="lang-en">Month Pillar (e.g. 丙寅)</span></div>
-            <input type="text" id="bMonth" maxlength="2" placeholder="丙寅" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
-          </div>
-          <div>
-            <div class="label-sm"><span class="lang-zh">日柱（如 丁卯）</span><span class="lang-en">Day Pillar (e.g. 丁卯)</span></div>
-            <input type="text" id="bDay" maxlength="2" placeholder="丁卯" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
-          </div>
-          <div>
-            <div class="label-sm"><span class="lang-zh">时柱（如 己酉）</span><span class="lang-en">Hour Pillar (e.g. 己酉)</span></div>
-            <input type="text" id="bTime" maxlength="2" placeholder="己酉" class="btn btn-ghost" style="width:100%;padding:8px 12px;font-size:13px;"/>
-          </div>
-        </div>
-        <button class="btn btn-gold" id="btnSaveBirthB" style="padding:8px 16px;font-size:13px;">
-          <span class="lang-zh">确认并保存（方式B）</span><span class="lang-en">Save (Method B)</span>
-        </button>
-      </div>
-
-      <div id="baziSaveMsg" style="margin-top:8px;font-size:13px;"></div>
+    <!-- 隐藏的八字输入区（保留供JS内部使用，不显示给用户） -->
+    <div id="baziInputArea" class="hidden" style="display:none!important;">
+      <div id="baziSaveMsg"></div>
     </div>
   </div>
 
@@ -713,8 +708,6 @@
   var btnToday        = document.getElementById('btnToday');
   var btnGenBasic     = document.getElementById('btnGenBasic');
   var btnGenPersonal  = document.getElementById('btnGenPersonal');
-  var btnToggleBazi   = document.getElementById('btnToggleBaziInput');
-  var btnClearBazi    = document.getElementById('btnClearBazi');
   var baziInputArea   = document.getElementById('baziInputArea');
   var baziStatusText  = document.getElementById('baziStatusText');
   var errorBox        = document.getElementById('errorBox');
@@ -722,6 +715,8 @@
   var secBazi         = document.getElementById('secBazi');
   var baziSaveMsg     = document.getElementById('baziSaveMsg');
   var profileBaziHint = document.getElementById('profileBaziHint');
+  var notLoginHint    = document.getElementById('notLoginHint');
+  var noBaziHint      = document.getElementById('noBaziHint');
 
   // ── 初始化日期 ────────────────────────────────
   var today = new Date();
@@ -743,27 +738,19 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
     updateBaziStatus();
   }
-  function clearBazi(){
-    savedBazi = null;
-    localStorage.removeItem(STORAGE_KEY);
-    updateBaziStatus();
-    secBazi.classList.add('hidden');
-    profileBaziHint.classList.add('hidden');
-    showMsg(baziSaveMsg, '已清除八字', false);
-  }
   function updateBaziStatus(){
     if(!savedBazi){
-      baziStatusText.innerHTML = '<span style="opacity:.55;">● 未设置八字（个性化功能需要八字）</span>';
+      baziStatusText.innerHTML = '<span style="opacity:.55;">● <span class="lang-zh">未设置八字</span><span class="lang-en">No BaZi set</span></span>';
       return;
     }
-    var mode = savedBazi.mode === 'birth' ? '方式A（阳历）' : (savedBazi.mode === 'profile' ? '账户资料' : '方式B（手动）');
     var gz = savedBazi.year.gz + ' ' + savedBazi.month.gz + ' ' + savedBazi.day.gz + ' ' + savedBazi.time.gz;
     baziStatusText.innerHTML =
-      '<span style="color:var(--green);">✓ 已保存（' + mode + '）</span>' +
+      '<span style="color:var(--green);">✓ <span class="lang-zh">已读取八字（账户资料）</span><span class="lang-en">BaZi loaded from profile</span></span>' +
       '<span style="opacity:.65;font-size:12px;margin-left:10px;">' + gz + '</span>';
   }
 
   function showMsg(el, text, isError){
+    if(!el) return;
     el.style.color = isError ? 'rgba(220,90,90,.9)' : 'rgba(70,200,120,.9)';
     el.textContent = text;
     setTimeout(function(){ el.textContent = ''; }, 3000);
@@ -771,17 +758,18 @@
 
   // ── 从登录用户账户读取八字 ───────────────────────
   function tryLoadProfileBazi(){
-    if(typeof getMyProfile !== 'function') return;
+    if(typeof getMyProfile !== 'function'){
+      notLoginHint.classList.remove('hidden');
+      return;
+    }
     getMyProfile().then(function(profile){
-      if(!profile) return;
-      // 如果账户有四柱数据
+      if(!profile){
+        // 未登录
+        notLoginHint.classList.remove('hidden');
+        return;
+      }
       if(profile.bazi_year && profile.bazi_month && profile.bazi_day && profile.bazi_hour){
-        // 只有在 localStorage 没有八字，或者 localStorage 里的是旧数据时才用账户数据
-        // （用户手动清除后不强制覆盖）
-        var raw = localStorage.getItem(STORAGE_KEY);
-        var existing = null;
-        try{ existing = raw ? JSON.parse(raw) : null; }catch(e){}
-
+        // 已登录且有八字
         var profileBazi = {
           mode: 'profile',
           year:  { gz: profile.bazi_year },
@@ -789,90 +777,24 @@
           day:   { gz: profile.bazi_day },
           time:  { gz: profile.bazi_hour },
         };
-
-        if(!existing){
-          // 没有本地保存，自动用账户数据
-          saveBazi(profileBazi);
-          profileBaziHint.classList.remove('hidden');
-        } else if(existing.mode === 'profile'){
-          // 上次也是从账户读的，更新
-          saveBazi(profileBazi);
-          profileBaziHint.classList.remove('hidden');
-        }
-        // 如果用户手动输入了八字（mode=birth/manual），不覆盖
+        saveBazi(profileBazi);
+        profileBaziHint.classList.remove('hidden');
+        notLoginHint.classList.add('hidden');
+        noBaziHint.classList.add('hidden');
+        // 更新侧边栏登录链接为资料页
+        var sidebarLogin = document.getElementById('sidebarLoginLink');
+        if(sidebarLogin){ sidebarLogin.href='profile.html'; }
+      } else {
+        // 已登录但无八字
+        noBaziHint.classList.remove('hidden');
+        notLoginHint.classList.add('hidden');
       }
-    }).catch(function(){});
+      // 更新用户名
+      if(profile.full_name) currentUserName = profile.full_name;
+    }).catch(function(){
+      notLoginHint.classList.remove('hidden');
+    });
   }
-
-  // ── 八字Tab切换 ──────────────────────────────
-  document.getElementById('bTabA').addEventListener('click', function(){
-    this.classList.add('active');
-    document.getElementById('bTabB').classList.remove('active');
-    document.getElementById('bPanelA').classList.add('active');
-    document.getElementById('bPanelB').classList.remove('active');
-  });
-  document.getElementById('bTabB').addEventListener('click', function(){
-    this.classList.add('active');
-    document.getElementById('bTabA').classList.remove('active');
-    document.getElementById('bPanelB').classList.add('active');
-    document.getElementById('bPanelA').classList.remove('active');
-  });
-
-  btnToggleBazi.addEventListener('click', function(){
-    baziInputArea.classList.toggle('hidden');
-  });
-  btnClearBazi.addEventListener('click', clearBazi);
-
-  // ── 保存方式A ─────────────────────────────────
-  document.getElementById('btnSaveBirthA').addEventListener('click', function(){
-    var birth = document.getElementById('birthInput').value;
-    if(!birth){ showMsg(baziSaveMsg, '请选择出生时间', true); return; }
-    fetchAPI('/api/personal_day_birth', {
-      date: dateInput.value,
-      birth: birth
-    }, function(res){
-      if(res.bazi){
-        res.bazi.mode = 'birth';
-        saveBazi(res.bazi);
-        showMsg(baziSaveMsg, '✓ 八字已保存（方式A）', false);
-        baziInputArea.classList.add('hidden');
-      }
-    });
-  });
-
-  // ── 保存方式B ─────────────────────────────────
-  document.getElementById('btnSaveBirthB').addEventListener('click', function(){
-    var GAN_LIST = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-    var ZHI_LIST = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    var fields = [
-      ['年柱', document.getElementById('bYear').value.trim()],
-      ['月柱', document.getElementById('bMonth').value.trim()],
-      ['日柱', document.getElementById('bDay').value.trim()],
-      ['时柱', document.getElementById('bTime').value.trim()],
-    ];
-    for(var i=0;i<fields.length;i++){
-      var label = fields[i][0], gz = fields[i][1];
-      if(gz.length !== 2){ showMsg(baziSaveMsg, label+'必须是2个字', true); return; }
-      if(GAN_LIST.indexOf(gz[0]) < 0){ showMsg(baziSaveMsg, label+'第一字须是天干（'+GAN_LIST.join('')+'）', true); return; }
-      if(ZHI_LIST.indexOf(gz[1]) < 0){ showMsg(baziSaveMsg, label+'第二字须是地支（'+ZHI_LIST.join('')+'）', true); return; }
-    }
-    fetchAPI('/api/personal_day_manual', {
-      date: dateInput.value,
-      bazi: {
-        year_gz:  fields[0][1],
-        month_gz: fields[1][1],
-        day_gz:   fields[2][1],
-        time_gz:  fields[3][1],
-      }
-    }, function(res){
-      if(res.bazi){
-        res.bazi.mode = 'manual';
-        saveBazi(res.bazi);
-        showMsg(baziSaveMsg, '✓ 八字已保存（方式B）', false);
-        baziInputArea.classList.add('hidden');
-      }
-    });
-  });
 
   // ── 今天 ─────────────────────────────────────
   btnToday.addEventListener('click', function(){
