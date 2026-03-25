@@ -13,7 +13,8 @@
     .page-profile .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .page-profile .span-2{grid-column:1/-1;}
     .page-profile .mode-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-    .page-profile .mode-btn{appearance:none;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);color:var(--gold2);border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer;transition:.18s ease;}
+    .page-profile .mode-btn{appearance:none;border:1px solid rgba(255,213,122,.18);background:rgba(255,255,255,.03);color:var(--gold2);border-radius:999px;padding:10px 18px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease;}
+    .page-profile .mode-btn:hover{transform:translateY(-1px);}
     .page-profile .mode-btn.active{background:rgba(255,213,122,.14);border-color:rgba(255,213,122,.32);color:var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.18);}
     .page-profile .mode-panel{display:none;}
     .page-profile .mode-panel.active{display:block;}
