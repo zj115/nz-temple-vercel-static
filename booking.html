@@ -414,12 +414,17 @@
         </div>
 
         <form id="formChaodu" class="booking-grid">
-          <div>
+          <div class="span-2">
             <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Deceased Name <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">亡灵姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-en">Deceased Name(s) <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">故者姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
             </label>
-            <input id="cd_deceased_name" type="text" class="form-control" required />
+            <textarea id="cd_deceased_name" rows="3" class="form-control" required
+              placeholder="张三、李四、王五（多位请用逗号、顿号或换行分隔）"></textarea>
+            <div style="font-size:12px;opacity:.6;margin-top:5px;">
+              <span class="lang-zh">多位故者请用逗号、顿号、分号或换行分隔</span>
+              <span class="lang-en">Multiple names: separate by comma, semicolon, or new line</span>
+            </div>
           </div>
           <div>
             <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
@@ -516,12 +521,17 @@
         </div>
 
         <form id="formYuanbao" class="booking-grid">
-          <div>
+          <div class="span-2">
             <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Deceased Name <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">亡灵姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-en">Deceased Name(s) <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-zh">故者姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
             </label>
-            <input id="yb_deceased_name" type="text" class="form-control" required />
+            <textarea id="yb_deceased_name" rows="3" class="form-control" required
+              placeholder="张三、李四、王五（多位请用逗号、顿号或换行分隔）"></textarea>
+            <div style="font-size:12px;opacity:.6;margin-top:5px;">
+              <span class="lang-zh">多位故者请用逗号、顿号、分号或换行分隔</span>
+              <span class="lang-en">Multiple names: separate by comma, semicolon, or new line</span>
+            </div>
           </div>
           <div>
             <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
@@ -740,7 +750,7 @@
       服务类型: params.service_type,
       预约人姓名: params.contact_name,
       联系方式: params.contact_info,
-      亡灵姓名: params.deceased_name,
+      故者姓名: params.deceased_name,
       去世时间: params.deceased_time || '（未填写）',
       地址: params.address,
       数量: params.quantity || '（不适用）',
