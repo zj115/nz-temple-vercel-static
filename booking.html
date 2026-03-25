@@ -414,31 +414,16 @@
         </div>
 
         <form id="formChaodu" class="booking-grid">
+          <!-- ── 多位故者信息块 ── -->
           <div class="span-2">
-            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Deceased Name(s) <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">故者姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
-            </label>
-            <textarea id="cd_deceased_name" rows="3" class="form-control" required
-              placeholder="张三、李四、王五（多位请用逗号、顿号或换行分隔）"></textarea>
-            <div style="font-size:12px;opacity:.6;margin-top:5px;">
-              <span class="lang-zh">多位故者请用逗号、顿号、分号或换行分隔</span>
-              <span class="lang-en">Multiple names: separate by comma, semicolon, or new line</span>
+            <div style="font-weight:700;opacity:.9;margin-bottom:10px;">
+              <span class="lang-zh">故者信息 <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-en">Deceased Information <span style="color:rgba(220,90,90,.8);">*</span></span>
             </div>
-          </div>
-          <div>
-            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Date of Passing <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">去世时间 <span style="color:rgba(220,90,90,.8);">*</span></span>
-            </label>
-            <input id="cd_deceased_time" type="date" class="form-control" required />
-          </div>
-          <div class="span-2">
-            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Cemetery or Family Address <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">墓地地址或亲属地址 <span style="color:rgba(220,90,90,.8);">*</span></span>
-            </label>
-            <input id="cd_address" type="text" class="form-control" required />
+            <div id="cd_deceased_list"></div>
+            <button type="button" id="cd_add_btn" class="btn btn-ghost" style="margin-top:10px;width:100%;">
+              <span class="lang-zh">＋ 添加故者</span><span class="lang-en">＋ Add Deceased</span>
+            </button>
           </div>
           <div>
             <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
@@ -521,31 +506,16 @@
         </div>
 
         <form id="formYuanbao" class="booking-grid">
+          <!-- ── 多位故者信息块 ── -->
           <div class="span-2">
-            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Deceased Name(s) <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">故者姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>
-            </label>
-            <textarea id="yb_deceased_name" rows="3" class="form-control" required
-              placeholder="张三、李四、王五（多位请用逗号、顿号或换行分隔）"></textarea>
-            <div style="font-size:12px;opacity:.6;margin-top:5px;">
-              <span class="lang-zh">多位故者请用逗号、顿号、分号或换行分隔</span>
-              <span class="lang-en">Multiple names: separate by comma, semicolon, or new line</span>
+            <div style="font-weight:700;opacity:.9;margin-bottom:10px;">
+              <span class="lang-zh">故者信息 <span style="color:rgba(220,90,90,.8);">*</span></span>
+              <span class="lang-en">Deceased Information <span style="color:rgba(220,90,90,.8);">*</span></span>
             </div>
-          </div>
-          <div>
-            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Date of Passing <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">去世时间 <span style="color:rgba(220,90,90,.8);">*</span></span>
-            </label>
-            <input id="yb_deceased_time" type="date" class="form-control" required />
-          </div>
-          <div class="span-2">
-            <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
-              <span class="lang-en">Cemetery or Family Address <span style="color:rgba(220,90,90,.8);">*</span></span>
-              <span class="lang-zh">墓地地址或亲属地址 <span style="color:rgba(220,90,90,.8);">*</span></span>
-            </label>
-            <input id="yb_address" type="text" class="form-control" required />
+            <div id="yb_deceased_list"></div>
+            <button type="button" id="yb_add_btn" class="btn btn-ghost" style="margin-top:10px;width:100%;">
+              <span class="lang-zh">＋ 添加故者</span><span class="lang-en">＋ Add Deceased</span>
+            </button>
           </div>
           <div>
             <label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">
@@ -750,9 +720,7 @@
       服务类型: params.service_type,
       预约人姓名: params.contact_name,
       联系方式: params.contact_info,
-      故者姓名: params.deceased_name,
-      去世时间: params.deceased_time || '（未填写）',
-      地址: params.address,
+      故者信息: params.deceased_name,
       数量: params.quantity || '（不适用）',
       备注: params.notes || '（无）',
       提交时间: new Date().toLocaleString('zh-CN')
@@ -766,12 +734,119 @@
     }).catch(function(e){ console.warn('[邮件通知] Formspree 请求错误：', e.message); });
   }
 
+  // ─── Multi-deceased dynamic blocks ──────────────────────
+  var CD_ADDR_LABEL_ZH = '墓地地址';
+  var CD_ADDR_LABEL_EN = 'Cemetery Address';
+  var YB_ADDR_LABEL_ZH = '目的地址';
+  var YB_ADDR_LABEL_EN = 'Destination Address';
+
+  function createDeceasedBlock(prefix, idx, addrLabelZh, addrLabelEn) {
+    var wrap = document.createElement('div');
+    wrap.className = 'deceased-entry';
+    wrap.setAttribute('data-idx', idx);
+    wrap.innerHTML =
+      '<div class="deceased-entry-header">' +
+        '<span class="deceased-entry-title">' +
+          '<span class="lang-zh">故者 ' + idx + '</span>' +
+          '<span class="lang-en">Deceased #' + idx + '</span>' +
+        '</span>' +
+        '<button type="button" class="deceased-entry-del">' +
+          '<span class="lang-zh">删除</span><span class="lang-en">Remove</span>' +
+        '</button>' +
+      '</div>' +
+      '<div class="deceased-entry-grid">' +
+        '<div>' +
+          '<label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">' +
+            '<span class="lang-zh">故者姓名 <span style="color:rgba(220,90,90,.8);">*</span></span>' +
+            '<span class="lang-en">Deceased Name <span style="color:rgba(220,90,90,.8);">*</span></span>' +
+          '</label>' +
+          '<input name="' + prefix + '_name" type="text" class="form-control" required />' +
+        '</div>' +
+        '<div>' +
+          '<label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">' +
+            '<span class="lang-zh">去世时间</span>' +
+            '<span class="lang-en">Date of Passing</span>' +
+          '</label>' +
+          '<input name="' + prefix + '_time" type="date" class="form-control" />' +
+        '</div>' +
+        '<div class="span-2">' +
+          '<label style="font-weight:700;opacity:.9;display:block;margin-bottom:6px;">' +
+            '<span class="lang-zh">' + addrLabelZh + '</span>' +
+            '<span class="lang-en">' + addrLabelEn + '</span>' +
+          '</label>' +
+          '<input name="' + prefix + '_addr" type="text" class="form-control" />' +
+        '</div>' +
+      '</div>';
+
+    var delBtn = wrap.querySelector('.deceased-entry-del');
+    delBtn.addEventListener('click', function() {
+      var list = wrap.parentNode;
+      if (list.querySelectorAll('.deceased-entry').length <= 1) return;
+      list.removeChild(wrap);
+      refreshDeceasedNumbers(list);
+    });
+    return wrap;
+  }
+
+  function refreshDeceasedNumbers(listEl) {
+    var entries = listEl.querySelectorAll('.deceased-entry');
+    entries.forEach(function(entry, i) {
+      var zhSpan = entry.querySelector('.deceased-entry-title .lang-zh');
+      var enSpan = entry.querySelector('.deceased-entry-title .lang-en');
+      if (zhSpan) zhSpan.textContent = '故者 ' + (i + 1);
+      if (enSpan) enSpan.textContent = 'Deceased #' + (i + 1);
+    });
+  }
+
+  function collectDeceasedList(listEl, prefix) {
+    var entries = listEl.querySelectorAll('.deceased-entry');
+    var persons = [];
+    entries.forEach(function(entry) {
+      var nameEl = entry.querySelector('input[name="' + prefix + '_name"]');
+      var timeEl = entry.querySelector('input[name="' + prefix + '_time"]');
+      var addrEl = entry.querySelector('input[name="' + prefix + '_addr"]');
+      persons.push({
+        name: nameEl ? nameEl.value.trim() : '',
+        time: timeEl ? timeEl.value : '',
+        addr: addrEl ? addrEl.value.trim() : ''
+      });
+    });
+    return persons;
+  }
+
+  function formatDeceasedForEmail(persons, addrLabelZh) {
+    return persons.map(function(p, i) {
+      return '故者 ' + (i + 1) + '：\n' +
+        '  故者姓名：' + (p.name || '（未填写）') + '\n' +
+        '  去世时间：' + (p.time || '（未填写）') + '\n' +
+        '  ' + addrLabelZh + '：' + (p.addr || '（未填写）');
+    }).join('\n\n');
+  }
+
+  function formatDeceasedSummary(persons) {
+    return persons.map(function(p) { return p.name || '（未填写）'; }).join('、');
+  }
+
+  // Init first block for each form
+  var cdList = document.getElementById('cd_deceased_list');
+  var ybList = document.getElementById('yb_deceased_list');
+  cdList.appendChild(createDeceasedBlock('cd', 1, CD_ADDR_LABEL_ZH, CD_ADDR_LABEL_EN));
+  ybList.appendChild(createDeceasedBlock('yb', 1, YB_ADDR_LABEL_ZH, YB_ADDR_LABEL_EN));
+
+  document.getElementById('cd_add_btn').addEventListener('click', function() {
+    var count = cdList.querySelectorAll('.deceased-entry').length + 1;
+    cdList.appendChild(createDeceasedBlock('cd', count, CD_ADDR_LABEL_ZH, CD_ADDR_LABEL_EN));
+  });
+  document.getElementById('yb_add_btn').addEventListener('click', function() {
+    var count = ybList.querySelectorAll('.deceased-entry').length + 1;
+    ybList.appendChild(createDeceasedBlock('yb', count, YB_ADDR_LABEL_ZH, YB_ADDR_LABEL_EN));
+  });
+
   // ─── Submit 超度牌位 ─────────────────────────────────────
   document.getElementById('formChaodu').addEventListener('submit', async function(e) {
     e.preventDefault();
     var session = await getSession();
     if (!session) {
-      var l = root.getAttribute('data-lang') === 'en' ? 'en' : 'zh';
       showMsg('msgChaodu',
         'Login required', '请先登录',
         'Please log in before submitting a booking.', '请先登录再提交预约。',
@@ -784,16 +859,20 @@
     var btn = document.getElementById('btnChaodu');
     if (btn) btn.disabled = true;
 
+    var persons = collectDeceasedList(cdList, 'cd');
+    var deceasedSummary = formatDeceasedSummary(persons);
+    var deceasedEmail  = formatDeceasedForEmail(persons, CD_ADDR_LABEL_ZH);
+
     var data = {
       user_id:       session.user.id,
       service_type:  'chaodu',
-      deceased_name: document.getElementById('cd_deceased_name').value.trim(),
-      deceased_time: document.getElementById('cd_deceased_time').value || null,
-      address:       document.getElementById('cd_address').value.trim(),
+      deceased_name: deceasedSummary,
+      deceased_time: persons[0] ? (persons[0].time || null) : null,
+      address:       persons[0] ? (persons[0].addr || null) : null,
       contact_name:  document.getElementById('cd_contact_name').value.trim(),
       contact_info:  document.getElementById('cd_contact_info').value.trim(),
       notes:         document.getElementById('cd_notes').value.trim() || null,
-      quantity:      1
+      quantity:      persons.length
     };
 
     var res = await _sb.from('ritual_bookings').insert(data).select().single();
@@ -810,12 +889,10 @@
     }
 
     sendAdminEmail({
-      service_type:  '超度牌位',
+      service_type:  '超度牌位（共 ' + persons.length + ' 位）',
       contact_name:  data.contact_name,
       contact_info:  data.contact_info,
-      deceased_name: data.deceased_name,
-      deceased_time: data.deceased_time,
-      address:       data.address,
+      deceased_name: deceasedEmail,
       notes:         data.notes
     });
 
@@ -825,6 +902,8 @@
       '超度牌位预约已收到。请将善款转账至公益账户，并将截图发送至邮箱，我们会尽快确认。'
     );
     document.getElementById('formChaodu').reset();
+    cdList.innerHTML = '';
+    cdList.appendChild(createDeceasedBlock('cd', 1, CD_ADDR_LABEL_ZH, CD_ADDR_LABEL_EN));
     prefillFromProfile();
   });
 
@@ -856,12 +935,16 @@
     var btn = document.getElementById('btnYuanbao');
     if (btn) btn.disabled = true;
 
+    var persons = collectDeceasedList(ybList, 'yb');
+    var deceasedSummary = formatDeceasedSummary(persons);
+    var deceasedEmail  = formatDeceasedForEmail(persons, YB_ADDR_LABEL_ZH);
+
     var data = {
       user_id:       session.user.id,
       service_type:  'yuanbao',
-      deceased_name: document.getElementById('yb_deceased_name').value.trim(),
-      deceased_time: document.getElementById('yb_deceased_time').value || null,
-      address:       document.getElementById('yb_address').value.trim(),
+      deceased_name: deceasedSummary,
+      deceased_time: persons[0] ? (persons[0].time || null) : null,
+      address:       persons[0] ? (persons[0].addr || null) : null,
       quantity:      qty,
       contact_name:  document.getElementById('yb_contact_name').value.trim(),
       contact_info:  document.getElementById('yb_contact_info').value.trim(),
@@ -886,12 +969,10 @@
     if (btn) btn.disabled = false;
 
     sendAdminEmail({
-      service_type:  '代化元宝 ×' + qty,
+      service_type:  '代化元宝 ×' + qty + '（共 ' + persons.length + ' 位故者）',
       contact_name:  data.contact_name,
       contact_info:  data.contact_info,
-      deceased_name: data.deceased_name,
-      deceased_time: data.deceased_time,
-      address:       data.address,
+      deceased_name: deceasedEmail,
       quantity:      qty,
       notes:         data.notes
     });
@@ -902,6 +983,8 @@
       '代化元宝预约（' + qty + '个）已收到。请将善款转账至公益账户，并将截图发至邮箱，我们会尽快确认。'
     );
     document.getElementById('formYuanbao').reset();
+    ybList.innerHTML = '';
+    ybList.appendChild(createDeceasedBlock('yb', 1, YB_ADDR_LABEL_ZH, YB_ADDR_LABEL_EN));
     prefillFromProfile();
     loadInventory();
   });
