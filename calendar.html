@@ -1480,13 +1480,13 @@
     // 宜 圆
     circle(yiCX, R4Y+22, 14, GREEN_C);
     txt('宜', yiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
-    // 宜内容竖排（每条取前4字，多条依次往下）
+    // 宜内容竖排（每条取前2字，多条依次往下）
     var yiCurY=R4Y+46;
     var yiLineH=18;
     var yiMaxY=R4Y+R4H-10;
     yi.forEach(function(t){
       if(yiCurY >= yiMaxY) return;
-      var clean = t.replace(/[·・\s]/g,'').slice(0,5);
+      var clean = t.replace(/[·・\s]/g,'').slice(0,3);
       vtxt(clean, yiCX, yiCurY, '13px "PingFang SC",serif', DARK, yiLineH);
       yiCurY += clean.length * yiLineH + 6;
     });
@@ -1500,7 +1500,7 @@
     var jiMaxY=R4Y+R4H-10;
     ji.forEach(function(t){
       if(jiCurY >= jiMaxY) return;
-      var clean = t.replace(/[·・\s]/g,'').slice(0,5);
+      var clean = t.replace(/[·・\s]/g,'').slice(0,3);
       vtxt(clean, jiCX, jiCurY, '13px "PingFang SC",serif', DARK, jiLineH);
       jiCurY += clean.length * jiLineH + 6;
     });

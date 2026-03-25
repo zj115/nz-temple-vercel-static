@@ -610,39 +610,58 @@ def build_personal(day_data, bazi):
     if ji_list:
         action_points.append(f"今日忌需谨慎对待：{'、'.join(ji_list[:2])}。")
 
-    # ── 个性化宜忌 ────────────────────────────
+    # ── 个性化宜忌（短词，与黄历格式一致）────────────
     SHISHEN_YI = {
-        "正财":"理财·收款·签约",   "偏财":"投资·开拓·进财",
-        "正官":"办公务·见长辈·规范流程", "七杀":"主动出击·处理竞争",
-        "正印":"学习·求助·修复关系",  "偏印":"研究·独处·创作",
-        "食神":"表达·展示·社交输出",  "伤官":"创新·突破·艺术",
-        "比肩":"合作·同侪互助·坚守立场","劫财":"主动争取·独立行动",
+        "正财": ["理财","收款","签约"],
+        "偏财": ["进财","开拓","投资"],
+        "正官": ["公务","谒贵","立券"],
+        "七杀": ["出行","竞争","求职"],
+        "正印": ["学习","求医","修缮"],
+        "偏印": ["研究","静修","独处"],
+        "食神": ["祈福","社交","纳采"],
+        "伤官": ["创作","出行","开光"],
+        "比肩": ["合作","会友","立券"],
+        "劫财": ["求财","动土","开市"],
     }
     SHISHEN_JI = {
-        "正财":"冲动消费·乱花钱", "偏财":"投机冒险·不实之财",
-        "正官":"违规·拖延公务",  "七杀":"逃避压力·拖延决策",
-        "正印":"急于求成·忽视细节","偏印":"过度封闭·拒绝沟通",
-        "食神":"压抑情绪·不表达", "伤官":"破坏规则·言语冒失",
-        "比肩":"争执·固执己见",  "劫财":"冲动消费·意气用事",
+        "正财": ["冲动","借贷","赌博"],
+        "偏财": ["投机","冒险","散财"],
+        "正官": ["违规","词讼","争执"],
+        "七杀": ["动土","破土","冲煞"],
+        "正印": ["嫁娶","出行","安葬"],
+        "偏印": ["开市","纳财","会亲"],
+        "食神": ["争执","动土","安葬"],
+        "伤官": ["嫁娶","词讼","作灶"],
+        "比肩": ["争执","嫁娶","借贷"],
+        "劫财": ["嫁娶","安葬","开仓"],
     }
+    REL_YI = {"合": "合谋", "三合": "聚众", "三会": "纳财", "同气": "守成"}
+    REL_JI = {"冲": "出行", "刑": "词讼", "害": "嫁娶", "破": "动土"}
     personal_yi_set = []
     personal_ji_set = []
     for r in zhi_relations_list:
-        if r["rel"] in support_rels:
-            personal_yi_set.append(f"借{r['level']}之力·{r['user_label']}顺势")
-        elif r["rel"] in conflict_rels:
-            personal_ji_set.append(f"慎防{r['level']}冲{r['user_label']}·避免强行推进")
+        if r["level"] == "流日":
+            if r["rel"] in support_rels and r["rel"] in REL_YI:
+                w = REL_YI[r["rel"]]
+                if w not in personal_yi_set:
+                    personal_yi_set.append(w)
+            elif r["rel"] in conflict_rels and r["rel"] in REL_JI:
+                w = REL_JI[r["rel"]]
+                if w not in personal_ji_set:
+                    personal_ji_set.append(w)
     day_flow_tg = next((t for t in flow_ten_gods if t["level"] == "流日"), None)
     if day_flow_tg and day_flow_tg["ten_god"]:
         tg = day_flow_tg["ten_god"]
-        if tg in SHISHEN_YI:
-            personal_yi_set.append(SHISHEN_YI[tg])
-        if tg in SHISHEN_JI:
-            personal_ji_set.append(SHISHEN_JI[tg])
+        for w in SHISHEN_YI.get(tg, []):
+            if w not in personal_yi_set:
+                personal_yi_set.append(w)
+        for w in SHISHEN_JI.get(tg, []):
+            if w not in personal_ji_set:
+                personal_ji_set.append(w)
     if not personal_yi_set:
-        personal_yi_set = list(yi_list[:4])
+        personal_yi_set = list(yi_list[:6])
     if not personal_ji_set:
-        personal_ji_set = list(ji_list[:3])
+        personal_ji_set = list(ji_list[:4])
 
     return {
         "day_master":       day_master,
@@ -669,19 +688,21 @@ def build_personal_hour_table(basic_table, bazi):
     CONFLICT_RELS = {"冲","刑","害","破"}
 
     HOUR_TG_YI = {
-        "正财":"收款·谈钱", "偏财":"主动开拓",
-        "正官":"办正事·见领导", "七杀":"主动出击",
-        "正印":"学习·休养", "偏印":"独处·研究",
-        "食神":"社交·表达", "伤官":"创新·突破",
-        "比肩":"合作·商议", "劫财":"独立行动",
+        "正财":"收款", "偏财":"进财",
+        "正官":"公务", "七杀":"出行",
+        "正印":"学习", "偏印":"静修",
+        "食神":"祈福", "伤官":"创作",
+        "比肩":"合作", "劫财":"求财",
     }
     HOUR_TG_JI = {
-        "正财":"冲动花钱", "偏财":"冒险投机",
-        "正官":"违规拖延", "七杀":"逃避压力",
-        "正印":"急于求成", "偏印":"过度封闭",
-        "食神":"压抑情绪", "伤官":"言语冒失",
-        "比肩":"争执固执", "劫财":"意气用事",
+        "正财":"借贷", "偏财":"投机",
+        "正官":"词讼", "七杀":"冲煞",
+        "正印":"嫁娶", "偏印":"开市",
+        "食神":"争执", "伤官":"嫁娶",
+        "比肩":"争执", "劫财":"安葬",
     }
+    HOUR_REL_YI = {"合": "合谋", "三合": "纳财", "三会": "聚众", "同气": "守成"}
+    HOUR_REL_JI = {"冲": "出行", "刑": "词讼", "害": "嫁娶", "破": "动土"}
 
     result = []
     for hour in basic_table:
@@ -708,14 +729,23 @@ def build_personal_hour_table(basic_table, bazi):
 
         hour_yi = []
         hour_ji = []
-        if rel_types & SUPPORT_RELS:
-            hour_yi.append("借合力·顺势推进")
-        if rel_types & CONFLICT_RELS:
-            hour_ji.append("慎防冲刑·避免强推")
+        for r_type in rel_types:
+            if r_type in SUPPORT_RELS and r_type in HOUR_REL_YI:
+                w = HOUR_REL_YI[r_type]
+                if w not in hour_yi:
+                    hour_yi.append(w)
+            elif r_type in CONFLICT_RELS and r_type in HOUR_REL_JI:
+                w = HOUR_REL_JI[r_type]
+                if w not in hour_ji:
+                    hour_ji.append(w)
         if tg in HOUR_TG_YI:
-            hour_yi.append(HOUR_TG_YI[tg])
+            w = HOUR_TG_YI[tg]
+            if w not in hour_yi:
+                hour_yi.append(w)
         if tg in HOUR_TG_JI:
-            hour_ji.append(HOUR_TG_JI[tg])
+            w = HOUR_TG_JI[tg]
+            if w not in hour_ji:
+                hour_ji.append(w)
         if not hour_yi:
             hour_yi = list(hour.get("yi", []))
         if not hour_ji:
