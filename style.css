@@ -433,7 +433,11 @@ textarea.form-control{resize:vertical;}
   border-left-color:var(--gold2);
   color:var(--gold);
 }
-.sidebar-nav a .nav-icon{font-size:18px;width:24px;text-align:center;}
+.sidebar-nav a .nav-icon{display:none;}
+
+.sidebar-nav a{
+  gap:0;
+}
 
 .sidebar-foot{
   padding:16px 20px;
@@ -448,6 +452,8 @@ textarea.form-control{resize:vertical;}
   .topbar-actions .btn-lang{display:flex;}
   /* hide login btn in topbar on mobile (it's in sidebar) */
   .topbar-actions .btn-ghost:not(.btn-lang){display:none;}
+  /* hide brand logo on mobile — hamburger already shows the logo */
+  .brand-logo-wrap{display:none;}
 }
 
 /* ===== Global Mobile Improvements ===== */
