@@ -936,7 +936,7 @@
       currentBazi         = res.bazi;
       currentPersonal     = res.personal;
       currentPersonalHours= res.personal_hour_table;
-      renderAlmanac(res.day);
+      renderAlmanac(res.day, res.personal);
       renderHours(res.basic_hour_table, null);
       renderPillars(res.bazi);
       renderPersonal(res.personal);
@@ -982,7 +982,7 @@
   }
 
   // ── 渲染：黄历 ───────────────────────────────
-  function renderAlmanac(day){
+  function renderAlmanac(day, personal){
     document.getElementById('alDate').textContent   = day.date + ' ' + day.weekday;
     document.getElementById('alLunar').textContent  = '农历 ' + day.lunar_ymd;
     document.getElementById('alGz').textContent     = '年：'+ day.year_gz + '  月：' + day.month_gz + '  日：' + day.day_gz;
@@ -1005,8 +1005,9 @@
     }).join('');
     document.getElementById('alDir').innerHTML = dirHtml;
 
-    var yi = day.yi || [];
-    var ji = day.ji || [];
+    // 个性化模式替换宜/忌
+    var yi = (personal && personal.personal_yi && personal.personal_yi.length) ? personal.personal_yi : (day.yi || []);
+    var ji = (personal && personal.personal_ji && personal.personal_ji.length) ? personal.personal_ji : (day.ji || []);
     document.getElementById('alYi').innerHTML = yi.map(function(t){ return '<span class="tag tag-green">'+t+'</span>'; }).join('');
     document.getElementById('alJi').innerHTML = ji.map(function(t){ return '<span class="tag tag-red">'+t+'</span>'; }).join('');
     document.getElementById('alPengzu').textContent = day.pengzu || '—';
@@ -1059,13 +1060,17 @@
   function renderPersonalHours(table){
     var html = (table||[]).map(function(h){
       var p = h.personal || {};
-      var luckCls = h.luck === '凶' ? 'ji' : h.luck === '吉' ? 'ji-ok' : 'ping';
-      var cardCls = h.luck === '凶' ? 'luck-ji' : '';
+      // 使用个性化吉凶，无则沿用基础
+      var luck = p.luck || h.luck;
+      var luckCls = luck === '凶' ? 'ji' : luck === '吉' ? 'ji-ok' : 'ping';
+      var cardCls = luck === '凶' ? 'luck-ji' : '';
       var persHtml = '';
       if(p.relations && p.relations.length > 0){
         persHtml = '<div class="hour-rel">'+p.relations.map(function(r){ return r.with+'<b>'+r.type+'</b>'; }).join(' · ')+'</div>';
       }
       var pTgHtml = p.ten_god ? '<span class="tag tag-gold" style="font-size:10px;">'+p.ten_god+'</span>' : '';
+      var pYi = (p.yi && p.yi.length) ? p.yi : [];
+      var pJi = (p.ji && p.ji.length) ? p.ji : [];
       return '<div class="hour-card '+cardCls+'">' +
         '<div class="hour-range">'+h.range+'</div>' +
         '<div style="display:flex;align-items:baseline;gap:8px;">' +
@@ -1073,11 +1078,12 @@
           '<div class="hour-gz">'+h.gz+'</div>' +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">' +
-          '<span class="hour-luck '+luckCls+'">'+h.luck+'</span>' +
+          '<span class="hour-luck '+luckCls+'">'+luck+'</span>' +
           pTgHtml +
         '</div>' +
-        (p.relations && p.relations.length > 0 ? persHtml : '<div style="font-size:11px;opacity:.5;margin-top:4px;">无关系</div>') +
-        '<div style="margin-top:4px;font-size:11px;opacity:.7;">宜：'+(h.yi||[]).join(' ')+'</div>' +
+        (persHtml || '<div style="font-size:11px;opacity:.5;margin-top:4px;">无命局关系</div>') +
+        (pYi.length ? '<div style="margin-top:4px;font-size:11px;opacity:.85;color:var(--green);">宜：'+pYi.join(' · ')+'</div>' : '') +
+        (pJi.length ? '<div style="font-size:11px;opacity:.85;color:var(--red);">忌：'+pJi.join(' · ')+'</div>' : '') +
       '</div>';
     }).join('');
     document.getElementById('persHourGrid').innerHTML = html;

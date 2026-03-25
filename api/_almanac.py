@@ -436,6 +436,52 @@ def build_personal(day_data, bazi):
         action_points.append(f"今日宜优先考虑：{'、'.join(yi_list[:3])}。")
     if ji_list:
         action_points.append(f"今日忌需谨慎对待：{'、'.join(ji_list[:2])}。")
+    # ── 个性化宜/忌 ───────────────────────────────
+    # 基于命局关系 + 十神推导，替换通用黄历宜忌
+    support_rels = {"合","三合","三会","同气","天干合"}
+    conflict_rels = {"冲","刑","害","破","天干冲"}
+
+    # 十神 → 宜/忌 映射
+    SHISHEN_YI = {
+        "正财": "理财·收款·签约",  "偏财": "投资·开拓·进财",
+        "正官": "办公务·见长辈·规范流程", "七杀": "主动出击·处理竞争",
+        "正印": "学习·求助·修复关系",  "偏印": "研究·独处·创作",
+        "食神": "表达·展示·社交输出",  "伤官": "创新·突破·艺术",
+        "比肩": "合作·同侪互助·坚守立场", "劫财": "主动争取·独立行动",
+    }
+    SHISHEN_JI = {
+        "正财": "冲动消费·乱花钱", "偏财": "投机冒险·不实之财",
+        "正官": "违规·拖延公务",  "七杀": "逃避压力·拖延决策",
+        "正印": "急于求成·忽视细节", "偏印": "过度封闭·拒绝沟通",
+        "食神": "压抑情绪·不表达", "伤官": "破坏规则·言语冒失",
+        "比肩": "争执·固执己见",  "劫财": "冲动消费·意气用事",
+    }
+
+    personal_yi_set = []
+    personal_ji_set = []
+
+    # 从流日/月的地支关系提取宜忌
+    for r in zhi_relations_list:
+        if r["rel"] in support_rels:
+            personal_yi_set.append(f"借{r['level']}之力·{r['user_label']}顺势")
+        elif r["rel"] in conflict_rels:
+            personal_ji_set.append(f"慎防{r['level']}冲{r['user_label']}·避免强行推进")
+
+    # 从十神提取宜忌（取流日天干对日主的十神）
+    day_flow_tg = next((t for t in flow_ten_gods if t["level"] == "流日"), None)
+    if day_flow_tg and day_flow_tg["ten_god"]:
+        tg = day_flow_tg["ten_god"]
+        if tg in SHISHEN_YI:
+            personal_yi_set.append(SHISHEN_YI[tg])
+        if tg in SHISHEN_JI:
+            personal_ji_set.append(SHISHEN_JI[tg])
+
+    # 若完全无关系，降级到通用黄历宜忌
+    if not personal_yi_set:
+        personal_yi_set = list(yi_list[:4])
+    if not personal_ji_set:
+        personal_ji_set = list(ji_list[:3])
+
     return {
         "day_master": day_master,
         "gan_relations": gan_relations_list,
@@ -444,18 +490,41 @@ def build_personal(day_data, bazi):
         "flow_ten_gods": flow_ten_gods,
         "summary": summary_base,
         "action_points": action_points,
+        "personal_yi": personal_yi_set,
+        "personal_ji": personal_ji_set,
     }
 
 def build_personal_hour_table(basic_table, bazi):
     day_master = bazi["day"]["gan"]
     user_zhis  = [bazi["year"]["zhi"], bazi["month"]["zhi"], bazi["day"]["zhi"], bazi["time"]["zhi"]]
     user_labels= ["年支","月支","日支","时支"]
+
+    SUPPORT_RELS  = {"合","三合","三会","同气"}
+    CONFLICT_RELS = {"冲","刑","害","破"}
+
+    # 十神对时辰的宜忌建议
+    HOUR_TG_YI = {
+        "正财":"收款·谈钱", "偏财":"主动开拓",
+        "正官":"办正事·见领导", "七杀":"主动出击",
+        "正印":"学习·休养", "偏印":"独处·研究",
+        "食神":"社交·表达", "伤官":"创新·突破",
+        "比肩":"合作·商议", "劫财":"独立行动",
+    }
+    HOUR_TG_JI = {
+        "正财":"冲动花钱", "偏财":"冒险投机",
+        "正官":"违规拖延", "七杀":"逃避压力",
+        "正印":"急于求成", "偏印":"过度封闭",
+        "食神":"压抑情绪", "伤官":"言语冒失",
+        "比肩":"争执固执", "劫财":"意气用事",
+    }
+
     result = []
     for hour in basic_table:
         gz  = hour["gz"]
         zhi = hour["zhi"]
         hg  = gz[0] if gz else ""
         tg = ten_god(day_master, hg) if (day_master and hg) else ""
+
         rels = []
         for uz, ul in zip(user_zhis, user_labels):
             if not uz: continue
@@ -463,7 +532,40 @@ def build_personal_hour_table(basic_table, bazi):
             if rs and rs != ["无"]:
                 for r in rs:
                     rels.append({"with": ul, "type": r})
+
+        # 个性化吉凶：有合→吉，有冲/刑→凶，否则跟随基础
+        rel_types = {r["type"] for r in rels}
+        if rel_types & SUPPORT_RELS and not (rel_types & CONFLICT_RELS):
+            personal_luck = "吉"
+        elif rel_types & CONFLICT_RELS:
+            personal_luck = "凶"
+        else:
+            personal_luck = hour["luck"]  # 无个性化关系时沿用基础
+
+        # 个性化时辰宜忌
+        hour_yi = []
+        hour_ji = []
+        if rel_types & SUPPORT_RELS:
+            hour_yi.append("借合力·顺势推进")
+        if rel_types & CONFLICT_RELS:
+            hour_ji.append("慎防冲刑·避免强推")
+        if tg in HOUR_TG_YI:
+            hour_yi.append(HOUR_TG_YI[tg])
+        if tg in HOUR_TG_JI:
+            hour_ji.append(HOUR_TG_JI[tg])
+        # 无个性化宜忌时降级到基础时辰宜忌
+        if not hour_yi:
+            hour_yi = list(hour.get("yi", []))
+        if not hour_ji:
+            hour_ji = list(hour.get("ji", []))
+
         h = dict(hour)
-        h["personal"] = {"ten_god": tg, "relations": rels}
+        h["personal"] = {
+            "ten_god": tg,
+            "relations": rels,
+            "luck": personal_luck,
+            "yi": hour_yi,
+            "ji": hour_ji,
+        }
         result.append(h)
     return result
