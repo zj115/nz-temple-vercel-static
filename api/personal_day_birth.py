@@ -1,19 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Vercel Serverless Function: POST /api/personal_day_birth
-"""
-import sys
-import os
-import json
+"""Vercel Serverless Function: POST /api/personal_day_birth"""
+import sys, os, json, datetime as dt
 from http.server import BaseHTTPRequestHandler
 
 sys.path.insert(0, os.path.dirname(__file__))
-
-from _almanac import (
-    _lunar_to_day_dict, build_basic_hour_table,
-    calc_bazi_from_birth, build_personal, build_personal_hour_table
-)
-from lunar_python import Solar
+from _almanac import compute_bazi_from_birth, compute_day, build_personal_analysis
 
 
 class handler(BaseHTTPRequestHandler):
@@ -32,34 +23,28 @@ class handler(BaseHTTPRequestHandler):
         except Exception:
             body = {}
 
-        date_str  = body.get('date', '')
-        birth_iso = body.get('birth', '')
-
+        birth_s = body.get('birth', '')
+        date_s  = body.get('date', '')
+        if not birth_s or not date_s:
+            self._json({'error': "Need 'birth' and 'date'"}, 400)
+            return
         try:
-            yy, mm, dd = [int(x) for x in date_str.split('-')]
-            solar = Solar.fromYmd(yy, mm, dd)
-            lunar = solar.getLunar()
+            birth_dt = dt.datetime.fromisoformat(birth_s.replace("T", " "))
+            date_    = dt.date.fromisoformat(date_s)
         except Exception as e:
             self._json({'error': f'日期解析失败: {e}'}, 400)
             return
-
         try:
-            bazi = calc_bazi_from_birth(birth_iso)
+            bazi     = compute_bazi_from_birth(birth_dt)
         except Exception as e:
             self._json({'error': f'八字计算失败: {e}'}, 400)
             return
 
-        day_data    = _lunar_to_day_dict(lunar)
-        basic_table = build_basic_hour_table(lunar, day_data['day_gz'])
-        personal    = build_personal(day_data, bazi)
-        pers_table  = build_personal_hour_table(basic_table, bazi)
-
-        self._json({
-            'bazi': bazi, 'day': day_data,
-            'basic_hour_table': basic_table,
-            'personal': personal,
-            'personal_hour_table': pers_table,
-        })
+        day      = compute_day(date_)
+        personal = build_personal_analysis(day, bazi)
+        self._json({'bazi': bazi, 'day': day, 'personal': personal,
+                    'basic_hour_table':    personal['basic_hour_table'],
+                    'personal_hour_table': personal['personal_hour_table']})
 
     def _json(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')

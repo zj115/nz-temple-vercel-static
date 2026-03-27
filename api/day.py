@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Vercel Serverless Function: POST /api/day
-"""
-import sys
-import os
-import json
+"""Vercel Serverless Function: POST /api/day"""
+import sys, os, json, datetime as dt
 from http.server import BaseHTTPRequestHandler
 
 sys.path.insert(0, os.path.dirname(__file__))
-
-from _almanac import _lunar_to_day_dict, build_basic_hour_table
-from lunar_python import Solar
+from _almanac import compute_day, compute_basic_hour_table
 
 
 class handler(BaseHTTPRequestHandler):
@@ -31,15 +25,13 @@ class handler(BaseHTTPRequestHandler):
 
         date_str = body.get('date', '')
         try:
-            yy, mm, dd = [int(x) for x in date_str.split('-')]
-            solar = Solar.fromYmd(yy, mm, dd)
-            lunar = solar.getLunar()
+            date_ = dt.date.fromisoformat(date_str)
         except Exception as e:
             self._json({'error': str(e)}, 400)
             return
 
-        day_data   = _lunar_to_day_dict(lunar)
-        hour_table = build_basic_hour_table(lunar, day_data['day_gz'])
+        day_data   = compute_day(date_)
+        hour_table = compute_basic_hour_table(date_)
         self._json({'day': day_data, 'basic_hour_table': hour_table})
 
     def _json(self, data, status=200):

@@ -2,6 +2,10 @@
   "version": 2,
   "routes": [
     {
+      "src": "/api/bazi",
+      "dest": "/api/bazi.py"
+    },
+    {
       "src": "/api/day",
       "dest": "/api/day.py"
     },

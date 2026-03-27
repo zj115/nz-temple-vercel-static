@@ -552,54 +552,62 @@
   }
 
   // ── Bazi helpers ─────────────────────────────────────────
-  function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  function getHourBranch(hour) {
-    var b = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    return b[Math.floor(((Number(hour) + 1) % 24) / 2)];
+  /**
+   * 将 datetime-local 值（如 "1990-05-15T14:30"）按用户选择的时区
+   * 解析为 {year, month, day, hour, minute}，不依赖浏览器本地时区。
+   *
+   * NZ 时区：NZST = UTC+12，NZDT = UTC+13（每年9月~4月夏令时）
+   *   用 Intl.DateTimeFormat 把 UTC 时间转为新西兰当地时间，
+   *   但这里更简单：用户输入的已经是当地时间字面值，我们直接读取数字，
+   *   不做任何时区偏移——因为 datetime-local 就是"用户眼中的当地时间"。
+   *   只需确保把这组数字传给后端（后端按照字面值计算八字）。
+   *
+   * 注意：datetime-local 的值格式为 "YYYY-MM-DDTHH:mm"，不含时区，
+   *       就是用户肉眼看到的时间。只要用户正确输入了出生当地时间，
+   *       我们直接用这组数字即可，时区信息只是记录备注。
+   */
+  function parseDatetimeLocal(dtStr) {
+    // dtStr = "1990-05-15T14:30" or "1990-05-15T14:30:00"
+    var t = dtStr || '';
+    var datePart = t.split('T')[0] || '';
+    var timePart = t.split('T')[1] || '00:00';
+    var dp = datePart.split('-');
+    var tp = timePart.split(':');
+    return {
+      year:   parseInt(dp[0], 10) || 0,
+      month:  parseInt(dp[1], 10) || 1,
+      day:    parseInt(dp[2], 10) || 1,
+      hour:   parseInt(tp[0], 10) || 0,
+      minute: parseInt(tp[1], 10) || 0
+    };
   }
 
-  function getGZ(idx) {
-    var g = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-    var z = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    return g[idx % 10] + z[idx % 12];
-  }
-
-  function approxYearGZ(date) {
-    var idx = (date.getFullYear() - 4) % 60;
-    return getGZ(idx < 0 ? idx + 60 : idx);
-  }
-
-  function approxMonthGZ(date) {
-    var mBranches = ['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'];
-    var m = date.getMonth() + 1;
-    var yg = approxYearGZ(date).charAt(0);
-    var sg = {'甲':'丙','己':'丙','乙':'戊','庚':'戊','丙':'庚','辛':'庚','丁':'壬','壬':'壬'}[yg] || '甲';
-    var gl = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-    return gl[(gl.indexOf(sg) + m - 1) % 10] + mBranches[m - 1];
-  }
-
-  function approxDayGZ(date) {
-    var base = Date.UTC(1984, 1, 2);
-    var now  = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-    var days = Math.floor((now - base) / 86400000);
-    var idx  = days % 60;
-    return getGZ(idx < 0 ? idx + 60 : idx);
-  }
-
-  function approxHourGZ(dayGZ, hour) {
-    var gl = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-    var dg = dayGZ.charAt(0);
-    var sg = {'甲':'甲','己':'甲','乙':'丙','庚':'丙','丙':'戊','辛':'戊','丁':'庚','壬':'庚','戊':'壬','癸':'壬'}[dg] || '甲';
-    var zi = Math.floor(((Number(hour) + 1) % 24) / 2);
-    var zhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][zi];
-    return gl[(gl.indexOf(sg) + zi) % 10] + zhi;
-  }
-
-  function formatLunarLocal(date) {
+  /**
+   * 调用后端 /api/bazi 计算八字。
+   * 返回 Promise<{year_gz, month_gz, day_gz, hour_gz,
+   *               lunar_ymd, shichen, shichen_range, solar, ...} | null>
+   */
+  async function fetchBazi(dtStr, timezone) {
+    var p = parseDatetimeLocal(dtStr);
+    if (!p.year) return null;
     try {
-      return new Intl.DateTimeFormat('zh-Hans-u-ca-chinese', { year:'numeric', month:'numeric', day:'numeric' }).format(date);
-    } catch(e) { return '—'; }
+      var resp = await fetch('/api/bazi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: p.year, month: p.month, day: p.day,
+          hour: p.hour, minute: p.minute,
+          timezone: timezone || 'local'
+        })
+      });
+      var data = await resp.json();
+      if (data.error) { console.warn('[bazi]', data.error); return null; }
+      return data;
+    } catch (e) {
+      console.error('[bazi fetch]', e);
+      return null;
+    }
   }
 
   // ── setMode ──────────────────────────────────────────────
@@ -632,7 +640,15 @@
   // ── fill bazi form from profile ──────────────────────────
   function fillBaziForm(p) {
     if (p.birth_gender)   document.getElementById('gender').value = p.birth_gender;
-    if (p.birth_datetime) document.getElementById('birthDateTime').value = p.birth_datetime.slice(0,16);
+    if (p.birth_datetime) {
+      // 兼容旧版 ISO UTC 格式 ("2024-01-15T06:00:00.000Z") 和新版字面量格式 ("1990-05-15T14:30")
+      var dtVal = p.birth_datetime;
+      if (dtVal.indexOf('Z') !== -1 || (dtVal.indexOf('+') !== -1 && dtVal.length > 19)) {
+        // 旧版 ISO UTC：转为本地时间字符串（不理想，但保持向后兼容）
+        dtVal = dtVal.slice(0, 16);
+      }
+      document.getElementById('birthDateTime').value = dtVal.slice(0, 16);
+    }
     if (p.birth_timezone) document.getElementById('timezone').value = p.birth_timezone;
     if (p.birth_place)    document.getElementById('birthPlace').value = p.birth_place;
     if (p.bazi_year)  document.getElementById('pillarYear').value  = p.bazi_year;
@@ -667,16 +683,22 @@
         showMsg('baziToast', l==='en'?'Please fill in all required fields.':'请填写所有必填项。');
         return;
       }
-      updates.birth_datetime = dt ? new Date(dt).toISOString() : null;
-      // also calc pillars
-      var dtParts = dt.split('T');
-      var dp = (dtParts[0]||'').split('-');
-      var tp = (dtParts[1]||'00:00').split(':');
-      var d  = new Date(Number(dp[0]), Number(dp[1])-1, Number(dp[2]), Number(tp[0]), Number(tp[1]));
-      updates.bazi_year  = approxYearGZ(d);
-      updates.bazi_month = approxMonthGZ(d);
-      updates.bazi_day   = approxDayGZ(d);
-      updates.bazi_hour  = approxHourGZ(updates.bazi_day, Number(tp[0]));
+      // 存储字面时间字符串，不转 UTC（避免时区错位）
+      updates.birth_datetime = dt;  // "YYYY-MM-DDTHH:mm"
+      var btn = document.getElementById('btnBaziSave');
+      if (btn) btn.disabled = true;
+      showMsg('baziToast', l==='en'?'Calculating Bazi…':'正在计算八字…');
+      // 调用后端正确计算八字
+      var bazi = await fetchBazi(dt, updates.birth_timezone);
+      if (btn) btn.disabled = false;
+      if (!bazi) {
+        showMsg('baziToast', l==='en'?'Bazi calculation failed. Check the date/time.':'八字计算失败，请检查出生时间。');
+        return;
+      }
+      updates.bazi_year  = bazi.year_gz;
+      updates.bazi_month = bazi.month_gz;
+      updates.bazi_day   = bazi.day_gz;
+      updates.bazi_hour  = bazi.hour_gz;
     } else {
       updates.bazi_year  = document.getElementById('pillarYear').value;
       updates.bazi_month = document.getElementById('pillarMonth').value;
@@ -687,13 +709,12 @@
         return;
       }
     }
-    var btn = document.getElementById('btnBaziSave');
-    if (btn) btn.disabled = true;
+    var btn2 = document.getElementById('btnBaziSave');
+    if (btn2) btn2.disabled = true;
     var r = await updateMyProfile(updates);
-    if (btn) btn.disabled = false;
+    if (btn2) btn2.disabled = false;
     if (r.error) { showMsg('baziToast', r.error.message); return; }
     showMsg('baziToast', l==='en'?'Bazi saved.':'八字资料已保存。');
-    // 刷新摘要显示
     var updated = await getMyProfile();
     if (updated) renderBaziSummary(updated);
   }
@@ -708,9 +729,15 @@
     var l = getLang();
     var gMap = { male: l==='en'?'Male':'男', female: l==='en'?'Female':'女', other: l==='en'?'Other':'其他' };
     document.getElementById('sumGender').textContent   = gMap[p.birth_gender] || p.birth_gender || '—';
-    document.getElementById('sumBirth').textContent    = p.birth_datetime ? formatDateTime(p.birth_datetime) : '—';
+    // 显示字面量出生时间（不做时区转换）
+    var dtDisplay = '—';
+    if (p.birth_datetime) {
+      dtDisplay = p.birth_datetime.slice(0, 16).replace('T', ' ');
+    }
+    document.getElementById('sumBirth').textContent    = dtDisplay;
     document.getElementById('sumPlace').textContent    = p.birth_place    || '—';
-    document.getElementById('sumTimezone').textContent = p.birth_timezone || '—';
+    var tzMap = { NZ: l==='en'?'New Zealand':'新西兰', CN: l==='en'?'China (UTC+8)':'中国（UTC+8）', local: l==='en'?'Device timezone':'设备时区' };
+    document.getElementById('sumTimezone').textContent = tzMap[p.birth_timezone] || p.birth_timezone || '—';
     document.getElementById('sumYear').textContent     = p.bazi_year   || '—';
     document.getElementById('sumMonth').textContent    = p.bazi_month  || '—';
     document.getElementById('sumDay').textContent      = p.bazi_day    || '—';
@@ -718,7 +745,7 @@
   }
 
   // ── calc bazi ────────────────────────────────────────────
-  function calcBazi() {
+  async function calcBazi() {
     var l    = getLang();
     var mode = root.getAttribute('data-input-mode') || 'solar';
     var gender = document.getElementById('gender').value;
@@ -740,16 +767,32 @@
     } else {
       var dt = document.getElementById('birthDateTime').value;
       if (!dt) { showMsg('baziToast', l==='en'?'Please enter birth datetime.':'请输入出生时间。'); return; }
-      var dp = (dt.split('T')[0]||'').split('-');
-      var tp = (dt.split('T')[1]||'00:00').split(':');
-      var d  = new Date(Number(dp[0]), Number(dp[1])-1, Number(dp[2]), Number(tp[0]), Number(tp[1]));
-      yGz = approxYearGZ(d);
-      mGz = approxMonthGZ(d);
-      dGz = approxDayGZ(d);
-      hGz = approxHourGZ(dGz, Number(tp[0]));
-      document.getElementById('outSolar').textContent = dp[0]+'-'+pad2(Number(dp[1]))+'-'+pad2(Number(dp[2]))+' '+pad2(Number(tp[0]))+':'+pad2(Number(tp[1]));
-      document.getElementById('outLunar').textContent = formatLunarLocal(d);
-      document.getElementById('outHour').textContent  = pad2(Number(tp[0]))+':'+pad2(Number(tp[1]))+' ('+getHourBranch(Number(tp[0]))+')';
+      var tz = document.getElementById('timezone').value;
+
+      // 显示计算中状态
+      var btn = document.getElementById('btnBaziCalc');
+      if (btn) { btn.disabled = true; btn.textContent = l==='en'?'Calculating…':'计算中…'; }
+
+      var bazi = await fetchBazi(dt, tz);
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = l==='en'?'<span class="lang-en">Generate</span><span class="lang-zh">生成</span>':'<span class="lang-en">Generate</span><span class="lang-zh">生成</span>';
+      }
+
+      if (!bazi) {
+        showMsg('baziToast', l==='en'?'Bazi calculation failed. Check the date/time.':'八字计算失败，请检查出生时间。');
+        return;
+      }
+
+      yGz = bazi.year_gz;
+      mGz = bazi.month_gz;
+      dGz = bazi.day_gz;
+      hGz = bazi.hour_gz;
+
+      document.getElementById('outSolar').textContent = bazi.solar || dt.replace('T', ' ');
+      document.getElementById('outLunar').textContent = bazi.lunar_ymd || '—';
+      document.getElementById('outHour').textContent  = bazi.shichen + ' (' + (bazi.shichen_range || '') + ')';
     }
     document.getElementById('gzYear').textContent  = yGz;
     document.getElementById('gzMonth').textContent = mGz;

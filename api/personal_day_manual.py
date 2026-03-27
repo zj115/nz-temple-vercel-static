@@ -1,20 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Vercel Serverless Function: POST /api/personal_day_manual
-"""
-import sys
-import os
-import json
+"""Vercel Serverless Function: POST /api/personal_day_manual"""
+import sys, os, json, datetime as dt
 from http.server import BaseHTTPRequestHandler
 
 sys.path.insert(0, os.path.dirname(__file__))
-
-from _almanac import (
-    _lunar_to_day_dict, build_basic_hour_table,
-    build_bazi_manual, build_personal, build_personal_hour_table,
-    GAN, ZHI
-)
-from lunar_python import Solar
+from _almanac import compute_bazi_from_manual, compute_day, build_personal_analysis
 
 
 class handler(BaseHTTPRequestHandler):
@@ -33,45 +23,26 @@ class handler(BaseHTTPRequestHandler):
         except Exception:
             body = {}
 
-        date_str = body.get('date', '')
-        bazi_raw = body.get('bazi', {})
-
+        manual = body.get('bazi') or {}
+        date_s = body.get('date', '')
+        if not manual or not date_s:
+            self._json({'error': "Need 'bazi' and 'date'"}, 400)
+            return
         try:
-            yy, mm, dd = [int(x) for x in date_str.split('-')]
-            solar = Solar.fromYmd(yy, mm, dd)
-            lunar = solar.getLunar()
+            bazi  = compute_bazi_from_manual(manual)
+            date_ = dt.date.fromisoformat(date_s)
+        except ValueError as ve:
+            self._json({'error': str(ve)}, 400)
+            return
         except Exception as e:
-            self._json({'error': f'日期解析失败: {e}'}, 400)
+            self._json({'error': f'参数解析失败: {e}'}, 400)
             return
 
-        for k in ['year_gz', 'month_gz', 'day_gz', 'time_gz']:
-            gz = bazi_raw.get(k, '')
-            if len(gz) != 2:
-                self._json({'error': f'{k} 必须是2个字（天干+地支），当前：{gz}'}, 400)
-                return
-            if gz[0] not in GAN:
-                self._json({'error': f'{k} 第一个字必须是天干，当前：{gz[0]}'}, 400)
-                return
-            if gz[1] not in ZHI:
-                self._json({'error': f'{k} 第二个字必须是地支，当前：{gz[1]}'}, 400)
-                return
-
-        bazi = build_bazi_manual(
-            bazi_raw['year_gz'], bazi_raw['month_gz'],
-            bazi_raw['day_gz'],  bazi_raw['time_gz'],
-        )
-
-        day_data    = _lunar_to_day_dict(lunar)
-        basic_table = build_basic_hour_table(lunar, day_data['day_gz'])
-        personal    = build_personal(day_data, bazi)
-        pers_table  = build_personal_hour_table(basic_table, bazi)
-
-        self._json({
-            'bazi': bazi, 'day': day_data,
-            'basic_hour_table': basic_table,
-            'personal': personal,
-            'personal_hour_table': pers_table,
-        })
+        day      = compute_day(date_)
+        personal = build_personal_analysis(day, bazi)
+        self._json({'bazi': bazi, 'day': day, 'personal': personal,
+                    'basic_hour_table':    personal['basic_hour_table'],
+                    'personal_hour_table': personal['personal_hour_table']})
 
     def _json(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')
