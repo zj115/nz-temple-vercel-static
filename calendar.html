@@ -1049,52 +1049,86 @@
     }).join('');
     document.getElementById('actionList').innerHTML = actHtml || '<div style="opacity:.6;">暂无建议</div>';
 
+    // 流年/月/日 干支展示 — 从 details.flow 读取
+    var flowData = (p.details && p.details.flow) || {};
     var flowLevels = [
-      {level:'流年', gz: ''},
-      {level:'流月', gz: ''},
-      {level:'流日', gz: ''},
+      {level:'流年', data: flowData.liunian},
+      {level:'流月', data: flowData.liuyue},
+      {level:'流日', data: flowData.liuri},
     ];
-    var ftg = p.flow_ten_gods || [];
-    ftg.forEach(function(f){
-      flowLevels.forEach(function(fl){ if(fl.level === f.level){ fl.gz = f.flow_gz; fl.tg = f.ten_god; fl.kw = f.keyword; } });
-    });
     var flowHtml = flowLevels.map(function(f){
+      var gz = (f.data && f.data.gz) || '—';
       return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.02);">' +
         '<div class="label-sm">'+f.level+'</div>' +
-        '<div style="font-size:20px;font-weight:900;color:var(--gold);margin:4px 0;">'+( f.gz||'—')+'</div>' +
-        (f.tg ? '<span class="tag tag-gold" style="font-size:11px;">'+f.tg+'</span>' : '') +
-        (f.kw ? '<div style="font-size:11px;opacity:.65;margin-top:4px;">'+f.kw+'</div>' : '') +
+        '<div style="font-size:20px;font-weight:900;color:var(--gold);margin:4px 0;">'+gz+'</div>' +
       '</div>';
     }).join('');
     document.getElementById('flowGrid').innerHTML = flowHtml;
 
-    var ganHtml = (p.gan_relations||[]).map(function(r){
+    // 天干关系 — 从 details.stem 读取
+    var REL_DESC = {
+      '冲': '冲表示外部刺激、移动、变化与对立增强，适合预留缓冲与备选方案，不宜急推硬压。',
+      '合': '合表示牵引、协商、绑定与整合，适合沟通、对接、合作，但也要防止拖带与牵制。',
+      '害': '害偏向暗耗、误会、不对称摩擦，宜提前澄清信息，避免口舌与模糊承诺。',
+      '破': '破偏向结构性破口、节奏被打断与计划走样，关键事项应留冗余。',
+      '刑': '刑偏向规则压力、约束、内耗或情绪紧张，宜按流程办事，避免强行顶撞。',
+      '三合': '三合表示聚势成局，利于整合资源、形成共识与推进联合事项。',
+      '三会': '三会表示同一气势汇聚，利于顺势推进长期主线与系统性工作。',
+      '同气': '同气表示同频共振，利于延续与复盘，但也要避免因惯性而迟滞。',
+    };
+    var LEVEL_MAP = {'流年天干':'流年','流月天干':'流月','流日天干':'流日'};
+    var stemDetails = (p.details && p.details.stem) || [];
+    var ganRows = [];
+    stemDetails.forEach(function(s){
+      var level = LEVEL_MAP[s.label] || s.label;
+      (s.relations||[]).forEach(function(r){
+        ganRows.push({level:level, flow_gan:s.gan, ten_god:s.ten_god, rel:r.type, user_label:r.with, element:r.element});
+      });
+    });
+    var ganHtml = ganRows.map(function(r){
+      var relCls = (['冲','刑','害','破'].indexOf(r.rel) >= 0) ? 'tag-red' : 'tag-blue';
+      var desc = REL_DESC[r.rel] || '';
       return '<div class="rel-item">' +
-        '<div class="rel-title">'+r.level+'天干 '+r.flow_gan+' '+'<span class="tag tag-blue">'+r.rel+'</span>'+'你的'+r.user_label+' '+r.user_gan +
+        '<div class="rel-title">'+r.level+'天干 '+r.flow_gan+' <span class="tag '+relCls+'">'+r.rel+'</span> 你的'+r.user_label +
         (r.ten_god ? ' · 十神：<span class="tag tag-gold">'+r.ten_god+'</span>' : '') + '</div>' +
-        '<div class="rel-desc">'+r.desc+'</div>' +
+        (desc ? '<div class="rel-desc">'+desc+'</div>' : '') +
       '</div>';
     }).join('');
     document.getElementById('ganRelList').innerHTML = ganHtml || '<div style="opacity:.55;font-size:13px;">本日无明显天干关系</div>';
 
-    var zhiHtml = (p.zhi_relations||[]).map(function(r){
+    // 地支关系 — 从 details.branch 读取
+    var BRANCH_LEVEL_MAP = {'流年地支':'流年','流月地支':'流月','流日地支':'流日'};
+    var branchDetails = (p.details && p.details.branch) || [];
+    var zhiRows = [];
+    branchDetails.forEach(function(b){
+      var level = BRANCH_LEVEL_MAP[b.label] || b.label;
+      (b.relations||[]).forEach(function(r){
+        zhiRows.push({level:level, flow_zhi:b.zhi, rel:r.type, user_label:r.with, element:r.element});
+      });
+    });
+    var zhiHtml = zhiRows.map(function(r){
       var tagCls = (['冲','刑','害','破'].indexOf(r.rel) >= 0) ? 'tag-red' : 'tag-green';
+      var desc = REL_DESC[r.rel] || '';
       return '<div class="rel-item">' +
-        '<div class="rel-title">'+r.level+'地支 '+r.flow_zhi+' <span class="tag '+tagCls+'">'+r.rel+'</span>你的'+r.user_label+' '+r.user_zhi+'</div>' +
-        '<div class="rel-desc">'+r.desc+'</div>' +
+        '<div class="rel-title">'+r.level+'地支 '+r.flow_zhi+' <span class="tag '+tagCls+'">'+r.rel+'</span> 你的'+r.user_label +
+        (r.element ? '（'+r.element+'）' : '') + '</div>' +
+        (desc ? '<div class="rel-desc">'+desc+'</div>' : '') +
       '</div>';
     }).join('');
     document.getElementById('zhiRelList').innerHTML = zhiHtml || '<div style="opacity:.55;font-size:13px;">本日无明显地支关系</div>';
 
-    var cgHtml = (p.cang_gan_analysis||[]).map(function(c){
-      var cg_html = c.cang_gan.map(function(cg){
-        return '<span class="tag tag-gold" style="margin:2px;">'+cg.gan+'→'+cg.ten_god+'（'+cg.keyword+'）</span>';
+    // 藏干与十神 — 从 details.branch 的 hidden 读取
+    var cgHtml = branchDetails.map(function(b){
+      if(!b.hidden || b.hidden.length === 0) return '';
+      var level = BRANCH_LEVEL_MAP[b.label] || b.label;
+      var cg_html = b.hidden.map(function(cg){
+        return '<span class="tag tag-gold" style="margin:2px;">'+cg.gan+(cg.ten_god ? '→'+cg.ten_god : '')+'</span>';
       }).join('');
       return '<div class="rel-item">' +
-        '<div class="rel-title">'+c.level+' '+c.flow_gz+' 地支'+c.flow_zhi+'的藏干</div>' +
+        '<div class="rel-title">'+level+' 地支'+b.zhi+'的藏干</div>' +
         '<div style="margin-top:6px;">'+cg_html+'</div>' +
       '</div>';
-    }).join('');
+    }).filter(Boolean).join('');
     document.getElementById('cangGanList').innerHTML = cgHtml || '<div style="opacity:.55;font-size:13px;">无数据</div>';
   }
 
