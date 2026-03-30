@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>南半球版本 · Southern Edition — NZ Temple</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
+</head>
+<body>
+<div class="bg-ornament"></div>
+
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar panel -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <a class="sidebar-brand" href="index.html">
+      <img src="images/logo.jpg" alt="NZ Temple Logo"/>
+      <div class="sidebar-brand-text">
+        <span class="lang-zh">新西兰财神庙</span><span class="lang-en">NZ Temple</span>
+      </div>
+    </a>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span><span class="lang-zh">主页</span><span class="lang-en">Home</span></a>
+    <a href="calendar.html"><span class="nav-icon">📅</span><span class="lang-zh">财神黄历</span><span class="lang-en">Almanac</span></a>
+    <a href="southern.html" class="nav-active"><span class="nav-icon">🌏</span><span class="lang-zh">南半球</span><span class="lang-en">Southern</span></a>
+    <a href="courses.html"><span class="nav-icon">📖</span><span class="lang-zh">课程</span><span class="lang-en">Courses</span></a>
+    <a href="booking.html"><span class="nav-icon">🙏</span><span class="lang-zh">法事预约</span><span class="lang-en">Ritual Booking</span></a>
+    <a href="shop.html"><span class="nav-icon">🛍</span><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
+    <a href="profile.html"><span class="nav-icon">👤</span><span class="lang-zh">资料</span><span class="lang-en">Profile</span></a>
+    <a href="login.html" id="sidebarLoginLink"><span class="nav-icon">🔑</span><span class="lang-zh">登录</span><span class="lang-en">Login</span></a>
+  </nav>
+  <div class="sidebar-foot">
+    <button class="btn btn-ghost btn-lang" type="button" id="langToggleSidebar">
+      <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Top navigation -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="nav-hamburger" id="navHamburger" aria-label="Open menu">
+      <img src="images/logo.jpg" alt="Menu"/>
+    </button>
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo"/>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="calendar.html"><span class="lang-en">Almanac</span><span class="lang-zh">财神黄历</span></a>
+      <a href="southern.html" class="nav-active"><span class="lang-en">Southern</span><span class="lang-zh">南半球</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+      </button>
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+      var saved = localStorage.getItem(key);
+      root.setAttribute('data-lang', (saved === 'zh' || saved === 'en') ? saved : 'zh');
+      function setLang(next) {
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      }
+      var btn = document.getElementById('langToggle');
+      if (btn) btn.addEventListener('click', function(){ setLang(root.getAttribute('data-lang')==='zh'?'en':'zh'); });
+      var btnSb = document.getElementById('langToggleSidebar');
+      if (btnSb) btnSb.addEventListener('click', function(){ setLang(root.getAttribute('data-lang')==='zh'?'en':'zh'); });
+      var sidebar=document.getElementById('sidebar'), overlay=document.getElementById('sidebarOverlay'),
+          hamburger=document.getElementById('navHamburger'), closeBtn=document.getElementById('sidebarClose');
+      function openSidebar(){ sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+      function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+      if(hamburger) hamburger.addEventListener('click', openSidebar);
+      if(closeBtn)  closeBtn.addEventListener('click', closeSidebar);
+      if(overlay)   overlay.addEventListener('click', closeSidebar);
+    })();
+    renderNavAuthBtn();
+  </script>
+</header>
+
+<!-- =============================================
+     Main Content
+============================================== -->
+<main class="container">
+
+  <!-- ── 1. HERO ── -->
+  <section class="sp-hero">
+    <div class="sp-hero-badge">
+      <span>🌏</span>
+      <span class="lang-zh">南半球专属版本</span>
+      <span class="lang-en">Southern Hemisphere Edition</span>
+    </div>
+
+    <h1 class="sp-hero-title">
+      <span class="lang-zh">真正懂南半球的<br><em>华人财运平台</em></span>
+      <span class="lang-en">Wealth Guidance<br><em>Built for the South</em></span>
+    </h1>
+
+    <p class="sp-hero-desc">
+      <span class="lang-zh">我们不是把北半球内容直接翻译过来。方位、节气、季节能量、日常场景——每一项都针对新西兰与澳洲的地理与生活节奏，做了本地化深度校准。</span>
+      <span class="lang-en">We don't simply translate Northern Hemisphere content. Directions, solar terms, seasonal energy, and everyday scenarios are all deeply recalibrated for New Zealand and Australian life.</span>
+    </p>
+
+    <div class="sp-hero-ctas">
+      <a href="calendar.html" class="btn btn-gold btn-lg">
+        <span class="lang-zh">✦ 查看今日南半球黄历</span>
+        <span class="lang-en">✦ Today's Southern Almanac</span>
+      </a>
+      <a href="index.html#ai-advisor" class="btn btn-ghost btn-lg">
+        <span class="lang-zh">AI 财富问答</span>
+        <span class="lang-en">AI Wealth Advisor</span>
+      </a>
+    </div>
+
+    <div class="sp-hero-stats">
+      <div class="sp-stat-item">
+        <span class="sp-stat-value">2+</span>
+        <span class="sp-stat-label">
+          <span class="lang-zh">南半球国家覆盖</span>
+          <span class="lang-en">Countries Served</span>
+        </span>
+      </div>
+      <div class="sp-stat-item">
+        <span class="sp-stat-value">365</span>
+        <span class="sp-stat-label">
+          <span class="lang-zh">天天更新南半球黄历</span>
+          <span class="lang-en">Days / Year Updated</span>
+        </span>
+      </div>
+      <div class="sp-stat-item">
+        <span class="sp-stat-value">100%</span>
+        <span class="sp-stat-label">
+          <span class="lang-zh">本地化方位与节气</span>
+          <span class="lang-en">Localised Directions</span>
+        </span>
+      </div>
+      <div class="sp-stat-item">
+        <span class="sp-stat-value">双语</span>
+        <span class="sp-stat-label">
+          <span class="lang-zh">中英文同步支持</span>
+          <span class="lang-en">Bilingual Support</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="sp-divider"></div>
+
+  <!-- ── 2. WHY SECTION ── -->
+  <section class="sp-why">
+    <div class="sp-section-header">
+      <div class="sp-section-tag green">
+        <span>🧭</span>
+        <span class="lang-zh">为什么南半球需要不一样</span>
+        <span class="lang-en">Why the South is Different</span>
+      </div>
+      <div class="sp-section-title">
+        <span class="lang-zh">北半球逻辑在南半球行不通</span>
+        <span class="lang-en">Northern Hemisphere Logic Doesn't Work Here</span>
+      </div>
+      <div class="sp-section-sub">
+        <span class="lang-zh">传统黄历与风水大多以北半球地理为基准。对于生活在新西兰、澳洲的华人来说，直接套用往往会产生偏差。</span>
+        <span class="lang-en">Most traditional almanacs and feng shui systems are calibrated for Northern Hemisphere geography. Direct application to New Zealand or Australia creates real misalignments.</span>
+      </div>
+    </div>
+
+    <div class="sp-why-grid">
+      <div class="sp-why-card">
+        <span class="sp-why-icon">🧭</span>
+        <div class="sp-why-title">
+          <span class="lang-zh">方位基准不同</span>
+          <span class="lang-en">Direction Baselines Differ</span>
+        </div>
+        <div class="sp-why-desc">
+          <span class="lang-zh">南半球坐北朝南是背阳，而非北半球的迎阳格局。财神、喜神、福神的方位参数，需要针对南半球地理坐标重新推算。</span>
+          <span class="lang-en">In the Southern Hemisphere, facing north means facing away from the sun — the opposite of the Northern norm. Wealth God directions must be recalculated accordingly.</span>
+        </div>
+      </div>
+
+      <div class="sp-why-card">
+        <span class="sp-why-icon">🍂</span>
+        <div class="sp-why-title">
+          <span class="lang-zh">季节完全颠倒</span>
+          <span class="lang-en">Seasons Are Reversed</span>
+        </div>
+        <div class="sp-why-desc">
+          <span class="lang-zh">农历春节在南半球是盛夏，清明节在秋天，冬至在六月。节气与自然的关系需要对应南半球的真实节律。</span>
+          <span class="lang-en">Lunar New Year falls in midsummer, Qingming in autumn, Winter Solstice in June. Solar term guidance must reflect Southern Hemisphere reality.</span>
+        </div>
+      </div>
+
+      <div class="sp-why-card">
+        <span class="sp-why-icon">🌤</span>
+        <div class="sp-why-title">
+          <span class="lang-zh">五行能量分布不同</span>
+          <span class="lang-en">Five-Element Energy Flows Differently</span>
+        </div>
+        <div class="sp-why-desc">
+          <span class="lang-zh">南半球的地磁场、日照角度、风向，都与北半球存在系统性差异，直接影响风水格局和五行日常能量的分布逻辑。</span>
+          <span class="lang-en">The Southern Hemisphere's magnetic field, solar angles, and prevailing winds differ systematically — affecting feng shui patterns and the daily distribution of five-element energies.</span>
+        </div>
+      </div>
+
+      <div class="sp-why-card">
+        <span class="sp-why-icon">🏘</span>
+        <div class="sp-why-title">
+          <span class="lang-zh">生活场景不同</span>
+          <span class="lang-en">Different Everyday Context</span>
+        </div>
+        <div class="sp-why-desc">
+          <span class="lang-zh">新西兰、澳洲的华人有独特的生活与商业节奏。我们的内容以本地的工作、出行、社区生活为基础，而不是简单的文化翻译。</span>
+          <span class="lang-en">Chinese communities in NZ and Australia have their own rhythms of work, commute, and community life. Our guidance is built around that reality, not translated from elsewhere.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sp-divider"></div>
+
+  <!-- ── 3. FEATURES GRID ── -->
+  <section class="sp-features">
+    <div class="sp-section-header">
+      <div class="sp-section-tag gold">
+        <span>✦</span>
+        <span class="lang-zh">南半球版本核心功能</span>
+        <span class="lang-en">Southern Edition Features</span>
+      </div>
+      <div class="sp-section-title">
+        <span class="lang-zh">我们是怎么做本地化的</span>
+        <span class="lang-en">How We Localise</span>
+      </div>
+      <div class="sp-section-sub">
+        <span class="lang-zh">从方位到节气，从穿搭建议到每日宜忌，每个环节都经过南半球适配。</span>
+        <span class="lang-en">From directions to solar terms, outfit guidance to daily auspicious timing — every layer is Southern Hemisphere-adapted.</span>
+      </div>
+    </div>
+
+    <div class="sp-feat-grid">
+      <div class="sp-feat-card">
+        <div class="sp-feat-icon-wrap green">🧭</div>
+        <div class="sp-feat-title">
+          <span class="lang-zh">南半球方位系统</span>
+          <span class="lang-en">SH Direction System</span>
+        </div>
+        <div class="sp-feat-desc">
+          <span class="lang-zh">财神、喜神、福神方位，依据南纬地理逻辑重新计算，不套用北半球模板。</span>
+          <span class="lang-en">Wealth, Joy, and Blessing God directions recalculated for southern-latitude geography — no Northern templates applied.</span>
+        </div>
+        <span class="sp-feat-tag">
+          <span class="lang-zh">本地校准</span>
+          <span class="lang-en">Localised</span>
+        </span>
+      </div>
+
+      <div class="sp-feat-card">
+        <div class="sp-feat-icon-wrap green">🌿</div>
+        <div class="sp-feat-title">
+          <span class="lang-zh">本地节气与季节</span>
+          <span class="lang-en">Local Seasons & Terms</span>
+        </div>
+        <div class="sp-feat-desc">
+          <span class="lang-zh">黄历节气建议与新西兰/澳洲实际季节对应，夏至、冬至、清明等都按南半球日期真实展示。</span>
+          <span class="lang-en">Almanac guidance aligns with actual NZ/AU seasons — solstices, Qingming, and all solar terms displayed for Southern Hemisphere dates.</span>
+        </div>
+        <span class="sp-feat-tag">
+          <span class="lang-zh">本地校准</span>
+          <span class="lang-en">Localised</span>
+        </span>
+      </div>
+
+      <div class="sp-feat-card">
+        <div class="sp-feat-icon-wrap gold">👗</div>
+        <div class="sp-feat-title">
+          <span class="lang-zh">五行穿衣催财建议</span>
+          <span class="lang-en">Five-Element Outfit Guide</span>
+        </div>
+        <div class="sp-feat-desc">
+          <span class="lang-zh">结合南半球实际季节温度，提供当日最旺财色系、次吉色系与避色建议，让每天穿对颜色成为习惯。</span>
+          <span class="lang-en">Outfit color guidance integrates actual Southern Hemisphere seasons — so "wear gold for wealth" reflects summer, not a northern winter.</span>
+        </div>
+        <span class="sp-feat-tag">
+          <span class="lang-zh">每日更新</span>
+          <span class="lang-en">Daily</span>
+        </span>
+      </div>
+
+      <div class="sp-feat-card">
+        <div class="sp-feat-icon-wrap blue">🤖</div>
+        <div class="sp-feat-title">
+          <span class="lang-zh">AI 财富问答</span>
+          <span class="lang-en">AI Wealth Advisor</span>
+        </div>
+        <div class="sp-feat-desc">
+          <span class="lang-zh">结合南半球时间、方位、节气逻辑的智能财富顾问，回答你今日最关心的实际问题。</span>
+          <span class="lang-en">An AI wealth advisor that integrates Southern Hemisphere timing and feng shui logic to answer your most practical daily questions.</span>
+        </div>
+        <span class="sp-feat-tag">
+          <span class="lang-zh">每日可用</span>
+          <span class="lang-en">Daily</span>
+        </span>
+      </div>
+
+      <div class="sp-feat-card">
+        <div class="sp-feat-icon-wrap gold">📅</div>
+        <div class="sp-feat-title">
+          <span class="lang-zh">每日宜忌建议</span>
+          <span class="lang-en">Daily Do's & Don'ts</span>
+        </div>
+        <div class="sp-feat-desc">
+          <span class="lang-zh">今日适合做什么、不适合做什么，依据当地日期与五行能量生成，每天自动更新，无需手动查询。</span>
+          <span class="lang-en">Daily auspicious and inauspicious activities, generated from local date and five-element energy. Auto-updated, no manual lookup needed.</span>
+        </div>
+        <span class="sp-feat-tag">
+          <span class="lang-zh">自动更新</span>
+          <span class="lang-en">Auto</span>
+        </span>
+      </div>
+
+      <div class="sp-feat-card">
+        <div class="sp-feat-icon-wrap blue">🌐</div>
+        <div class="sp-feat-title">
+          <span class="lang-zh">中英双语全程支持</span>
+          <span class="lang-en">Full Bilingual Support</span>
+        </div>
+        <div class="sp-feat-desc">
+          <span class="lang-zh">所有内容提供中文与英文完整版本，支持随时切换，适合在新西兰和澳洲生活的双语华人用户。</span>
+          <span class="lang-en">All content available in full Chinese and English. Switch anytime — ideal for bilingual Chinese communities across NZ and Australia.</span>
+        </div>
+        <span class="sp-feat-tag">
+          <span class="lang-zh">中英双语</span>
+          <span class="lang-en">Bilingual</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="sp-divider"></div>
+
+  <!-- ── 4. COMPARE SECTION ── -->
+  <section class="sp-compare">
+    <div class="sp-section-header">
+      <div class="sp-section-tag green">
+        <span>⚖️</span>
+        <span class="lang-zh">与通用版本有何不同</span>
+        <span class="lang-en">How We Differ from Generic Guides</span>
+      </div>
+      <div class="sp-section-title">
+        <span class="lang-zh">通用版本 vs 南半球版本</span>
+        <span class="lang-en">Generic Version vs Southern Edition</span>
+      </div>
+      <div class="sp-section-sub">
+        <span class="lang-zh">差别不是外观，而是逻辑与贴合度。</span>
+        <span class="lang-en">The difference isn't cosmetic — it's about accuracy and relevance.</span>
+      </div>
+    </div>
+
+    <div class="sp-compare-card">
+      <div class="sp-compare-grid">
+        <!-- General column -->
+        <div>
+          <div class="sp-compare-col-title general">
+            <span class="lang-zh">通用版本（北半球默认）</span>
+            <span class="lang-en">Generic Version (Northern Default)</span>
+          </div>
+          <div class="sp-compare-items">
+            <div class="sp-compare-item general">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">方位以北半球地磁北为基准，南半球用户直接套用容易出现方向偏差</span>
+              <span class="lang-en">Directions calibrated for Northern Hemisphere magnetic north — misaligned for Southern users</span>
+            </div>
+            <div class="sp-compare-item general">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">节气建议按北半球季节逻辑，清明是春天、冬至在十二月</span>
+              <span class="lang-en">Solar terms follow Northern seasons — Qingming as spring, Winter Solstice in December</span>
+            </div>
+            <div class="sp-compare-item general">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">穿衣催财色的场景建议，默认北半球的季节温度（如冬日穿红）</span>
+              <span class="lang-en">Outfit advice assumes Northern seasons — e.g., "wear red in winter" doesn't match an NZ summer</span>
+            </div>
+            <div class="sp-compare-item general">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">生活场景以中国大陆或台湾为主要参照，与新西兰日常有明显落差</span>
+              <span class="lang-en">Life scenarios based on mainland China or Taiwan contexts, distant from New Zealand daily reality</span>
+            </div>
+            <div class="sp-compare-item general">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">仅中文界面，英文内容缺失或机器翻译质量差</span>
+              <span class="lang-en">Chinese-only interface, or English content is machine-translated and awkward</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VS divider -->
+        <div class="sp-compare-vs">
+          <div class="sp-vs-badge">VS</div>
+        </div>
+
+        <!-- Southern column -->
+        <div>
+          <div class="sp-compare-col-title southern">
+            <span class="lang-zh">南半球版本（本地化校准）</span>
+            <span class="lang-en">Southern Edition (Locally Calibrated)</span>
+          </div>
+          <div class="sp-compare-items">
+            <div class="sp-compare-item southern">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">财神方位参数针对南纬地理逻辑重新推算，更符合新西兰与澳洲实际</span>
+              <span class="lang-en">Wealth God directions recalculated for southern-latitude geography — accurate for NZ and AU</span>
+            </div>
+            <div class="sp-compare-item southern">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">节气建议对应南半球真实季节：清明在秋天，冬至在六月，春节在夏天</span>
+              <span class="lang-en">Solar terms mapped to Southern Hemisphere reality: Qingming in autumn, Winter Solstice in June</span>
+            </div>
+            <div class="sp-compare-item southern">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">穿衣催财建议结合南半球实际气候与温度，让旺财穿搭真正可执行</span>
+              <span class="lang-en">Outfit guidance integrates actual Southern Hemisphere weather — wealth dressing advice you can actually follow</span>
+            </div>
+            <div class="sp-compare-item southern">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">以新西兰华人的生活、工作、社区场景为基础，内容更贴近日常</span>
+              <span class="lang-en">Built around the actual lives, workplaces, and community contexts of Chinese in New Zealand</span>
+            </div>
+            <div class="sp-compare-item southern">
+              <span class="sp-compare-dot"></span>
+              <span class="lang-zh">完整中英双语，两种语言均为人工整理，质量一致</span>
+              <span class="lang-en">Full bilingual support — both languages are manually curated, not machine-translated</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sp-divider"></div>
+
+  <!-- ── 5. SCENES SECTION ── -->
+  <section class="sp-scenes">
+    <div class="sp-section-header">
+      <div class="sp-section-tag gold">
+        <span>🎯</span>
+        <span class="lang-zh">场景化使用建议</span>
+        <span class="lang-en">Practical Daily Scenarios</span>
+      </div>
+      <div class="sp-section-title">
+        <span class="lang-zh">南半球用户如何用好每日建议</span>
+        <span class="lang-en">How Southern Hemisphere Users Apply Daily Guidance</span>
+      </div>
+      <div class="sp-section-sub">
+        <span class="lang-zh">不是看完就算，而是真正落地到你的每一天。</span>
+        <span class="lang-en">Not just reading — actually applying it to your every day.</span>
+      </div>
+    </div>
+
+    <div class="sp-scenes-grid">
+      <div class="sp-scene-card">
+        <div class="sp-scene-emoji">🚗</div>
+        <div class="sp-scene-name">
+          <span class="lang-zh">出门上班 / 外出</span>
+          <span class="lang-en">Commute & Daily Outings</span>
+        </div>
+        <div class="sp-scene-tips">
+          <div class="sp-scene-tip">
+            <span class="lang-zh">出发前查今日吉时，选吉时段出门效率更高</span>
+            <span class="lang-en">Check lucky hours before leaving — schedule departures accordingly</span>
+          </div>
+          <div class="sp-scene-tip">
+            <span class="lang-zh">出门朝今日财神方位的方向走一段，积累每日财气</span>
+            <span class="lang-en">Walk briefly toward today's Wealth God direction to accumulate daily wealth energy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-scene-card">
+        <div class="sp-scene-emoji">💼</div>
+        <div class="sp-scene-name">
+          <span class="lang-zh">商务洽谈 / 见客户</span>
+          <span class="lang-en">Business Meetings</span>
+        </div>
+        <div class="sp-scene-tips">
+          <div class="sp-scene-tip">
+            <span class="lang-zh">选今日吉时约见，搭配旺财色系穿搭，气场加分</span>
+            <span class="lang-en">Schedule meetings during lucky hours, wear today's wealth colors for stronger presence</span>
+          </div>
+          <div class="sp-scene-tip">
+            <span class="lang-zh">查看今日宜忌，判断是否适合签约或推进重要决定</span>
+            <span class="lang-en">Check today's do's and don'ts before committing to contracts or key decisions</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-scene-card">
+        <div class="sp-scene-emoji">💰</div>
+        <div class="sp-scene-name">
+          <span class="lang-zh">投资 / 财务决策</span>
+          <span class="lang-en">Financial Decisions</span>
+        </div>
+        <div class="sp-scene-tips">
+          <div class="sp-scene-tip">
+            <span class="lang-zh">重大财务决定选宜"纳财"的日子，避开大额借贷忌日</span>
+            <span class="lang-en">Make major financial moves on days marked auspicious for wealth-gathering</span>
+          </div>
+          <div class="sp-scene-tip">
+            <span class="lang-zh">通过 AI 财富问答获取今日具体判断，有依据再行动</span>
+            <span class="lang-en">Use the AI Advisor for today's specific verdict before taking action</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-scene-card">
+        <div class="sp-scene-emoji">🎯</div>
+        <div class="sp-scene-name">
+          <span class="lang-zh">求职 / 面试</span>
+          <span class="lang-en">Job Search & Interviews</span>
+        </div>
+        <div class="sp-scene-tips">
+          <div class="sp-scene-tip">
+            <span class="lang-zh">面试当天穿今日旺财色系，提升气场与自信</span>
+            <span class="lang-en">Wear today's wealth color to boost confidence and positive energy</span>
+          </div>
+          <div class="sp-scene-tip">
+            <span class="lang-zh">在吉时送出简历或进行面试，顺应时运</span>
+            <span class="lang-en">Send your application or attend interviews during lucky hours</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-scene-card">
+        <div class="sp-scene-emoji">🙏</div>
+        <div class="sp-scene-name">
+          <span class="lang-zh">祈福 / 上香</span>
+          <span class="lang-en">Blessings & Offerings</span>
+        </div>
+        <div class="sp-scene-tips">
+          <div class="sp-scene-tip">
+            <span class="lang-zh">查看今日宜祈福，选择适合的时辰到财神庙上香</span>
+            <span class="lang-en">Check if today favors prayer, then visit during the best lucky hour</span>
+          </div>
+          <div class="sp-scene-tip">
+            <span class="lang-zh">线上 Zoom 法事可结合今日吉时安排，诚心最重要</span>
+            <span class="lang-en">Online Zoom rituals can be timed to today's lucky hours — sincerity matters most</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-scene-card">
+        <div class="sp-scene-emoji">🏡</div>
+        <div class="sp-scene-name">
+          <span class="lang-zh">家居 / 风水布置</span>
+          <span class="lang-en">Home & Feng Shui</span>
+        </div>
+        <div class="sp-scene-tips">
+          <div class="sp-scene-tip">
+            <span class="lang-zh">以南半球方位逻辑布置居家财位，避免套用北半球错误</span>
+            <span class="lang-en">Set up your wealth corner using Southern Hemisphere direction logic</span>
+          </div>
+          <div class="sp-scene-tip">
+            <span class="lang-zh">今日财神方位即为当日最佳活动区域，居家办公时优先选择</span>
+            <span class="lang-en">Today's Wealth God direction is your best daily activity zone — ideal for home offices</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sp-divider"></div>
+
+  <!-- ── 6. TRUST BAND ── -->
+  <section class="sp-trust">
+    <div class="sp-trust-band">
+      <div class="sp-trust-layout">
+        <!-- Left: text -->
+        <div>
+          <div class="sp-section-tag green" style="margin-bottom:16px;">
+            <span>🌏</span>
+            <span class="lang-zh">服务新西兰华人社区</span>
+            <span class="lang-en">Serving the NZ Chinese Community</span>
+          </div>
+          <div class="sp-section-title" style="text-align:left;margin-bottom:12px;">
+            <span class="lang-zh">立足新西兰<br>服务南半球华人</span>
+            <span class="lang-en">Based in New Zealand<br>Serving the Southern Hemisphere</span>
+          </div>
+          <div class="sp-section-sub" style="text-align:left;margin:0 0 24px;">
+            <span class="lang-zh">新西兰财神庙扎根本地，长期服务新西兰及澳洲华人社区。我们理解本地华人的文化背景、生活习惯与精神需求，提供真正贴近的服务。</span>
+            <span class="lang-en">NZ Temple is rooted in New Zealand, long-serving the Chinese communities of New Zealand and Australia. We understand the cultural background, lifestyle, and spiritual needs of local Chinese communities.</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span class="cov-tag">🇳🇿 <span class="lang-zh">新西兰</span><span class="lang-en">New Zealand</span></span>
+            <span class="cov-tag">🇦🇺 <span class="lang-zh">澳大利亚</span><span class="lang-en">Australia</span></span>
+            <span class="cov-tag">🌏 <span class="lang-zh">南半球华人</span><span class="lang-en">Southern Chinese</span></span>
+          </div>
+        </div>
+
+        <!-- Right: numbers -->
+        <div class="sp-trust-nums">
+          <div class="sp-trust-num-card">
+            <div class="sp-trust-num-value">🧭</div>
+            <div class="sp-trust-num-label">
+              <span class="lang-zh">方位本地化</span>
+              <span class="lang-en">Local Directions</span>
+            </div>
+          </div>
+          <div class="sp-trust-num-card">
+            <div class="sp-trust-num-value">📅</div>
+            <div class="sp-trust-num-label">
+              <span class="lang-zh">节气本地化</span>
+              <span class="lang-en">Local Seasons</span>
+            </div>
+          </div>
+          <div class="sp-trust-num-card">
+            <div class="sp-trust-num-value">🌐</div>
+            <div class="sp-trust-num-label">
+              <span class="lang-zh">中英双语</span>
+              <span class="lang-en">Bilingual</span>
+            </div>
+          </div>
+          <div class="sp-trust-num-card">
+            <div class="sp-trust-num-value">🤖</div>
+            <div class="sp-trust-num-label">
+              <span class="lang-zh">AI 智能问答</span>
+              <span class="lang-en">AI Advisor</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 7. CTA ── -->
+  <section class="sp-cta">
+    <div class="sp-cta-card">
+      <div style="position:relative;z-index:1;">
+        <div class="sp-hero-badge" style="margin:0 auto 20px;">
+          <span>✦</span>
+          <span class="lang-zh">开始你的南半球财运之旅</span>
+          <span class="lang-en">Begin Your Southern Fortune Journey</span>
+        </div>
+        <div class="sp-cta-title">
+          <span class="lang-zh">今天就开始，用对的方式<br>在南半球求财问运</span>
+          <span class="lang-en">Start today — seek wealth and fortune<br>the right way for the Southern Hemisphere</span>
+        </div>
+        <div class="sp-cta-desc">
+          <span class="lang-zh">查看今日南半球专属黄历建议、五行穿衣催财指引，或向 AI 财富顾问提问。</span>
+          <span class="lang-en">Check today's Southern Hemisphere almanac, get your five-element outfit guide, or ask the AI Wealth Advisor anything.</span>
+        </div>
+        <div class="sp-cta-btns">
+          <a href="calendar.html" class="btn btn-gold btn-lg">
+            <span class="lang-zh">✦ 查看今日南半球黄历</span>
+            <span class="lang-en">✦ Today's Southern Almanac</span>
+          </a>
+          <a href="index.html#outfit" class="btn btn-ghost btn-lg">
+            <span class="lang-zh">今日五行穿衣建议</span>
+            <span class="lang-en">Today's Outfit Guide</span>
+          </a>
+          <a href="booking.html" class="btn btn-ghost btn-lg">
+            <span class="lang-zh">预约法事</span>
+            <span class="lang-en">Book a Ritual</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer (minimal, consistent with other pages) -->
+<footer style="border-top:1px solid var(--line-dim);padding:24px 0;margin-top:0;">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div style="font-size:13px;color:var(--text-muted);">
+      <span class="lang-zh">© 2026 新西兰财神庙 · 狐仙姻缘堂</span>
+      <span class="lang-en">© 2026 NZ Temple · Fox Spirit Relationship Hall</span>
+    </div>
+    <div style="display:flex;gap:16px;font-size:13px;">
+      <a href="index.html" style="color:var(--text-muted);">
+        <span class="lang-zh">主页</span><span class="lang-en">Home</span>
+      </a>
+      <a href="calendar.html" style="color:var(--text-muted);">
+        <span class="lang-zh">黄历</span><span class="lang-en">Almanac</span>
+      </a>
+      <a href="booking.html" style="color:var(--text-muted);">
+        <span class="lang-zh">法事预约</span><span class="lang-en">Booking</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

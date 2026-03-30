@@ -156,6 +156,7 @@
   <nav class="sidebar-nav">
     <a href="index.html" class="nav-active"><span class="nav-icon">🏠</span><span class="lang-zh">主页</span><span class="lang-en">Home</span></a>
     <a href="calendar.html"><span class="nav-icon">📅</span><span class="lang-zh">财神黄历</span><span class="lang-en">Almanac</span></a>
+    <a href="southern.html"><span class="nav-icon">🌏</span><span class="lang-zh">南半球</span><span class="lang-en">Southern</span></a>
     <a href="courses.html"><span class="nav-icon">📖</span><span class="lang-zh">课程</span><span class="lang-en">Courses</span></a>
     <a href="booking.html"><span class="nav-icon">🙏</span><span class="lang-zh">法事预约</span><span class="lang-en">Ritual Booking</span></a>
     <a href="shop.html"><span class="nav-icon">🛍</span><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
@@ -191,6 +192,7 @@
     <nav class="navlinks" aria-label="Primary">
       <a href="index.html" class="nav-active"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
       <a href="calendar.html"><span class="lang-en">Almanac</span><span class="lang-zh">财神黄历</span></a>
+      <a href="southern.html"><span class="lang-en">Southern</span><span class="lang-zh">南半球</span></a>
       <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
@@ -233,13 +235,13 @@
 </header>
 
 <main class="container">
-  <section class="hero">
+  <section class="hero" style="padding:52px 0 44px;">
     <div>
-      <h1 class="hero-title">
+      <h1 class="hero-title" style="margin-bottom:20px;">
         <span class="lang-en">Wealth · Destiny · Daily Guidance</span>
         <span class="lang-zh">财富 · 命运 · 每日指引</span>
       </h1>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0;">
         <a class="btn btn-gold" href="calendar.html">
           <span class="lang-en">✦ Open Almanac Calendar</span>
           <span class="lang-zh">✦ 打开财神黄历</span>
@@ -255,26 +257,26 @@
       </div>
     </div>
 
-    <div class="glass-card">
-      <div style="font-weight:700;margin-bottom:10px;">
+    <div class="glass-card" style="padding:22px 24px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:14px;">
         <span class="lang-en">Today</span>
         <span class="lang-zh">今日</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,213,122,.14);">
-        <span style="opacity:.75;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,213,122,.10);">
+        <span style="opacity:.65;font-size:13px;">
           <span class="lang-en">Date</span>
           <span class="lang-zh">日期</span>
         </span>
-        <span id="todayText" style="color:var(--gold2);font-weight:700;"></span>
+        <span id="todayText" style="color:var(--gold2);font-weight:700;font-size:14px;"></span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0;">
-        <span style="opacity:.75;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-bottom:4px;">
+        <span style="opacity:.65;font-size:13px;">
           <span class="lang-en">Lucky Hours</span>
           <span class="lang-zh">吉时</span>
         </span>
-        <span id="luckyHoursText" style="color:var(--gold2);font-weight:700;"></span>
+        <span id="luckyHoursText" style="color:var(--gold2);font-weight:700;font-size:14px;"></span>
       </div>
-      <a class="btn btn-gold" style="margin-top:12px;width:100%;" href="calendar.html">
+      <a class="btn btn-gold" style="margin-top:14px;width:100%;" href="calendar.html">
         <span class="lang-en">Open Almanac Calendar ✦</span>
         <span class="lang-zh">打开财神黄历 ✦</span>
       </a>
@@ -282,7 +284,7 @@
   </section>
 
   <!-- Merit Board (Gongde) -->
-  <section id="merit" style="padding:8px 0 24px;">
+  <section id="merit" style="padding:0 0 32px;">
     <div class="merit-board glass-card" style="padding:0;">
       <div class="merit-board-inner">
         <div class="merit-board-title">
@@ -300,8 +302,8 @@
   </section>
 
   <!-- Daily Almanac (Huangli) - centered, auto-updated by date -->
-  <section id="almanac" style="padding:8px 0 24px;">
-    <div style="text-align:center;margin:10px 0 16px;">
+  <section id="almanac" style="padding:0 0 36px;">
+    <div style="text-align:center;margin:0 0 20px;">
       <div style="color:var(--gold);font-weight:800;letter-spacing:.6px;font-size:22px;">
         <span class="lang-en">Daily Almanac</span>
         <span class="lang-zh">今日黄历</span>
@@ -378,10 +380,295 @@
           <span class="lang-en">Lucky Hours</span>
           <span class="lang-zh">今日时运</span>
         </div>
-        <div id="hoursGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+        <div id="hoursGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div>
       </div>
     </div>
   </section>
+
+  <!-- ====================================================
+       MODULE 1: 五行穿衣催财建议 / Five Elements Outfit
+  ===================================================== -->
+  <section id="outfit" class="outfit-section">
+    <div style="text-align:center;margin:0 0 24px;">
+      <div style="color:var(--gold);font-weight:800;letter-spacing:.6px;font-size:22px;">
+        <span class="lang-zh">今日五行穿衣催财</span>
+        <span class="lang-en">Today's Wealth Outfit Guide</span>
+      </div>
+      <div style="opacity:.72;margin-top:6px;font-size:14px;">
+        <span class="lang-zh">根据今日五行能量，选对颜色，旺财旺运</span>
+        <span class="lang-en">Align your outfit with today's elemental energy to attract wealth</span>
+      </div>
+    </div>
+
+    <div class="outfit-main-card">
+      <!-- Top: color swatches + advice -->
+      <div class="outfit-top">
+        <!-- Left: color recommendations -->
+        <div class="outfit-colors">
+          <!-- Primary color row (today's top wealth color) -->
+          <div class="outfit-color-row primary" id="outfitPrimary">
+            <div class="color-swatch" id="outfitPrimarySwatchA" style="background:#d4a017;"></div>
+            <div class="color-info">
+              <div class="color-type">
+                <span class="lang-zh">★ 今日旺财色</span>
+                <span class="lang-en">★ Top Wealth Color</span>
+              </div>
+              <div class="color-name" id="outfitPrimaryName">金黄色</div>
+              <div class="color-reason" id="outfitPrimaryReason">
+                <span class="lang-zh">今日土金当令，黄色催财最旺</span>
+                <span class="lang-en">Earth-Metal energy peaks today — gold boosts wealth</span>
+              </div>
+            </div>
+            <div class="color-badge badge-strong">
+              <span class="lang-zh">最旺</span>
+              <span class="lang-en">Best</span>
+            </div>
+          </div>
+
+          <!-- Secondary color row -->
+          <div class="outfit-color-row secondary" id="outfitSecondary">
+            <div class="color-swatch" id="outfitSecondarySwatchA" style="background:#fff5e6;"></div>
+            <div class="color-info">
+              <div class="color-type">
+                <span class="lang-zh">次吉颜色</span>
+                <span class="lang-en">Second Choice</span>
+              </div>
+              <div class="color-name" id="outfitSecondaryName">米白色</div>
+              <div class="color-reason" id="outfitSecondaryReason">
+                <span class="lang-zh">白色纳气，适合商务场合</span>
+                <span class="lang-en">White invites pure energy, good for business settings</span>
+              </div>
+            </div>
+            <div class="color-badge badge-good">
+              <span class="lang-zh">次吉</span>
+              <span class="lang-en">Good</span>
+            </div>
+          </div>
+
+          <!-- Avoid color row -->
+          <div class="outfit-color-row avoid" id="outfitAvoid">
+            <div class="color-swatch" id="outfitAvoidSwatchA" style="background:#1a1a2e;"></div>
+            <div class="color-info">
+              <div class="color-type">
+                <span class="lang-zh">今日尽量避开</span>
+                <span class="lang-en">Colors to Avoid</span>
+              </div>
+              <div class="color-name" id="outfitAvoidName">深蓝/黑色</div>
+              <div class="color-reason" id="outfitAvoidReason">
+                <span class="lang-zh">水克当日土金之气，不宜求财</span>
+                <span class="lang-en">Water element weakens today's Earth-Metal energy</span>
+              </div>
+            </div>
+            <div class="color-badge badge-avoid">
+              <span class="lang-zh">少用</span>
+              <span class="lang-en">Avoid</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: outfit advice -->
+        <div class="outfit-advice">
+          <div class="outfit-advice-title">
+            <span class="lang-zh">穿搭催财建议</span>
+            <span class="lang-en">Styling Tips for Wealth</span>
+          </div>
+          <div id="outfitAdviceList">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene recommendations -->
+      <div style="font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:.3px;margin-bottom:10px;">
+        <span class="lang-zh">场景穿搭建议</span>
+        <span class="lang-en">Outfit Scenarios</span>
+      </div>
+      <div class="outfit-scenes" id="outfitScenes">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       MODULE 2: AI 智能财富问答 / AI Wealth Advisor
+  ===================================================== -->
+  <section id="ai-advisor" class="ai-section">
+    <div style="text-align:center;margin:0 0 24px;">
+      <div style="color:var(--gold);font-weight:800;letter-spacing:.6px;font-size:22px;">
+        <span class="lang-zh">AI 财富智能问答</span>
+        <span class="lang-en">AI Wealth Advisor</span>
+      </div>
+      <div style="opacity:.72;margin-top:6px;font-size:14px;">
+        <span class="lang-zh">结合今日黄历与五行，为你提供每日财运决策参考</span>
+        <span class="lang-en">Daily fortune insights powered by almanac &amp; five-element analysis</span>
+      </div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-layout">
+        <!-- Left: input panel -->
+        <div class="ai-left">
+          <div class="ai-header">
+            <div class="ai-badge">
+              <span class="ai-badge-icon">✦</span>
+              <span class="lang-zh">财神智能顾问</span>
+              <span class="lang-en">Wealth AI Advisor</span>
+            </div>
+            <div class="ai-title">
+              <span class="lang-zh">今天，你想问什么？</span>
+              <span class="lang-en">What would you like to know today?</span>
+            </div>
+            <div class="ai-desc">
+              <span class="lang-zh">输入你的问题，或选择下方常见问题，获取今日财运建议。</span>
+              <span class="lang-en">Type your question or tap a quick question below for today's wealth guidance.</span>
+            </div>
+          </div>
+
+          <div class="ai-quick-label">
+            <span class="lang-zh">常见问题快捷键</span>
+            <span class="lang-en">Quick Questions</span>
+          </div>
+          <div class="ai-quick-btns" id="aiQuickBtns">
+            <button class="ai-quick-btn" data-zh="今天适合谈合作吗？" data-en="Is today good for partnerships?">
+              <span class="lang-zh">今天适合谈合作吗？</span>
+              <span class="lang-en">Good for partnerships?</span>
+            </button>
+            <button class="ai-quick-btn" data-zh="今天穿什么颜色最旺财？" data-en="What color attracts wealth today?">
+              <span class="lang-zh">今天穿什么颜色旺财？</span>
+              <span class="lang-en">Best wealth color today?</span>
+            </button>
+            <button class="ai-quick-btn" data-zh="今天财神方位在哪里？" data-en="Where is the Wealth God today?">
+              <span class="lang-zh">今天财神方位在哪？</span>
+              <span class="lang-en">Wealth God direction?</span>
+            </button>
+            <button class="ai-quick-btn" data-zh="今天适合出门谈单吗？" data-en="Good day for business meetings?">
+              <span class="lang-zh">今天适合出门谈单吗？</span>
+              <span class="lang-en">Good for business meetings?</span>
+            </button>
+            <button class="ai-quick-btn" data-zh="今天适合祈福或签约吗？" data-en="Suitable for prayers or signing?">
+              <span class="lang-zh">今天适合祈福/签约吗？</span>
+              <span class="lang-en">For prayers or signing?</span>
+            </button>
+          </div>
+
+          <div class="ai-input-wrap">
+            <textarea class="ai-input" id="aiInput" rows="1"
+              placeholder="输入你的问题…"></textarea>
+            <button class="ai-send-btn" id="aiSendBtn" aria-label="Send">➤</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-faint);line-height:1.5;">
+            <span class="lang-zh">⚠️ 本问答基于黄历五行推算，供参考，不构成财务建议</span>
+            <span class="lang-en">⚠️ Based on almanac &amp; five-element analysis. For reference only.</span>
+          </div>
+        </div>
+
+        <!-- Right: chat window -->
+        <div class="ai-right">
+          <div class="ai-chat-wrap">
+            <div class="ai-chat-messages" id="aiChatMessages">
+              <!-- Initial AI greeting -->
+              <div class="chat-msg ai" id="aiGreeting">
+                <div class="chat-avatar chat-avatar-ai">✦</div>
+                <div class="chat-bubble chat-bubble-ai" id="aiGreetingText">
+                  <span class="lang-zh">你好！我是新西兰财神庙的 AI 财运顾问。<br>今日黄历已更新，你有什么想问的吗？</span>
+                  <span class="lang-en">Hello! I'm the NZ Temple AI Wealth Advisor.<br>Today's almanac is ready — what would you like to know?</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       MODULE 3: 南半球本地化版本 / Southern Hemisphere
+  ===================================================== -->
+  <section id="southern" class="southern-section">
+    <div class="southern-card">
+      <div class="southern-layout">
+        <!-- Left: content -->
+        <div class="southern-content">
+          <div class="southern-tag">
+            <span>🌏</span>
+            <span class="lang-zh">南半球专属版本</span>
+            <span class="lang-en">Southern Hemisphere Edition</span>
+          </div>
+          <div class="southern-title">
+            <span class="lang-zh">真正懂南半球的<br>华人财运平台</span>
+            <span class="lang-en">Built for the<br>Southern Hemisphere</span>
+          </div>
+          <div class="southern-desc">
+            <span class="lang-zh">我们不是把北半球版本照搬过来。方位、节气、季节能量——每一项都针对新西兰和澳洲的地理与生活节奏做了本地化校准。</span>
+            <span class="lang-en">We don't simply copy Northern Hemisphere templates. Directions, solar terms, and seasonal energy are all locally calibrated for New Zealand and Australia.</span>
+          </div>
+
+          <div class="southern-features">
+            <div class="sf-item">
+              <div class="sf-icon">🧭</div>
+              <div class="sf-body">
+                <div class="sf-title">
+                  <span class="lang-zh">方位系统本地校准</span>
+                  <span class="lang-en">Direction System Recalibrated</span>
+                </div>
+                <div class="sf-desc">
+                  <span class="lang-zh">南半球坐北朝南与北半球相反，财神方位参数已针对新西兰地理坐标重新调整。</span>
+                  <span class="lang-en">South-facing homes work differently here. Our wealth directions are recalculated for Southern Hemisphere geography.</span>
+                </div>
+              </div>
+            </div>
+            <div class="sf-item">
+              <div class="sf-icon">🌿</div>
+              <div class="sf-body">
+                <div class="sf-title">
+                  <span class="lang-zh">节气与季节同步本地</span>
+                  <span class="lang-en">Seasons & Solar Terms Aligned</span>
+                </div>
+                <div class="sf-desc">
+                  <span class="lang-zh">春节在夏天、清明在秋天——我们的黄历建议真正契合你所在地的季节与自然能量。</span>
+                  <span class="lang-en">Lunar New Year falls in summer here. Our almanac guidance reflects your actual seasons and natural energy.</span>
+                </div>
+              </div>
+            </div>
+            <div class="sf-item">
+              <div class="sf-icon">🏡</div>
+              <div class="sf-body">
+                <div class="sf-title">
+                  <span class="lang-zh">贴近本地华人生活场景</span>
+                  <span class="lang-en">Designed for Local Chinese Communities</span>
+                </div>
+                <div class="sf-desc">
+                  <span class="lang-zh">以新西兰华人的日常生活、商业场景、社区需求为出发点，而非简单翻译。</span>
+                  <span class="lang-en">Grounded in the real life, business, and community needs of Chinese in New Zealand — not a translation.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: globe visual -->
+        <div class="southern-visual">
+          <div class="globe-card">
+            <div class="globe-icon">🌏</div>
+            <div class="globe-title">
+              <span class="lang-zh">服务覆盖</span>
+              <span class="lang-en">We Serve</span>
+            </div>
+            <div class="globe-sub">
+              <span class="lang-zh">立足新西兰，覆盖澳洲及南半球华人社区</span>
+              <span class="lang-en">Based in New Zealand, serving Chinese communities across the Southern Hemisphere</span>
+            </div>
+            <div class="coverage-tags">
+              <span class="cov-tag">🇳🇿 新西兰</span>
+              <span class="cov-tag">🇦🇺 澳大利亚</span>
+              <span class="cov-tag">🌏 南半球华人</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <script>
@@ -690,5 +977,444 @@
     });
   })();
 </script>
+
+<!-- =====================================================
+     MODULE 1 JS: 五行穿衣催财
+====================================================== -->
+<script>
+(function(){
+  var d = new Date();
+  var root = document.documentElement;
+
+  function getLang(){
+    var cur = root.getAttribute('data-lang');
+    return (cur === 'en' || cur === 'zh') ? cur : 'zh';
+  }
+
+  function pad2(n){ return (n<10?'0':'')+n; }
+  function seedFromDate(date){
+    return Number(String(date.getFullYear()) + pad2(date.getMonth()+1) + pad2(date.getDate()));
+  }
+  function mulberry32(a){
+    return function(){
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ (t>>>15), t|1);
+      t ^= t + Math.imul(t ^ (t>>>7), t|61);
+      return ((t ^ (t>>>14))>>>0) / 4294967296;
+    };
+  }
+
+  var seed = seedFromDate(d);
+  var rng  = mulberry32(seed + 1000); // offset so different from almanac rng
+
+  // ── Color database ──────────────────────────────────────────
+  // Each entry: { zhName, enName, hex, element, reason_zh, reason_en }
+  var colorDB = [
+    // Fire / 火
+    { zhName:'朱砂红',  enName:'Vermilion Red',  hex:'#c0392b', element:'fire',
+      reason_zh:'火行当令，红色催旺财气，宜求财、见贵',
+      reason_en:'Fire element rules today — red boosts wealth energy' },
+    { zhName:'玫瑰金',  enName:'Rose Gold',       hex:'#b76e79', element:'fire',
+      reason_zh:'暖色纳财，兼具贵气，适合社交与谈判',
+      reason_en:'Warm rose gold attracts wealth and status energy' },
+    { zhName:'橙红色',  enName:'Amber Orange',    hex:'#e25822', element:'fire',
+      reason_zh:'火土交融，商务谈判中展现气场',
+      reason_en:'Fire-Earth blend radiates confidence in meetings' },
+    // Earth / 土
+    { zhName:'金黄色',  enName:'Gold Yellow',     hex:'#d4a017', element:'earth',
+      reason_zh:'土金当令，黄色催财最旺，宜纳财签约',
+      reason_en:'Earth-Metal energy peaks — gold is the top wealth color' },
+    { zhName:'赭石色',  enName:'Ochre Brown',     hex:'#cc5500', element:'earth',
+      reason_zh:'大地之色稳财运，宜谈长期合作',
+      reason_en:'Earth tone grounds wealth energy, ideal for long-term deals' },
+    { zhName:'米白色',  enName:'Ivory White',     hex:'#fffff0', element:'earth',
+      reason_zh:'土金同源，米白纳气，适合商务场合',
+      reason_en:'Ivory aligns with Earth-Metal and projects clean energy' },
+    // Metal / 金
+    { zhName:'铂金白',  enName:'Platinum White',  hex:'#e5e4e2', element:'metal',
+      reason_zh:'金性纯洁，白色宜谈判、签约、进财',
+      reason_en:'Metal purity — white favors contracts and financial gains' },
+    { zhName:'银灰色',  enName:'Silver Grey',     hex:'#a8a9ad', element:'metal',
+      reason_zh:'金水辅助，专业干练，宜商务出行',
+      reason_en:'Silver-grey radiates professionalism, great for business' },
+    { zhName:'香槟金',  enName:'Champagne Gold',  hex:'#f7e7ce', element:'metal',
+      reason_zh:'轻奢金色增贵气，宜重要场合',
+      reason_en:'Champagne gold elevates status — ideal for important events' },
+    // Water / 水
+    { zhName:'靛蓝色',  enName:'Indigo Blue',     hex:'#3f4f8c', element:'water',
+      reason_zh:'水行旺，蓝色宜学习、创新，财运稳',
+      reason_en:'Water element active — blue suits learning and steady wealth' },
+    { zhName:'湖水蓝',  enName:'Teal Blue',       hex:'#008080', element:'water',
+      reason_zh:'水木相生，蓝绿宜拓展人脉求财',
+      reason_en:'Water nourishes Wood — teal helps expand networks' },
+    { zhName:'深海蓝',  enName:'Ocean Blue',      hex:'#1a3a5c', element:'water',
+      reason_zh:'财水汇聚之色，宜守财存款',
+      reason_en:'Deep blue holds wealth — good for savings and stability' },
+    // Wood / 木
+    { zhName:'翠绿色',  enName:'Jade Green',      hex:'#00897b', element:'wood',
+      reason_zh:'木行旺财，绿色宜创业拓展新财路',
+      reason_en:'Wood energy — green suits new ventures and growth' },
+    { zhName:'橄榄绿',  enName:'Olive Green',     hex:'#6b8e23', element:'wood',
+      reason_zh:'木土互调，宜求稳中有进',
+      reason_en:'Wood-Earth balance — steady progress and grounded growth' },
+    { zhName:'湖绿色',  enName:'Sage Green',      hex:'#7caa79', element:'wood',
+      reason_zh:'清和之色，宜签约、求职、合作',
+      reason_en:'Calm sage green — good for interviews, signing, and partnerships' },
+  ];
+
+  // Avoid color map by element
+  var avoidByElement = {
+    fire:  { zhName:'深黑/墨绿', enName:'Black / Dark Green', hex:'#1a2a1a',
+             reason_zh:'水克火，木泄火，今日应避深色压财气',
+             reason_en:'Water controls Fire — dark shades suppress today\'s energy' },
+    earth: { zhName:'深蓝/黑色', enName:'Navy / Black',       hex:'#1a1a2e',
+             reason_zh:'水克土，黑色削弱今日土金之气',
+             reason_en:'Water undermines Earth-Metal energy today' },
+    metal: { zhName:'朱红/火红', enName:'Fiery Red',          hex:'#c0392b',
+             reason_zh:'火克金，红色今日不利财运',
+             reason_en:'Fire weakens Metal energy — avoid red for wealth' },
+    water: { zhName:'土黄/橙色', enName:'Yellow / Orange',    hex:'#cc5500',
+             reason_zh:'土克水，黄橙压制今日水行财运',
+             reason_en:'Earth controls Water — yellow/orange suppresses today\'s flow' },
+    wood:  { zhName:'纯白/金色', enName:'Pure White / Bright Gold', hex:'#e5e4e2',
+             reason_zh:'金克木，纯白金色今日克制木行财运',
+             reason_en:'Metal controls Wood — bright gold clashes with today\'s Wood energy' },
+  };
+
+  // Advice database (pick 3 by rng)
+  var adviceDB = [
+    { icon:'✦', zh:'上装选旺财色，下装可搭百搭深色，重点在上身展示', en:'Choose the wealth color for your top — dark neutrals for bottoms' },
+    { icon:'💼', zh:'商务约见建议全身旺财色系，配件可点缀今日旺色', en:'For business meetings, dress head-to-toe in today\'s wealth palette' },
+    { icon:'🧣', zh:'若不便全身换色，可加一条今日旺色围巾或包包', en:'If you can\'t change your outfit, add a scarf or bag in today\'s color' },
+    { icon:'💍', zh:'佩戴对应五行材质饰品增强财运：金克木宜金饰，水旺宜蓝石', en:'Wear five-element jewelry to amplify: gold for Metal days, blue stones for Water' },
+    { icon:'📋', zh:'重要签约或谈判，旺财色系上装可增加谈判气场', en:'Wearing wealth colors at a signing or negotiation boosts your presence' },
+    { icon:'🌟', zh:'今日财气偏旺，旺色与吉时叠加效果更佳', en:'Today\'s fortune is strong — combining wealth colors with lucky hours amplifies effect' },
+    { icon:'🎯', zh:'出行时可在内层搭配旺财色，低调又有效', en:'Layer the wealth color as an inner garment for subtle but effective energy' },
+    { icon:'🏮', zh:'避开今日忌色后，全身色调不超过三色为宜', en:'After avoiding today\'s bad colors, keep your total palette to three colors or fewer' },
+  ];
+
+  // Scene database
+  var scenesDB = [
+    { icon:'🤝', zh:'见客户', en:'Client Meeting',
+      tips: [
+        { zh:'旺财色上装，展示气场', en:'Wear wealth color on top' },
+        { zh:'深色下装，稳重专业', en:'Dark bottoms for gravitas' },
+      ]},
+    { icon:'💰', zh:'求财纳财', en:'Attracting Wealth',
+      tips: [
+        { zh:'全身旺财色系，气场最强', en:'Full wealth-color outfit' },
+        { zh:'可佩戴金饰增强财气', en:'Gold jewelry amplifies' },
+      ]},
+    { icon:'🎯', zh:'求职面试', en:'Job Interview',
+      tips: [
+        { zh:'旺色上装+浅色下装，干练', en:'Wealth top + light bottoms' },
+        { zh:'避免今日忌色，不克气场', en:'Avoid today\'s clash colors' },
+      ]},
+    { icon:'✈️', zh:'出行远行', en:'Travel / Outing',
+      tips: [
+        { zh:'舒适旺财色系，出行顺遂', en:'Comfortable wealth tones' },
+        { zh:'随身携带旺色配件', en:'Carry a wealth-color accessory' },
+      ]},
+    { icon:'💑', zh:'约会社交', en:'Social / Dating',
+      tips: [
+        { zh:'暖色调旺财色，增人缘', en:'Warm tones boost charm' },
+        { zh:'避开今日克色，气场和谐', en:'Avoid clash colors for harmony' },
+      ]},
+  ];
+
+  // ── Generate daily data ─────────────────────────────────────
+  var primaryIdx   = Math.floor(rng() * colorDB.length);
+  // secondary: different element preferred
+  var secondaryIdx;
+  do { secondaryIdx = Math.floor(rng() * colorDB.length); }
+  while (secondaryIdx === primaryIdx);
+
+  var primaryColor   = colorDB[primaryIdx];
+  var secondaryColor = colorDB[secondaryIdx];
+  var avoidColor     = avoidByElement[primaryColor.element];
+
+  // Pick 3 advice items
+  var advicePicked = [];
+  var adviceCopy = adviceDB.slice();
+  while (advicePicked.length < 3 && adviceCopy.length) {
+    var ai = Math.floor(rng() * adviceCopy.length);
+    advicePicked.push(adviceCopy.splice(ai, 1)[0]);
+  }
+
+  // ── Render function ─────────────────────────────────────────
+  function renderOutfit(){
+    var l = getLang();
+
+    // Primary
+    var ps = document.getElementById('outfitPrimarySwatchA');
+    var pn = document.getElementById('outfitPrimaryName');
+    var pr = document.getElementById('outfitPrimaryReason');
+    if (ps) ps.style.background = primaryColor.hex;
+    if (pn) pn.textContent = (l==='en') ? primaryColor.enName : primaryColor.zhName;
+    if (pr) pr.innerHTML = (l==='en')
+      ? '<span class="lang-en">' + primaryColor.reason_en + '</span>'
+      : '<span class="lang-zh">' + primaryColor.reason_zh + '</span>';
+
+    // Secondary
+    var ss = document.getElementById('outfitSecondarySwatchA');
+    var sn = document.getElementById('outfitSecondaryName');
+    var sr = document.getElementById('outfitSecondaryReason');
+    if (ss) ss.style.background = secondaryColor.hex;
+    if (sn) sn.textContent = (l==='en') ? secondaryColor.enName : secondaryColor.zhName;
+    if (sr) sr.innerHTML = (l==='en')
+      ? '<span class="lang-en">' + secondaryColor.reason_en + '</span>'
+      : '<span class="lang-zh">' + secondaryColor.reason_zh + '</span>';
+
+    // Avoid
+    var avs = document.getElementById('outfitAvoidSwatchA');
+    var avn = document.getElementById('outfitAvoidName');
+    var avr = document.getElementById('outfitAvoidReason');
+    if (avs) avs.style.background = avoidColor.hex;
+    if (avn) avn.textContent = (l==='en') ? avoidColor.enName : avoidColor.zhName;
+    if (avr) avr.innerHTML = (l==='en')
+      ? '<span class="lang-en">' + avoidColor.reason_en + '</span>'
+      : '<span class="lang-zh">' + avoidColor.reason_zh + '</span>';
+
+    // Advice list
+    var advEl = document.getElementById('outfitAdviceList');
+    if (advEl) {
+      advEl.innerHTML = advicePicked.map(function(a){
+        return '<div class="advice-row">'
+          + '<div class="advice-icon">' + a.icon + '</div>'
+          + '<div class="advice-text">'
+          + (l==='en' ? a.en : a.zh)
+          + '</div></div>';
+      }).join('');
+    }
+
+    // Scenes
+    var scenesEl = document.getElementById('outfitScenes');
+    if (scenesEl) {
+      scenesEl.innerHTML = scenesDB.map(function(sc){
+        var tip = (l==='en') ? sc.tips[0].en : sc.tips[0].zh;
+        return '<div class="scene-card">'
+          + '<div class="scene-icon">' + sc.icon + '</div>'
+          + '<div class="scene-name">' + (l==='en' ? sc.en : sc.zh) + '</div>'
+          + '<div class="scene-tip">' + tip + '</div>'
+          + '<div class="scene-color-dot" style="background:' + primaryColor.hex + ';color:' + primaryColor.hex + ';"></div>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  renderOutfit();
+
+  window.addEventListener('langchange', renderOutfit);
+})();
+</script>
+
+<!-- =====================================================
+     MODULE 2 JS: AI 智能财富问答
+====================================================== -->
+<script>
+(function(){
+  var root = document.documentElement;
+  function getLang(){ var c=root.getAttribute('data-lang'); return (c==='en'||c==='zh')?c:'zh'; }
+
+  // ── AI response database (deterministic by date + question hash) ──
+  // Keyed by topic
+  var aiResponses = {
+    partnership: {
+      zh: [
+        '今日黄历宜"签约"，财神方位吉，是谈合作的有利日子。建议在吉时（上午 9–11 点）主动联系对方，先礼后兵，气场更顺。',
+        '今日财神方位偏旺，适合发起合作邀约。但今日忌"仓促签约"，建议先谈意向、不急于落笔，明日再定协议更稳。',
+        '今日运势平稳，合作谈判可推进，但需注意"避免情绪化沟通"。保持冷静，利大于弊时再推进。',
+      ],
+      en: [
+        'Today\'s almanac favors "signing contracts." The Wealth God direction is auspicious — a good day for partnership talks. Reach out during the lucky hour (9–11 AM) for best results.',
+        'The Wealth God energy is strong today. Good for initiating cooperation, but avoid rushing a formal agreement. Discuss intentions today, finalize tomorrow for a more stable outcome.',
+        'Today\'s fortune is steady for negotiations. Avoid emotional communication — stay calm and rational before moving forward with any commitments.',
+      ]
+    },
+    color: {
+      zh: [
+        '今日五行能量旺，最佳催财色已在穿衣模块显示。建议上装选旺财色系，下装配深色稳住气场，商务场合加分明显。',
+        '今日旺财色与你的日柱五行共鸣，穿着时建议搭配金色配饰（手表/项链），双重叠加催财效果更佳。',
+        '颜色催财的关键在"主色调"，今日旺财色宜作主色，占全身 60% 以上效果最佳。避色可作点缀但不宜为主。',
+      ],
+      en: [
+        'Today\'s top wealth color is shown in the Outfit Guide above. Wearing it as your top color while pairing with dark neutral bottoms gives the best result for business settings.',
+        'Today\'s wealth color resonates with your daily pillar energy. Adding gold accessories (watch, necklace) creates a double-amplification effect.',
+        'For color to attract wealth, make it your dominant tone — ideally 60% or more of your outfit. Today\'s avoid color can be a small accent but shouldn\'t be the main.',
+      ]
+    },
+    direction: {
+      zh: [
+        '今日财神方位已在黄历区域显示。建议在吉时面向此方位静心三分钟，或将工作桌面向该方位，助力日常财运积累。',
+        '财神方位的实际运用：出门时选择朝该方向行走一段，开会时坐在对应方位的座位，签约时面向财神方位更旺气。',
+        '今日喜神方位与财神方位相辅相成，两者共用时财运、人缘双旺，特别适合今天有社交或洽谈需求的朋友。',
+      ],
+      en: [
+        'Today\'s Wealth God direction is shown in the almanac section above. During a lucky hour, face that direction for 3 minutes of quiet focus, or orient your desk toward it.',
+        'Practical use: walk briefly in that direction when leaving home, sit on the corresponding side in meetings, and face the Wealth God direction when signing any agreements.',
+        'Today\'s Joy God direction complements the Wealth God direction — activating both amplifies both wealth and social fortune, ideal if you have meetings or networking today.',
+      ]
+    },
+    meeting: {
+      zh: [
+        '今日宜"出行"且宜"纳财"，外出谈单是今日重点加分项。建议选在上午吉时出发，旺财色穿搭出门，气场强劲。',
+        '今日忌"口舌是非"，出门谈单时注意言辞，避免争执，以诚信为先，合作成功率更高。',
+        '今日财气较旺，适合主动出击。如有久未跟进的客户，今天是主动联系的好时机，财神方位加持，成功率偏高。',
+      ],
+      en: [
+        'Today favors both "travel" and "attracting wealth" — going out for business meetings is a highlighted win today. Depart during a lucky hour in wealth-colored attire for strong energy.',
+        'Today cautions against "gossip and disputes." Keep your language careful and honest in meetings — sincerity closes more deals than aggression today.',
+        'Wealth energy is elevated today — good for taking the initiative. If you have overdue client follow-ups, today is an ideal day to reach out. Wealth God support increases success odds.',
+      ]
+    },
+    prayer: {
+      zh: [
+        '今日宜"祈福"，是向财神庙上香、诚心祈愿的好日子。建议在上午吉时前往，心诚则灵，财运自然随缘而来。',
+        '今日宜"签约"，但忌"仓促"。如有待签合同，建议先核实条款再落笔，吉时签约效果最佳（上午 9–11 点）。',
+        '今日宜静心、祈福、整理思路。若有重要决定悬而未决，可在今日吉时烧香问卜，借助天时地利寻求指引。',
+      ],
+      en: [
+        'Today favors "prayer and blessing" — an excellent day to visit the temple and make sincere offerings. The morning lucky hour is ideal. Sincerity brings fortune naturally.',
+        'Today favors "signing contracts" but cautions against haste. If you have a pending agreement, review all terms carefully first. Signing during the lucky hour (9–11 AM) is most auspicious.',
+        'Today favors quiet reflection and spiritual grounding. If a major decision has been pending, use today\'s lucky hour to seek guidance — the heavenly timing aligns well.',
+      ]
+    },
+    general: {
+      zh: [
+        '根据今日黄历推算，你的问题方向属于"财运咨询"范畴。今日整体财运偏旺，主动行动效果明显，但注意忌项中的内容，避开克运因素。',
+        '今日时运走势：上午吉时能量最强，适合推进重要事项；下午可处理日常事务；晚上建议静心、不宜大额决策。',
+        '每日运势与个人八字互动才能更精准。建议前往"财神黄历"页面，输入生辰八字获取个性化每日指引。',
+      ],
+      en: [
+        'Based on today\'s almanac, your question falls under "wealth consultation." Overall fortune is elevated today — proactive action yields results, but watch for today\'s inauspicious items.',
+        'Today\'s energy flow: morning lucky hours are strongest for advancing important matters; afternoon suits routine tasks; evening is better for rest and avoiding major financial decisions.',
+        'Daily fortune becomes more precise when combined with your personal BaZi chart. Visit the Almanac Calendar page and enter your birth data for personalized daily guidance.',
+      ]
+    }
+  };
+
+  function classifyQuestion(q){
+    var low = q.toLowerCase();
+    if (/合作|合伙|partnership|collaborat/i.test(q)) return 'partnership';
+    if (/颜色|穿|color|outfit|wear/i.test(q)) return 'color';
+    if (/方位|财神.*位|direction|wealth.*god/i.test(q)) return 'direction';
+    if (/谈单|见客|商务|meeting|business|客户/i.test(q)) return 'meeting';
+    if (/祈福|签约|prayer|sign|开工|bless/i.test(q)) return 'prayer';
+    return 'general';
+  }
+
+  function hashString(s){
+    var h = 0;
+    for (var i=0; i<s.length; i++){
+      h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+    }
+    return Math.abs(h);
+  }
+
+  function getAIResponse(question){
+    var topic = classifyQuestion(question);
+    var l = getLang();
+    var pool = aiResponses[topic][l];
+    var idx = hashString(question + new Date().toDateString()) % pool.length;
+    return pool[idx];
+  }
+
+  // ── Render chat message ──────────────────────────────────────
+  function appendMsg(type, text){
+    var msgs = document.getElementById('aiChatMessages');
+    if (!msgs) return;
+    var msg = document.createElement('div');
+    msg.className = 'chat-msg ' + (type==='user' ? 'user' : 'ai');
+    if (type==='user'){
+      msg.innerHTML = '<div class="chat-avatar chat-avatar-user">你</div>'
+        + '<div class="chat-bubble chat-bubble-user">' + escHtml(text) + '</div>';
+    } else {
+      msg.innerHTML = '<div class="chat-avatar chat-avatar-ai">✦</div>'
+        + '<div class="chat-bubble chat-bubble-ai">' + text + '</div>';
+    }
+    msgs.appendChild(msg);
+    msgs.scrollTop = msgs.scrollHeight;
+    return msg;
+  }
+
+  function escHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function showTyping(){
+    var msgs = document.getElementById('aiChatMessages');
+    if (!msgs) return null;
+    var typingEl = document.createElement('div');
+    typingEl.className = 'chat-msg ai';
+    typingEl.innerHTML = '<div class="chat-avatar chat-avatar-ai">✦</div>'
+      + '<div class="chat-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    msgs.appendChild(typingEl);
+    msgs.scrollTop = msgs.scrollHeight;
+    return typingEl;
+  }
+
+  function sendQuestion(q){
+    if (!q.trim()) return;
+    var inputEl = document.getElementById('aiInput');
+    if (inputEl) inputEl.value = '';
+    // Deactivate quick btns
+    document.querySelectorAll('.ai-quick-btn').forEach(function(b){ b.classList.remove('active'); });
+
+    appendMsg('user', q);
+
+    var typing = showTyping();
+    setTimeout(function(){
+      var msgs = document.getElementById('aiChatMessages');
+      if (typing && msgs) msgs.removeChild(typing);
+      var reply = getAIResponse(q);
+      appendMsg('ai', reply);
+    }, 900 + Math.random()*600);
+  }
+
+  // ── Wire up buttons & input ──────────────────────────────────
+  document.querySelectorAll('.ai-quick-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.ai-quick-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var l = getLang();
+      var q = btn.getAttribute('data-' + l) || btn.getAttribute('data-zh') || '';
+      sendQuestion(q);
+    });
+  });
+
+  var sendBtn = document.getElementById('aiSendBtn');
+  var inputEl = document.getElementById('aiInput');
+
+  function doSend(){
+    var l = getLang();
+    var q = inputEl ? inputEl.value.trim() : '';
+    if (!q) {
+      if (inputEl) inputEl.placeholder = (l==='en') ? 'Please type a question…' : '请输入你的问题…';
+      return;
+    }
+    sendQuestion(q);
+  }
+
+  if (sendBtn) sendBtn.addEventListener('click', doSend);
+  if (inputEl) {
+    inputEl.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); doSend(); }
+    });
+    // auto-resize
+    inputEl.addEventListener('input', function(){
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+
+  // Update placeholder on lang change
+  window.addEventListener('langchange', function(){
+    if (inputEl) {
+      inputEl.placeholder = getLang()==='en' ? 'Type your question…' : '输入你的问题…';
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
