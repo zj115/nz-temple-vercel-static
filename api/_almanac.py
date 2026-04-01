@@ -270,6 +270,21 @@ def build_personal_hour_table(date_: dt.date, bazi: Dict) -> List[Dict]:
         split_gz(bazi["day"]["gz"])[1],
         split_gz(bazi["time"]["gz"])[1],
     ]
+
+    # 个性化宜/忌映射：关系类型 → 对应的活动建议
+    _REL_YI = {
+        "合":   ["合作洽谈", "签约对接"],
+        "三合": ["整合资源", "联合推进"],
+        "三会": ["顺势推进", "长期规划"],
+        "同气": ["延续事务", "复盘整合"],
+    }
+    _REL_JI = {
+        "冲":  ["冒进硬撑", "强行推动"],
+        "刑":  ["违规越矩", "情绪对抗"],
+        "害":  ["模糊承诺", "轻信他人"],
+        "破":  ["仓促决策", "打乱节奏"],
+    }
+
     out = []
     for row in basic:
         hg, hz = split_gz(row["gz"])
@@ -284,10 +299,41 @@ def build_personal_hour_table(date_: dt.date, bazi: Dict) -> List[Dict]:
             if is_po(hz, z):        rels.append({"with": pillar_label, "type": "破"})
             if is_xing(hz, z):      rels.append({"with": pillar_label, "type": "刑"})
             if hz == z:             rels.append({"with": pillar_label, "type": "同气"})
+
+        # 基于命局关系计算个性化吉凶
+        good_types = {r["type"] for r in rels if r["type"] in ("合","三合","三会","同气")}
+        bad_types  = {r["type"] for r in rels if r["type"] in ("冲","刑","害","破")}
+
+        if good_types and not bad_types:
+            p_luck = "吉"
+        elif bad_types and not good_types:
+            p_luck = "凶"
+        elif good_types and bad_types:
+            p_luck = "中"
+        else:
+            p_luck = row["luck"]  # 无关系则沿用基础值
+
+        # 个性化宜：基础宜 + 命局助力对应建议
+        p_yi = list(row.get("yi", []))
+        for rt in good_types:
+            for item in _REL_YI.get(rt, []):
+                if item not in p_yi:
+                    p_yi.append(item)
+
+        # 个性化忌：基础忌 + 命局冲克对应建议
+        p_ji = list(row.get("ji", []))
+        for rt in bad_types:
+            for item in _REL_JI.get(rt, []):
+                if item not in p_ji:
+                    p_ji.append(item)
+
         row2 = dict(row)
         row2["personal"] = {
             "ten_god":   ten_god(day_master, hg) if hg else None,
             "relations": rels,
+            "luck":      p_luck,
+            "yi":        p_yi,
+            "ji":        p_ji,
         }
         out.append(row2)
     return out
