@@ -339,8 +339,6 @@
 .aiqa-send:disabled{opacity:.4;cursor:not-allowed;}
 .aiqa-answer{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:14px;line-height:1.8;color:var(--text);}
 .aiqa-answer.loading{opacity:.6;font-style:italic;}
-.aiqa-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r-sm);font-size:14px;font-weight:700;color:var(--gold2);background:rgba(255,213,122,.08);border:1px solid rgba(255,213,122,.2);cursor:pointer;transition:all .18s;white-space:nowrap;}
-.aiqa-nav-btn:hover{background:rgba(255,213,122,.15);color:var(--gold);}
 @media(max-width:600px){
   .wardrobe-row{gap:6px;}
   .aiqa-chips{gap:6px;}
@@ -373,7 +371,7 @@
     <a href="shop.html"><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
     <a href="profile.html"><span class="lang-zh">资料</span><span class="lang-en">Profile</span></a>
     <a href="login.html" id="sidebarLoginLink"><span class="lang-zh">登录</span><span class="lang-en">Login</span></a>
-    <button class="aiqa-nav-btn" id="sidebarAiQaBtn" type="button" style="margin:8px 12px;width:calc(100% - 24px);">✦ <span class="lang-zh">AI财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></button>
+    <a href="wealth-ai.html" class="wealth-qa-nav-link">✦ <span class="lang-zh">财富问答</span><span class="lang-en">Wealth Q&amp;A</span></a>
   </nav>
   <div class="sidebar-foot">
     <button class="btn btn-ghost btn-lang" type="button" id="langToggleSidebar">
@@ -410,7 +408,7 @@
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
       <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
-      <button class="aiqa-nav-btn" id="navAiQaBtn" type="button">✦ <span class="lang-zh">AI财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></button>
+      <a href="wealth-ai.html" class="wealth-qa-nav-link">✦ <span class="lang-zh">财富问答</span><span class="lang-en">Wealth Q&amp;A</span></a>
     </nav>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
@@ -485,6 +483,9 @@
       </button>
       <button class="btn btn-ghost" id="btnDownloadPng" style="margin-left:auto;">
         <span class="lang-zh">⬇ 下载 PNG</span><span class="lang-en">⬇ Download PNG</span>
+      </button>
+      <button class="btn btn-ghost" id="btnOpenAiQa" type="button">
+        ✦ <span class="lang-zh">问答</span><span class="lang-en">Q&amp;A</span>
       </button>
     </div>
 
@@ -1121,6 +1122,66 @@
     '</div>';
   }
 
+  // ── 时辰底部一句话提示（规则引擎，可后期替换为AI）────
+  // hemisphere: 'south' | 'north' | ''
+  function generateShichenSummary(h, hemisphere) {
+    try {
+      var luck  = (h.personal && h.personal.luck) ? h.personal.luck : (h.luck || '');
+      var yi    = (h.personal && h.personal.yi && h.personal.yi.length) ? h.personal.yi
+                  : (h.yi || []);
+      var ji    = (h.personal && h.personal.ji && h.personal.ji.length) ? h.personal.ji
+                  : (h.ji || []);
+      var ts    = h.tianshen || '';
+      var label = h.label    || '';
+      var yiN   = yi.length;
+      var jiN   = ji.length;
+
+      // 1. 凶时 — 谨慎提醒
+      if (luck === '凶') {
+        var jiTips = [
+          '此时能量收敛，宜静观不宜轻举妄动。',
+          '谨慎推进，避免签约与大额决策。',
+          '宜守勿攻，重要事务推至吉时处理。',
+          '此时忌冒进，以稳妥为先。',
+          '能量偏弱，不宜启动新项目。',
+        ];
+        var tip = jiTips[(h.gz || label).charCodeAt(0) % jiTips.length];
+        if (jiN > 0) tip = '忌' + ji.slice(0,2).join('、') + '，宜低调处事。';
+        return tip;
+      }
+
+      // 2. 吉时 — 正向鼓励
+      if (luck === '吉') {
+        if (yiN > 0) {
+          var top = yi.slice(0,2).join('、');
+          var posTips = [
+            '适合' + top + '，把握时机主动推进。',
+            '吉时宜' + top + '，顺势而为效果更佳。',
+            '可优先安排' + top + '类事务，事半功倍。',
+          ];
+          return posTips[(h.gz || label).charCodeAt(0) % posTips.length];
+        }
+        var genPos = [
+          '整体吉利，适合推进重要事项。',
+          '此时气场顺畅，宜主动行动。',
+          '吉时能量充足，可大胆推进计划。',
+        ];
+        return genPos[(h.gz || label).charCodeAt(0) % genPos.length];
+      }
+
+      // 3. 平时 — 中性建议
+      if (yiN > jiN && yiN > 0) {
+        return '宜' + yi.slice(0,2).join('、') + '，整体偏顺，稳步推进即可。';
+      }
+      if (jiN > yiN && jiN > 0) {
+        return '忌' + ji.slice(0,2).join('、') + '，注意细节，保守行事为宜。';
+      }
+      return '此时平稳，顺势而为，不强求、不冒进。';
+    } catch(e) {
+      return '此时宜稳妥行事，顺势而为。';
+    }
+  }
+
   // ── 渲染：基础时辰 ───────────────────────────
   function renderHours(table, personal){
     var html = (table||[]).map(function(h){
@@ -1151,6 +1212,7 @@
         '<div style="font-size:11px;opacity:.7;">忌：'+(h.ji||[]).join(' ')+'</div>' +
         (h.chong_desc ? '<div style="font-size:10px;opacity:.55;margin-top:2px;">'+h.chong_desc+'</div>' : '') +
         persHtml +
+        '<div class="hour-tip">'+generateShichenSummary(h, currentHemisphere)+'</div>' +
       '</div>';
     }).join('');
     document.getElementById('hourGrid').innerHTML = html;
@@ -1184,6 +1246,7 @@
         (persHtml || '<div style="font-size:11px;opacity:.5;margin-top:4px;">无命局关系</div>') +
         (pYi.length ? '<div style="margin-top:4px;font-size:11px;opacity:.85;color:var(--green);">宜：'+pYi.join(' · ')+'</div>' : '') +
         (pJi.length ? '<div style="font-size:11px;opacity:.85;color:var(--red);">忌：'+pJi.join(' · ')+'</div>' : '') +
+        '<div class="hour-tip">'+generateShichenSummary(h, currentHemisphere)+'</div>' +
       '</div>';
     }).join('');
     document.getElementById('persHourGrid').innerHTML = html;
@@ -2310,11 +2373,9 @@
   if (aiQaClose)  aiQaClose.addEventListener('click', closeAiQa);
   aiQaModal.addEventListener('click', function(e){ if(e.target===aiQaModal) closeAiQa(); });
 
-  // 导航按钮
-  var navAiQaBtn     = document.getElementById('navAiQaBtn');
-  var sidebarAiQaBtn = document.getElementById('sidebarAiQaBtn');
-  if (navAiQaBtn)     navAiQaBtn.addEventListener('click', openAiQa);
-  if (sidebarAiQaBtn) sidebarAiQaBtn.addEventListener('click', function(){ closeAiQa(); openAiQa(); });
+  // 导航按钮 → 现在统一链接到 wealth-ai.html，modal 由页内按钮触发
+  var btnOpenAiQa = document.getElementById('btnOpenAiQa');
+  if (btnOpenAiQa) btnOpenAiQa.addEventListener('click', openAiQa);
 
   // 快捷问题chips
   var aiQaChips = document.querySelectorAll('.aiqa-chip');
