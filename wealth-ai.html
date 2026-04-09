@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>财富问答 · NZ Temple</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
+<style>
+/* ── 问答页专属样式 ── */
+.wa-hero{padding:36px 0 24px;}
+.wa-hero-title{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:.5px;margin-bottom:8px;}
+.wa-hero-sub{opacity:.7;font-size:14px;line-height:1.7;}
+
+.wa-card{border:1px solid rgba(255,213,122,.14);border-radius:18px;padding:22px;background:rgba(255,255,255,.03);margin-bottom:18px;}
+
+/* 上下文状态栏 */
+.wa-status-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:10px 16px;border-radius:12px;border:1px solid rgba(255,213,122,.16);
+  background:rgba(255,213,122,.04);font-size:13px;margin-bottom:18px;}
+.wa-status-ok{color:rgba(70,200,120,.9);font-weight:700;}
+.wa-status-pending{opacity:.6;}
+.wa-status-link{font-size:12px;color:var(--gold2);opacity:.8;text-decoration:underline;white-space:nowrap;}
+
+/* 问题分类 */
+.wa-cat-label{font-size:11px;font-weight:700;color:var(--gold2);opacity:.6;letter-spacing:.6px;
+  text-transform:uppercase;margin-bottom:10px;margin-top:4px;}
+
+/* 问题按钮 */
+.wa-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+.wa-chip{
+  padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;
+  border:1px solid rgba(255,213,122,.22);
+  background:rgba(255,255,255,.04);
+  color:rgba(255,213,122,.8);
+  cursor:pointer;transition:all .18s;
+  line-height:1.4;
+}
+.wa-chip:hover{
+  background:rgba(255,213,122,.14);
+  border-color:rgba(255,213,122,.42);
+  color:var(--gold);
+  transform:translateY(-1px);
+  box-shadow:0 3px 12px rgba(255,213,122,.08);
+}
+.wa-chip.selected{
+  background:rgba(255,213,122,.18);
+  border-color:rgba(255,213,122,.5);
+  color:var(--gold);
+}
+
+/* 自由输入 */
+.wa-input-row{display:flex;gap:10px;margin-top:18px;margin-bottom:0;}
+.wa-input{
+  flex:1;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,213,122,.2);border-radius:12px;
+  padding:12px 16px;color:var(--text);font-size:14px;font-family:inherit;
+}
+.wa-input:focus{outline:none;border-color:rgba(255,213,122,.42);}
+.wa-input::placeholder{color:rgba(255,255,255,.28);}
+.wa-send{
+  background:rgba(255,213,122,.16);border:1px solid rgba(255,213,122,.36);
+  color:var(--gold);border-radius:12px;padding:12px 22px;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.wa-send:hover{background:rgba(255,213,122,.28);}
+.wa-send:disabled{opacity:.4;cursor:not-allowed;}
+
+/* 问答记录 */
+.wa-history{display:flex;flex-direction:column;gap:16px;}
+.wa-bubble{border-radius:16px;padding:16px 18px;font-size:14px;line-height:1.85;}
+.wa-bubble-q{
+  background:rgba(255,213,122,.08);border:1px solid rgba(255,213,122,.2);
+  color:var(--gold2);align-self:flex-end;
+}
+.wa-bubble-a{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  color:var(--text);
+}
+.wa-bubble-label{font-size:11px;font-weight:700;opacity:.5;margin-bottom:6px;letter-spacing:.5px;}
+.wa-bubble-body{white-space:pre-wrap;}
+.wa-bubble-meta{font-size:11px;opacity:.45;margin-top:8px;}
+
+/* 免责声明 */
+.wa-disclaimer{
+  font-size:12px;opacity:.55;line-height:1.7;margin-top:14px;
+  padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.02);
+}
+
+@media(max-width:600px){
+  .wa-chip{font-size:12px;padding:8px 13px;}
+  .wa-send{padding:12px 16px;font-size:13px;}
+}
+</style>
+</head>
+<body>
+<div class="bg-ornament"></div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <a class="sidebar-brand" href="index.html">
+      <img src="images/logo.jpg" alt="NZ Temple Logo"/>
+      <div class="sidebar-brand-text">
+        <span class="lang-zh">新西兰财神庙</span><span class="lang-en">NZ Temple</span>
+      </div>
+    </a>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html"><span class="lang-zh">主页</span><span class="lang-en">Home</span></a>
+    <a href="calendar.html"><span class="lang-zh">财神黄历</span><span class="lang-en">Almanac</span></a>
+    <a href="wealth-ai.html" class="nav-active"><span class="lang-zh">财富问答</span><span class="lang-en">Wealth Q&amp;A</span></a>
+    <a href="southern.html"><span class="lang-zh">南半球</span><span class="lang-en">Southern</span></a>
+    <a href="courses.html"><span class="lang-zh">课程</span><span class="lang-en">Courses</span></a>
+    <a href="booking.html"><span class="lang-zh">法事预约</span><span class="lang-en">Ritual Booking</span></a>
+    <a href="shop.html"><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
+    <a href="profile.html"><span class="lang-zh">资料</span><span class="lang-en">Profile</span></a>
+    <a href="login.html" id="sidebarLoginLink"><span class="lang-zh">登录</span><span class="lang-en">Login</span></a>
+  </nav>
+  <div class="sidebar-foot">
+    <button class="btn btn-ghost btn-lang" type="button" id="langToggleSidebar">
+      <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+    </button>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="nav-hamburger" id="navHamburger" aria-label="Open menu">
+      <img src="images/logo.jpg" alt="Menu"/>
+    </button>
+    <a class="brand" href="index.html">
+      <div class="brand-mark brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="images/logo.jpg" alt="NZ Temple Logo" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">
+          <span class="lang-en">New Zealand God of Wealth Temple</span>
+          <span class="lang-zh">新西兰财神庙</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="lang-en">Fox Spirit Relationship Hall</span>
+          <span class="lang-zh">狐仙姻缘堂</span>
+        </div>
+      </div>
+    </a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
+      <a href="calendar.html"><span class="lang-en">Almanac</span><span class="lang-zh">财神黄历</span></a>
+      <a href="wealth-ai.html" class="nav-active"><span class="lang-en">Wealth Q&amp;A</span><span class="lang-zh">财富问答</span></a>
+      <a href="southern.html"><span class="lang-en">Southern</span><span class="lang-zh">南半球</span></a>
+      <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
+      <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
+      <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
+      <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
+        <span class="lang-en">中文</span><span class="lang-zh">EN</span>
+      </button>
+      <a class="btn btn-ghost" href="login.html" id="navAuthBtn">
+        <span class="lang-en">Login</span><span class="lang-zh">登录</span>
+      </a>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var key = 'lang';
+      var root = document.documentElement;
+      var saved = localStorage.getItem(key);
+      root.setAttribute('data-lang', (saved === 'zh' || saved === 'en') ? saved : 'zh');
+      function setLang(next) {
+        root.setAttribute('data-lang', next);
+        localStorage.setItem(key, next);
+        window.dispatchEvent(new Event('langchange'));
+      }
+      var btn = document.getElementById('langToggle');
+      if (btn) btn.addEventListener('click', function(){ setLang(root.getAttribute('data-lang')==='zh'?'en':'zh'); });
+      var btnSb = document.getElementById('langToggleSidebar');
+      if (btnSb) btnSb.addEventListener('click', function(){ setLang(root.getAttribute('data-lang')==='zh'?'en':'zh'); });
+      var sidebar=document.getElementById('sidebar'), overlay=document.getElementById('sidebarOverlay'),
+          hamburger=document.getElementById('navHamburger'), closeBtn=document.getElementById('sidebarClose');
+      function openSidebar(){ sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+      function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+      if(hamburger) hamburger.addEventListener('click', openSidebar);
+      if(closeBtn)  closeBtn.addEventListener('click', closeSidebar);
+      if(overlay)   overlay.addEventListener('click', closeSidebar);
+    })();
+    renderNavAuthBtn();
+  </script>
+</header>
+
+<main class="container">
+
+  <div class="wa-hero">
+    <div class="wa-hero-title">✦ <span class="lang-zh">财富问答</span><span class="lang-en">Wealth Q&amp;A</span></div>
+    <div class="wa-hero-sub">
+      <span class="lang-zh">基于今日黄历数据，解答财富行动相关问题。内容仅供参考，不构成任何财务建议。</span>
+      <span class="lang-en">Answers based on today's almanac data. For reference only, not financial advice.</span>
+    </div>
+  </div>
+
+  <!-- 黄历数据状态栏 -->
+  <div class="wa-status-bar">
+    <span id="waStatusText" class="wa-status-pending">
+      <span class="lang-zh">⏳ 正在读取今日黄历…</span>
+      <span class="lang-en">⏳ Loading today's almanac…</span>
+    </span>
+    <a class="wa-status-link" href="calendar.html">
+      <span class="lang-zh">查看完整黄历 →</span>
+      <span class="lang-en">View full almanac →</span>
+    </a>
+  </div>
+
+  <!-- 问题区域 -->
+  <div class="wa-card">
+    <div class="wa-cat-label"><span class="lang-zh">今日行动</span><span class="lang-en">Today's Actions</span></div>
+    <div class="wa-chips" id="chipsAction">
+      <button class="wa-chip" data-key="qianyue"><span class="lang-zh">今天适合签约吗？</span><span class="lang-en">Good day for contracts?</span></button>
+      <button class="wa-chip" data-key="chumen"><span class="lang-zh">今天适合出门吗？</span><span class="lang-en">Good day to go out?</span></button>
+      <button class="wa-chip" data-key="hezuo"><span class="lang-zh">今天适合谈合作吗？</span><span class="lang-en">Good for partnerships?</span></button>
+      <button class="wa-chip" data-key="jingzhu"><span class="lang-zh">今天适合静守还是行动？</span><span class="lang-en">Rest or act today?</span></button>
+      <button class="wa-chip" data-key="qiucai"><span class="lang-zh">如果我想求财，今天适合做什么？</span><span class="lang-en">Best wealth action today?</span></button>
+    </div>
+
+    <div class="wa-cat-label" style="margin-top:14px;"><span class="lang-zh">财运指引</span><span class="lang-en">Wealth Guidance</span></div>
+    <div class="wa-chips" id="chipsWealth">
+      <button class="wa-chip" data-key="caiyun"><span class="lang-zh">今天财运重点要注意什么？</span><span class="lang-en">Wealth focus today?</span></button>
+      <button class="wa-chip" data-key="fangwei"><span class="lang-zh">财神方位今天怎么用？</span><span class="lang-en">How to use wealth directions?</span></button>
+      <button class="wa-chip" data-key="shichen"><span class="lang-zh">哪个时辰更适合处理重要事情？</span><span class="lang-en">Best hour for important tasks?</span></button>
+      <button class="wa-chip" data-key="yanse"><span class="lang-zh">穿什么颜色更利于今天财运？</span><span class="lang-en">Best colour for wealth today?</span></button>
+      <button class="wa-chip" data-key="wenjian"><span class="lang-zh">今天见客户要注意什么？</span><span class="lang-en">Tips for meeting clients?</span></button>
+      <button class="wa-chip" data-key="biyao"><span class="lang-zh">今天最应该避开什么？</span><span class="lang-en">What to avoid today?</span></button>
+    </div>
+
+    <div class="wa-cat-label" style="margin-top:14px;"><span class="lang-zh">南北半球</span><span class="lang-en">Hemispheres</span></div>
+    <div class="wa-chips" id="chipsHemi">
+      <button class="wa-chip" data-key="nanbeiqiebie"><span class="lang-zh">南半球黄历和北半球黄历有什么区别？</span><span class="lang-en">Difference between hemispheres?</span></button>
+      <button class="wa-chip" data-key="qiuwen"><span class="lang-zh">今天应该优先求稳还是求进？</span><span class="lang-en">Play safe or take initiative?</span></button>
+    </div>
+
+    <!-- 自由输入 -->
+    <div class="wa-input-row">
+      <input class="wa-input" id="waInput" type="text" maxlength="80"
+        placeholder="或者直接输入问题… / Or type your question…" autocomplete="off"/>
+      <button class="wa-send" id="waSend">
+        <span class="lang-zh">提问</span><span class="lang-en">Ask</span>
+      </button>
+    </div>
+
+    <div class="wa-disclaimer">
+      <span class="lang-zh">以上内容基于传统黄历规则生成，仅供参考，不构成任何投资或财务建议。如需个性化分析，请前往「财神黄历」填写八字。</span>
+      <span class="lang-en">All answers are generated from traditional almanac rules for reference only. Not financial advice. For personalised analysis, fill in your BaZi on the almanac page.</span>
+    </div>
+  </div>
+
+  <!-- 问答记录 -->
+  <div class="wa-card" id="historyCard" style="display:none;">
+    <div style="font-weight:900;color:var(--gold);font-size:15px;margin-bottom:16px;">
+      <span class="lang-zh">问答记录</span><span class="lang-en">Q&amp;A History</span>
+    </div>
+    <div class="wa-history" id="historyList"></div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  // ══════════════════════════════════════════════
+  // 0. 基础变量
+  // ══════════════════════════════════════════════
+  var API_BASE = '';
+  var lang = document.documentElement.getAttribute('data-lang') || 'zh';
+  window.addEventListener('langchange', function(){
+    lang = document.documentElement.getAttribute('data-lang') || 'zh';
+  });
+
+  // 今日黄历数据（异步加载）
+  var dayData  = null;   // /api/day 返回的 day 对象
+  var hourData = null;   // basic_hour_table
+
+  // 今天日期
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' +
+    String(today.getMonth()+1).padStart(2,'0') + '-' +
+    String(today.getDate()).padStart(2,'0');
+
+  // ══════════════════════════════════════════════
+  // 1. 加载今日黄历数据
+  // ══════════════════════════════════════════════
+  fetch(API_BASE + '/api/day', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({date: todayStr})
+  })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(res){
+    if(!res || !res.day) return;
+    dayData  = res.day;
+    hourData = res.basic_hour_table || [];
+
+    var dateLabel = dayData.date + ' ' + (dayData.weekday||'') + ' · 农历 ' + (dayData.lunar_ymd||'');
+    document.getElementById('waStatusText').innerHTML =
+      '<span class="wa-status-ok">✓ ' + dateLabel + '</span>';
+  })
+  .catch(function(){
+    document.getElementById('waStatusText').innerHTML =
+      '<span style="opacity:.65;"><span class="lang-zh">黄历加载失败，回答将使用通用模板</span>' +
+      '<span class="lang-en">Almanac unavailable, using general templates</span></span>';
+  });
+
+  // ══════════════════════════════════════════════
+  // 2. 规则引擎 — 根据当前黄历数据生成回答
+  //    （后期替换此函数即可接入真实AI）
+  // ══════════════════════════════════════════════
+  function generateAnswer(key) {
+    var yi   = dayData ? (dayData.yi  || []) : [];
+    var ji   = dayData ? (dayData.ji  || []) : [];
+    var dir  = dayData ? (dayData.dir || {}) : {};
+    var cai  = dir.cai || '';
+    var xi   = dir.xi  || '';
+    var fu   = dir.fu  || '';
+
+    // 找今日吉时（luck=吉）
+    var jiHours = (hourData||[]).filter(function(h){ return h.luck === '吉'; });
+    var jiHourNames = jiHours.map(function(h){ return h.label; }).join('、') || '暂无吉时数据';
+
+    // 辅助：宜/忌中是否含某关键词
+    function hasYi(kw){ return yi.some(function(t){ return t.indexOf(kw)>=0; }); }
+    function hasJi(kw){ return ji.some(function(t){ return t.indexOf(kw)>=0; }); }
+
+    // 辅助：方位补充语
+    function dirNote(){
+      if(!cai) return '';
+      return '财神今日居' + cai + '方，处理财务事项时可优先面朝或前往该方位。';
+    }
+
+    // 辅助：宜忌摘要
+    function yijiNote(){
+      var y = yi.slice(0,4).join('、');
+      var j = ji.slice(0,4).join('、');
+      var s = '';
+      if(y) s += '今日宜：' + y + '。';
+      if(j) s += '今日忌：' + j + '。';
+      return s;
+    }
+
+    // ── 问题 → 回答映射 ──────────────────────────
+    var answers = {
+
+      qianyue: function(){
+        if(!dayData) return fallback('qianyue');
+        if(hasYi('签约') || hasYi('开市') || hasYi('订盟')){
+          return '今日宜中包含签约/开市类事项，整体适宜推进合同与协议。\n\n' +
+            yijiNote() + '\n' + dirNote() +
+            (jiHours.length ? '\n\n建议优先选在' + jiHourNames + '前后完成签署，可借助时辰吉力。' : '');
+        }
+        if(hasJi('签约') || hasJi('开市')){
+          return '今日忌中包含签约/开市类事项，建议审慎评估，非必要可推迟至下一吉日。\n\n' +
+            yijiNote() +
+            '\n\n如有急务无法推迟，可在' + (jiHourNames !== '暂无吉时数据' ? jiHourNames : '相对稳定的') + '时辰内办理，减少冲力。';
+        }
+        return '今日黄历对签约无特别加持，也无明显冲克。整体中性偏稳，适合完善条款细节，若各方已协商充分，可酌情推进。\n\n' + yijiNote() + '\n' + dirNote();
+      },
+
+      chumen: function(){
+        if(!dayData) return fallback('chumen');
+        if(hasYi('出行') || hasYi('远行') || hasYi('赴任')){
+          return '今日宜出行，可放心外出处理事务。\n\n' + yijiNote() +
+            (cai ? '\n\n出发时可优先朝' + cai + '方行进，借财神方位之利。' : '');
+        }
+        if(hasJi('出行') || hasJi('远行')){
+          return '今日忌出行，建议减少不必要的外出，尤其是长途或重要的商务行程。\n\n' + yijiNote() +
+            '\n\n如必须出门，选在' + (jiHourNames !== '暂无吉时数据' ? jiHourNames : '平稳') + '时辰出发，做好行程保障。';
+        }
+        return '今日出行无特别禁忌，可按原计划外出。注意查看实际交通和天气情况。\n\n' + yijiNote();
+      },
+
+      hezuo: function(){
+        if(!dayData) return fallback('hezuo');
+        var positive = hasYi('会友') || hasYi('订盟') || hasYi('签约') || hasYi('开市');
+        var negative = hasJi('争讼') || hasJi('词讼');
+        if(positive && !negative){
+          return '今日整体利于社交与合作洽谈，宜推进合伙或协商事项。\n\n' + yijiNote() +
+            (jiHours.length ? '\n\n建议在' + jiHourNames + '安排见面，吉时会谈更顺畅。' : '');
+        }
+        if(negative){
+          return '今日忌中含争讼类条目，合作谈判中须注意措辞，避免引起口角或误解。\n\n' + yijiNote() +
+            '\n\n建议以倾听为主，不急于当场拍板，给对方留出回旋余地。';
+        }
+        return '今日合作洽谈整体平稳，适合做前期沟通和信息确认。正式签约可另选吉日。\n\n' + yijiNote();
+      },
+
+      jingzhu: function(){
+        if(!dayData) return fallback('jingzhu');
+        var tianshenLuck = dayData.tianshen_luck || '';
+        var xiu_luck     = dayData.xiu_luck      || '';
+        var moreAction   = hasYi('开市') || hasYi('出行') || hasYi('赴任');
+        var moreRest     = (tianshenLuck === '凶') || hasJi('出行') || hasJi('开市');
+        if(moreAction){
+          return '今日日干支整体偏动，宜主动出击，适合开拓、洽谈、推进事项。\n\n' + yijiNote() +
+            (jiHours.length ? '\n\n重要行动可安排在' + jiHourNames + '执行。' : '');
+        }
+        if(moreRest){
+          return '今日能量偏内收，值神' + (dayData.tianshen||'') + (tianshenLuck==='凶'?'（凶）':'') + '，更宜静守、整理、复盘，不适合大举推进新项目。\n\n' + yijiNote();
+        }
+        return '今日阴阳较为平衡，静守与行动均可。\n\n建议：已启动的事项可稳步推进；新项目暂缓评估，等待更明朗的时机。\n\n' + yijiNote();
+      },
+
+      qiucai: function(){
+        if(!dayData) return fallback('qiucai');
+        return '求财行动建议：\n\n' +
+          (cai ? '① 财神居' + cai + '方，可朝该方向处理财务事项或见面洽谈。\n' : '') +
+          (jiHours.length ? '② 吉时：' + jiHourNames + '，适合主动出击或接洽。\n' : '') +
+          (hasYi('开市') || hasYi('签约') ? '③ 今日宜开市/签约，有条件的可推进商业决策。\n' : '') +
+          (hasJi('破财') || hasJi('损财') ? '④ 注意今日忌中含破财类条目，避免冲动消费和高风险投入。\n' : '') +
+          '\n' + yijiNote();
+      },
+
+      caiyun: function(){
+        if(!dayData) return fallback('caiyun');
+        return '今日财运关键点：\n\n' +
+          '· 日支：' + (dayData.day_gz||'—') + '，纳音：' + (dayData.day_nayin||'—') + '\n' +
+          '· 值神：' + (dayData.tianshen||'—') + '（' + (dayData.tianshen_luck||'—') + '）\n' +
+          (cai ? '· 财神方位：' + cai + '方\n' : '') +
+          '\n' + yijiNote() +
+          '\n\n总体来看：' + (
+            (dayData.tianshen_luck === '吉') ? '今日值神吉，财运稳中有进，适合主动推进。'
+            : (dayData.tianshen_luck === '凶') ? '今日值神凶，财运偏守，建议稳健行事，避免大额冒险。'
+            : '今日财运平稳，正常推进即可，无须刻意规避也无须特别激进。'
+          );
+      },
+
+      fangwei: function(){
+        if(!dayData) return fallback('fangwei');
+        var parts = [];
+        if(cai) parts.push('财神：' + cai + '方（主动求财方向）');
+        if(xi)  parts.push('喜神：' + xi  + '方（利于洽谈、喜事）');
+        if(fu)  parts.push('福神：' + fu  + '方（利于稳健积累）');
+        if(dir.yanggui) parts.push('阳贵：' + dir.yanggui + '方');
+        if(dir.yingui)  parts.push('阴贵：' + dir.yingui  + '方');
+        if(!parts.length) return fallback('fangwei');
+        return '今日诸神方位：\n\n' + parts.join('\n') +
+          '\n\n使用方式：\n· 办公桌朝财神方摆放，有助聚气\n· 出门谈事前朝财神方站立片刻\n· 重要文件、合同可放置于财神方位置';
+      },
+
+      shichen: function(){
+        if(!dayData) return fallback('shichen');
+        if(!jiHours.length){
+          var pingHours = (hourData||[]).filter(function(h){ return h.luck !== '凶'; });
+          var pingNames = pingHours.map(function(h){ return h.label; }).join('、') || '暂无数据';
+          return '今日暂无标注为「吉」的时辰，建议选择非凶时辰处理重要事项：' + pingNames + '。\n\n如时间不允许，做好充分准备，减少临时变动即可。';
+        }
+        return '今日吉时：' + jiHourNames + '\n\n建议将签约、会谈、提案等重要事项安排在上述时辰内完成。\n\n' +
+          '其中尤以第一个吉时（' + jiHours[0].label + '，' + jiHours[0].range + '）最为稳妥，可优先考虑。';
+      },
+
+      yanse: function(){
+        if(!dayData) return fallback('yanse');
+        var gz = dayData.day_gz || '';
+        var gan = gz[0] || '';
+        var colorMap = {
+          '甲':'绿色、青色','乙':'绿色、青色',
+          '丙':'红色、橙色','丁':'红色、橙色',
+          '戊':'黄色、棕色','己':'黄色、棕色',
+          '庚':'白色、金属色','辛':'白色、金属色',
+          '壬':'黑色、深蓝色','癸':'黑色、深蓝色',
+        };
+        var color = colorMap[gan] || '';
+        if(!color) return fallback('yanse');
+        return '今日日干为「' + gan + '」，对应五行主色为：' + color + '。\n\n穿着或搭配这类颜色，与今日日主五行同气，有助于提升整体气场协调感。\n\n辅助参考：着装整洁大方本身即是旺财基础，颜色为辅，状态为主。';
+      },
+
+      wenjian: function(){
+        if(!dayData) return fallback('wenjian');
+        return '今日见客户注意事项：\n\n' +
+          (jiHours.length ? '· 尽量将见面时间安排在吉时：' + jiHourNames + '\n' : '') +
+          (hasJi('争讼') || hasJi('词讼') ? '· 今日忌争讼，保持沟通温和，避免当场对抗\n' : '') +
+          (hasYi('会友') || hasYi('签约') ? '· 今日宜会客/签约，可主动推进合作议题\n' : '') +
+          (cai ? '· 出发时可朝财神方位（' + cai + '方）出发\n' : '') +
+          '\n' + yijiNote() +
+          '\n\n整体建议：充分准备资料，掌握主动权，避免临时抱佛脚。';
+      },
+
+      biyao: function(){
+        if(!dayData) return fallback('biyao');
+        var jiList = ji.slice(0,6).join('、') || '暂无数据';
+        return '今日最应避开的事项：\n\n' + jiList +
+          '\n\n冲煞：' + (dayData.chong_desc||'无') +
+          '\n值神：' + (dayData.tianshen||'—') + '（' + (dayData.tianshen_luck||'—') + '）' +
+          '\n\n以上为今日黄历明确标注的忌事，建议尽量绕开或推迟。若因现实原因无法回避，做好预备方案，保持灵活。';
+      },
+
+      nanbeiqiebie: function(){
+        return '南半球黄历与北半球黄历的区别：\n\n' +
+          '【核心相同】\n天干地支、宜忌、时辰吉凶、方位神位，以传统黄历算法计算，南北半球完全一致。\n\n' +
+          '【解读层不同】\n南半球（如新西兰）与北半球季节相反：北半球4月是春季，南半球4月是秋季。\n因此本站在五行穿衣、季节建议等解读内容上，会根据所在半球做本地化调整。\n\n' +
+          '【结论】\n无论选南半球还是北半球模式，黄历数据本身不变，变的是季节解读。\n在新西兰等南半球地区，建议选「南半球模式」获得更贴合当地时令的参考。';
+      },
+
+      qiuwen: function(){
+        if(!dayData) return fallback('qiuwen');
+        var tianshenLuck = dayData.tianshen_luck || '';
+        var hasAction = hasYi('开市') || hasYi('出行') || hasYi('赴任') || hasYi('求财');
+        var hasRetreat = (tianshenLuck === '凶') || hasJi('开市') || hasJi('出行');
+        if(hasAction && !hasRetreat){
+          return '今日宜求进。\n\n值神' + (dayData.tianshen||'') + (tianshenLuck==='吉'?'（吉）':'') + '，宜中有行动相关条目，适合主动出击、推进项目、接洽合作。\n\n' + yijiNote();
+        }
+        if(hasRetreat){
+          return '今日宜求稳。\n\n' + (tianshenLuck === '凶' ? '值神' + (dayData.tianshen||'') + '（凶），' : '') + '今日忌中含行动类事项，建议以守为主，复盘整理，避免大举开拓。\n\n' + yijiNote();
+        }
+        return '今日求稳求进均可，视实际情况灵活决定。\n\n对于已有把握的事项，可稳步推进；对于尚不成熟的决策，可再等待观察。\n\n' + yijiNote();
+      },
+
+    };
+
+    var fn = answers[key];
+    return fn ? fn() : fallback(key);
+  }
+
+  // 保底回答（无黄历数据时）
+  function fallback(key){
+    var map = {
+      qianyue: '签约前建议确认合同条款完整、各方意见一致。选择上午或双方精力充沛时签署，避免仓促。',
+      chumen:  '出门前检查行程安排，做好天气和交通预案。重要商务出行建议提前确认目的地信息。',
+      hezuo:   '合作洽谈以倾听为主，不急于当场拍板。确认对方需求和自身边界，重要条款书面确认。',
+      jingzhu: '根据当前进展判断：已启动项目可稳步推进，新项目暂缓评估，等待更充分准备。',
+      qiucai:  '求财以本业为根基，稳中求进。避免轻信短期暴利信息，长期积累更可靠。',
+      caiyun:  '今日财运建议参考完整黄历数据。前往财神黄历页面加载完整内容，可获得更准确分析。',
+      fangwei: '传统财神方位以东南方居多，但每日方位不同。建议前往财神黄历页面查看今日具体方位。',
+      shichen: '建议选择上午精力充沛的时段处理重要事项，下午可处理例行事务，避免疲惫状态做重大决策。',
+      yanse:   '无黄历数据时，建议根据个人喜好选择令自己舒适自信的颜色，状态最重要。',
+      wenjian: '见客户前充分准备资料，提前5分钟到达，着装整洁。以倾听为主，避免急于推销。',
+      biyao:   '通用建议：避免冲动消费、避免言语冲突、重要事项做书面确认、不轻信口头承诺。',
+      nanbeiqiebie: '南北半球黄历核心算法相同，区别在季节解读层面。新西兰用户建议选南半球模式。',
+      qiuwen:  '根据当前项目状态决定：有把握的稳步推进，不确定的再等等看。',
+    };
+    return map[key] || '建议前往财神黄历页面查看今日完整数据，可获得更准确的参考。';
+  }
+
+  // ══════════════════════════════════════════════
+  // 3. 交互逻辑
+  // ══════════════════════════════════════════════
+  var msgCounter = 0;
+
+  // 点击预设问题
+  document.querySelectorAll('.wa-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('.wa-chip').forEach(function(c){ c.classList.remove('selected'); });
+      chip.classList.add('selected');
+      var key = chip.dataset.key;
+      var question = chip.querySelector('.lang-zh') ? chip.querySelector('.lang-zh').textContent : chip.textContent;
+      ask(question, key);
+    });
+  });
+
+  // 发送按钮
+  document.getElementById('waSend').addEventListener('click', function(){
+    var q = (document.getElementById('waInput').value || '').trim();
+    if(!q) return;
+    document.getElementById('waInput').value = '';
+    document.querySelectorAll('.wa-chip').forEach(function(c){ c.classList.remove('selected'); });
+    // 自由输入：尝试模糊匹配key，否则用通用回答
+    var key = guessKey(q);
+    ask(q, key);
+  });
+
+  document.getElementById('waInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      document.getElementById('waSend').click();
+    }
+  });
+
+  // 模糊匹配key
+  function guessKey(q){
+    if(q.indexOf('签约')>=0 || q.indexOf('合同')>=0) return 'qianyue';
+    if(q.indexOf('出门')>=0 || q.indexOf('出行')>=0) return 'chumen';
+    if(q.indexOf('合作')>=0 || q.indexOf('谈判')>=0) return 'hezuo';
+    if(q.indexOf('静')>=0   || q.indexOf('行动')>=0) return 'jingzhu';
+    if(q.indexOf('求财')>=0 || q.indexOf('赚钱')>=0) return 'qiucai';
+    if(q.indexOf('财运')>=0 || q.indexOf('运势')>=0) return 'caiyun';
+    if(q.indexOf('方位')>=0 || q.indexOf('财神')>=0) return 'fangwei';
+    if(q.indexOf('时辰')>=0 || q.indexOf('几点')>=0) return 'shichen';
+    if(q.indexOf('颜色')>=0 || q.indexOf('穿')>=0)   return 'yanse';
+    if(q.indexOf('客户')>=0 || q.indexOf('见面')>=0) return 'wenjian';
+    if(q.indexOf('避')>=0   || q.indexOf('忌')>=0)   return 'biyao';
+    if(q.indexOf('南半球')>=0|| q.indexOf('北半球')>=0) return 'nanbeiqiebie';
+    if(q.indexOf('稳')>=0   || q.indexOf('进')>=0)   return 'qiuwen';
+    return null;
+  }
+
+  // 提问 + 显示回答
+  function ask(question, key){
+    var historyCard = document.getElementById('historyCard');
+    var historyList = document.getElementById('historyList');
+    historyCard.style.display = '';
+
+    // 问题气泡
+    var qId = 'msg-' + (++msgCounter);
+    var qDiv = document.createElement('div');
+    qDiv.id = qId;
+    qDiv.className = 'wa-bubble wa-bubble-q';
+    qDiv.innerHTML = '<div class="wa-bubble-label">你问</div><div class="wa-bubble-body"></div>';
+    qDiv.querySelector('.wa-bubble-body').textContent = question;
+    historyList.appendChild(qDiv);
+
+    // 回答气泡（模拟延迟感）
+    var aId = 'msg-' + (++msgCounter);
+    var aDiv = document.createElement('div');
+    aDiv.id = aId;
+    aDiv.className = 'wa-bubble wa-bubble-a';
+    aDiv.innerHTML = '<div class="wa-bubble-label">财富问答</div><div class="wa-bubble-body" style="opacity:.5;font-style:italic;">正在分析今日黄历…</div>';
+    historyList.appendChild(aDiv);
+    aDiv.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+    // 延迟 400ms 显示回答，增加自然感
+    setTimeout(function(){
+      var answer = key ? generateAnswer(key) : fallback(null);
+      var body = aDiv.querySelector('.wa-bubble-body');
+      body.style.opacity = '';
+      body.style.fontStyle = '';
+      body.textContent = answer;
+
+      // 加时间戳
+      var meta = document.createElement('div');
+      meta.className = 'wa-bubble-meta';
+      var now = new Date();
+      meta.textContent = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + ' · 基于今日黄历规则';
+      aDiv.appendChild(meta);
+      aDiv.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 420);
+  }
+
+})();
+</script>
+</body>
+</html>
