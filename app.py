@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 财神日历 Flask 后端（本地开发）
-依赖: flask, lunar-python, flask-cors
+依赖: flask, lunar-python, flask-cors, openai, python-dotenv
 运行: python app.py
 """
 
@@ -12,6 +12,13 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from lunar_python import Solar
 
+# 加载 .env（本地开发用）
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "api"))
 from _almanac import (
     compute_bazi_from_birth, compute_bazi_from_manual,
@@ -19,6 +26,12 @@ from _almanac import (
     build_personal_analysis,
     split_gz, SHI_CHEN_RANGES, ZHI_ORDER,
 )
+from _wuxing_rules import (
+    GAN_WUXING, WUXING_TO_COLORS, WUXING_TO_COLORS_EN, WUXING_EN,
+    get_season, SEASON_NOTE_ZH, SEASON_NOTE_EN,
+)
+from ai_summary import _generate_summaries
+from ai_qa import _ask as _ai_ask
 
 app = Flask(__name__, static_folder="static", template_folder=".")
 CORS(app)
@@ -160,6 +173,75 @@ def api_personal_day_manual():
 @app.route("/<path:filename>")
 def static_files(filename):
     return send_from_directory(".", filename)
+
+
+# ──────────────────────────────────────────────
+# 新增：五行穿衣、AI时辰总结、AI财富问答
+# ──────────────────────────────────────────────
+
+@app.route("/api/wardrobe", methods=["POST"])
+def api_wardrobe():
+    data      = request.get_json(force=True) or {}
+    day_gz    = (data.get("day_gz") or "").strip()
+    month     = int(data.get("month") or 1)
+    hemi      = (data.get("hemisphere") or "south").strip().lower()
+
+    day_gan   = day_gz[0] if day_gz else ""
+    wuxing    = GAN_WUXING.get(day_gan, "土")
+    colors    = WUXING_TO_COLORS.get(wuxing, WUXING_TO_COLORS["土"])
+    colors_en = WUXING_TO_COLORS_EN.get(wuxing, WUXING_TO_COLORS_EN["土"])
+    season    = get_season(month, hemi)
+
+    hemi_note_zh = (
+        "以上颜色建议基于传统五行日干推算，季节说明已根据南半球时令做本地化调整。黄历干支与吉凶本体不变。"
+        if hemi == "south" else
+        "以上颜色建议基于传统五行日干推算，季节说明依据北半球时令。黄历干支与吉凶本体不变。"
+    )
+    hemi_note_en = (
+        "Colour suggestions are based on traditional Five Elements principles. "
+        "Seasonal context has been localised for the Southern Hemisphere. "
+        "The Chinese almanac and Ganzhi calculations remain unchanged."
+        if hemi == "south" else
+        "Colour suggestions are based on traditional Five Elements principles. "
+        "Seasonal context follows Northern Hemisphere seasons."
+    )
+
+    return jsonify({
+        "wuxing": wuxing, "wuxing_en": WUXING_EN.get(wuxing, wuxing),
+        "main_color": colors["main"], "support_color": colors["support"], "avoid_color": colors["avoid"],
+        "main_color_en": colors_en["main"], "support_color_en": colors_en["support"], "avoid_color_en": colors_en["avoid"],
+        "season": season,
+        "season_note_zh": SEASON_NOTE_ZH[season], "season_note_en": SEASON_NOTE_EN[season],
+        "hemisphere_note_zh": hemi_note_zh, "hemisphere_note_en": hemi_note_en,
+    })
+
+
+@app.route("/api/ai_summary", methods=["POST"])
+def api_ai_summary():
+    data  = request.get_json(force=True) or {}
+    hours = data.get("hours") or []
+    if not hours:
+        return jsonify({"items": [], "ai_unavailable": True}), 400
+    items = _generate_summaries(hours)
+    if not items:
+        return jsonify({"items": [], "ai_unavailable": True})
+    return jsonify({"items": items})
+
+
+@app.route("/api/ai_qa", methods=["POST"])
+def api_ai_qa():
+    data           = request.get_json(force=True) or {}
+    question       = (data.get("question") or "").strip()
+    visible_prompt = (data.get("visible_prompt") or "").strip()
+    lang           = (data.get("lang") or "zh").strip()
+    if not question:
+        return jsonify({"answer": "", "ai_unavailable": True}), 400
+    answer = _ai_ask(question, visible_prompt, lang)
+    if not answer:
+        fallback = ("AI assistant is currently unavailable."
+                    if lang == "en" else "AI助手暂时不可用，请直接参考今日黄历内容。")
+        return jsonify({"answer": fallback, "ai_unavailable": True})
+    return jsonify({"answer": answer})
 
 
 if __name__ == "__main__":

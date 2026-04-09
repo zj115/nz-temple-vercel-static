@@ -1,37 +1,16 @@
 {
   "version": 2,
   "routes": [
-    {
-      "src": "/api/bazi",
-      "dest": "/api/bazi.py"
-    },
-    {
-      "src": "/api/day",
-      "dest": "/api/day.py"
-    },
-    {
-      "src": "/api/personal_day_birth",
-      "dest": "/api/personal_day_birth.py"
-    },
-    {
-      "src": "/api/personal_day_manual",
-      "dest": "/api/personal_day_manual.py"
-    },
-    {
-      "src": "/images/(.*)",
-      "dest": "/images/$1"
-    },
-    {
-      "src": "/data/(.*)",
-      "dest": "/data/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
+    { "src": "/api/bazi",                  "dest": "/api/bazi.py" },
+    { "src": "/api/day",                   "dest": "/api/day.py" },
+    { "src": "/api/personal_day_birth",    "dest": "/api/personal_day_birth.py" },
+    { "src": "/api/personal_day_manual",   "dest": "/api/personal_day_manual.py" },
+    { "src": "/api/ai_summary",            "dest": "/api/ai_summary.py" },
+    { "src": "/api/ai_qa",                 "dest": "/api/ai_qa.py" },
+    { "src": "/api/wardrobe",              "dest": "/api/wardrobe.py" },
+    { "src": "/images/(.*)",               "dest": "/images/$1" },
+    { "src": "/data/(.*)",                 "dest": "/data/$1" },
+    { "src": "/",                          "dest": "/index.html" },
+    { "src": "/(.*)",                      "dest": "/$1" }
   ]
 }

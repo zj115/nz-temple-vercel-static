@@ -303,7 +303,49 @@
   .hl-card{padding:12px;}
   .section-title{font-size:14px;}
 }
-</style>
+
+/* ── 五行穿衣 ── */
+.wardrobe-card{border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:16px;background:rgba(255,213,122,.04);margin-top:14px;}
+.wardrobe-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.wardrobe-label{font-size:12px;opacity:.65;min-width:52px;padding-top:2px;}
+.wardrobe-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.color-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--border);}
+.color-chip.main{background:rgba(255,213,122,.14);border-color:rgba(255,213,122,.32);color:var(--gold);}
+.color-chip.support{background:rgba(100,160,255,.10);border-color:rgba(100,160,255,.25);color:rgba(160,200,255,.9);}
+.color-chip.avoid{background:rgba(220,90,90,.10);border-color:rgba(220,90,90,.25);color:var(--red);}
+.wardrobe-note{font-size:12px;opacity:.65;line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+
+/* ── AI时辰总结 ── */
+.ai-summary-bar{margin-top:8px;padding:7px 10px;border-radius:10px;background:rgba(255,213,122,.05);border:1px solid rgba(255,213,122,.14);font-size:12px;line-height:1.65;color:var(--text-muted);}
+.ai-summary-bar.loading{opacity:.5;font-style:italic;}
+.ai-summary-label{font-size:10px;color:var(--gold2);font-weight:700;letter-spacing:.5px;margin-bottom:3px;}
+
+/* ── AI问答弹窗 ── */
+#aiQaModal{position:fixed;inset:0;z-index:500;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);}
+#aiQaModal.hidden{display:none!important;}
+#aiQaSheet{width:100%;max-width:640px;background:linear-gradient(180deg,#14162e 0%,#0d0d18 100%);border-radius:24px 24px 0 0;border:1px solid var(--line);padding:24px 20px 32px;max-height:85vh;overflow-y:auto;}
+@media(min-width:640px){#aiQaSheet{border-radius:24px;margin-bottom:60px;}}
+.aiqa-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.aiqa-title{font-size:16px;font-weight:900;color:var(--gold);}
+.aiqa-close{background:none;border:none;font-size:22px;color:var(--text-muted);cursor:pointer;padding:0 4px;}
+.aiqa-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.aiqa-chip{padding:7px 14px;border-radius:999px;font-size:13px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text-muted);cursor:pointer;transition:all .18s;}
+.aiqa-chip:hover{background:rgba(255,213,122,.08);border-color:rgba(255,213,122,.3);color:var(--gold2);}
+.aiqa-input-row{display:flex;gap:8px;margin-bottom:16px;}
+.aiqa-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;}
+.aiqa-input:focus{outline:none;border-color:rgba(255,213,122,.35);}
+.aiqa-send{background:rgba(255,213,122,.12);border:1px solid rgba(255,213,122,.3);color:var(--gold);border-radius:12px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.aiqa-send:hover{background:rgba(255,213,122,.22);}
+.aiqa-send:disabled{opacity:.4;cursor:not-allowed;}
+.aiqa-answer{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:14px;line-height:1.8;color:var(--text);}
+.aiqa-answer.loading{opacity:.6;font-style:italic;}
+.aiqa-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r-sm);font-size:14px;font-weight:700;color:var(--gold2);background:rgba(255,213,122,.08);border:1px solid rgba(255,213,122,.2);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.aiqa-nav-btn:hover{background:rgba(255,213,122,.15);color:var(--gold);}
+@media(max-width:600px){
+  .wardrobe-row{gap:6px;}
+  .aiqa-chips{gap:6px;}
+  .aiqa-chip{font-size:12px;padding:6px 11px;}
+}
 </head>
 <body>
 <div class="bg-ornament"></div>
@@ -330,6 +372,7 @@
     <a href="shop.html"><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
     <a href="profile.html"><span class="lang-zh">资料</span><span class="lang-en">Profile</span></a>
     <a href="login.html" id="sidebarLoginLink"><span class="lang-zh">登录</span><span class="lang-en">Login</span></a>
+    <button class="aiqa-nav-btn" id="sidebarAiQaBtn" type="button" style="margin:8px 12px;width:calc(100% - 24px);">✦ <span class="lang-zh">AI财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></button>
   </nav>
   <div class="sidebar-foot">
     <button class="btn btn-ghost btn-lang" type="button" id="langToggleSidebar">
@@ -366,6 +409,7 @@
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
       <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
+      <button class="aiqa-nav-btn" id="navAiQaBtn" type="button">✦ <span class="lang-zh">AI财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></button>
     </nav>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
@@ -560,6 +604,14 @@
         <div class="hour-grid" id="persHourGrid"></div>
       </div>
 
+      <!-- ── 五行穿衣催财 ── -->
+      <div class="hl-card" id="secWardrobe" style="display:none;">
+        <div class="section-title">
+          <span class="lang-zh">五行穿衣催财</span><span class="lang-en">Five Elements Wardrobe</span>
+        </div>
+        <div id="wardrobeContent"></div>
+      </div>
+
       <!-- 详细关系分析 -->
       <div class="hl-card" id="secDetail">
         <div class="section-title">
@@ -684,6 +736,37 @@
   </div>
 
 </main>
+
+<!-- ══════ AI 财富问答弹窗 ══════ -->
+<div id="aiQaModal" class="hidden" role="dialog" aria-modal="true">
+  <div id="aiQaSheet">
+    <div class="aiqa-header">
+      <div class="aiqa-title">✦ <span class="lang-zh">AI 财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></div>
+      <button class="aiqa-close" id="aiQaClose" aria-label="Close">✕</button>
+    </div>
+    <p style="font-size:13px;opacity:.65;margin-bottom:14px;line-height:1.6;">
+      <span class="lang-zh">基于今日黄历内容智能解答，不重新算命，不承诺财富结果。</span>
+      <span class="lang-en">Answers are based on today's almanac data. No new fortune-telling, no guaranteed wealth outcomes.</span>
+    </p>
+    <div class="aiqa-chips" id="aiQaChips">
+      <button class="aiqa-chip" data-zh="今天适合签约吗？" data-en="Is today good for signing contracts?"><span class="lang-zh">今天适合签约吗？</span><span class="lang-en">Good for contracts?</span></button>
+      <button class="aiqa-chip" data-zh="今天财运重点是什么？" data-en="What is the wealth focus today?"><span class="lang-zh">今天财运重点？</span><span class="lang-en">Wealth focus today?</span></button>
+      <button class="aiqa-chip" data-zh="今天穿什么颜色更旺财？" data-en="Which colour boosts wealth today?"><span class="lang-zh">穿什么颜色旺财？</span><span class="lang-en">Best wealth colour?</span></button>
+      <button class="aiqa-chip" data-zh="今天适合出门还是静修？" data-en="Should I go out or stay home today?"><span class="lang-zh">出门还是静修？</span><span class="lang-en">Go out or stay in?</span></button>
+      <button class="aiqa-chip" data-zh="财神方位今天怎么用？" data-en="How to use the wealth directions today?"><span class="lang-zh">财神方位怎么用？</span><span class="lang-en">How to use wealth directions?</span></button>
+    </div>
+    <div class="aiqa-input-row">
+      <input class="aiqa-input" id="aiQaInput" type="text" maxlength="100"
+        placeholder="输入问题… / Ask a question…" autocomplete="off"/>
+      <button class="aiqa-send" id="aiQaSend">
+        <span class="lang-zh">发送</span><span class="lang-en">Send</span>
+      </button>
+    </div>
+    <div id="aiQaAnswerWrap" style="display:none;">
+      <div class="aiqa-answer" id="aiQaAnswer"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -871,6 +954,10 @@
       renderPersonalHours(res.personal_hour_table);
       secBazi.classList.remove('hidden');
       mainContent.classList.remove('hidden');
+      // 异步加载五行穿衣（不阻塞主页面）
+      loadWardrobe(res.day);
+      // 异步加载AI时辰总结（不阻塞主页面）
+      loadAiSummaries(res.personal_hour_table);
     });
   });
 
@@ -1247,21 +1334,21 @@
   // ── Canvas 绘制黄历 ────────────────────────────
   // titleOverride: 可选，若传入则替换顶部标题文字（用于个性化黄历）
   function drawHuangliCanvas(day, hours, titleOverride, personal){
-    // 尺寸（竖版）
-    var W = 800, H = 950;
+    // 尺寸：参考图比例 1320×1959 = 0.674，无底部footer
+    var W = 1320, H = 1920;
     var cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     var c = cv.getContext('2d');
 
-    // 颜色常量
-    var BG      = '#f5f0e6';   // 米色底
-    var BROWN   = '#5c3d1e';   // 深棕（边框、标题栏）
-    var BROWN2  = '#8b6340';   // 中棕（细边框）
-    var DARK    = '#2c1a00';   // 正文深棕黑
-    var GOLD    = '#f5e6b3';   // 标题栏金色文字
-    var GREEN_C = '#2d6a30';   // 宜 圆
-    var RED_C   = '#8b1a1a';   // 忌 圆
-    var AMBER   = '#8b6340';   // 平 圆
+    // ── 颜色常量 ──
+    var BG      = '#f5f0e6';   // 米白底（参考图标准色）
+    var BROWN   = '#4a2e0e';   // 深棕
+    var BROWN2  = '#7a5230';   // 中棕
+    var DARK    = '#1e1000';   // 深棕黑（正文）
+    var GOLD    = '#f0dfa0';   // 金色（标题栏文字）
+    var GREEN_C = '#1e5c20';
+    var RED_C   = '#7a1010';
+    var AMBER   = '#7a5230';
 
     // ── 辅助函数 ──
     function rect(x,y,w,h,fill,stroke,lw){
@@ -1272,275 +1359,453 @@
     function hline(y,x1,x2,col,lw){ c.beginPath(); c.moveTo(x1,y); c.lineTo(x2,y); c.strokeStyle=col||BROWN2; c.lineWidth=lw||1; c.stroke(); }
     function vline(x,y1,y2,col,lw){ c.beginPath(); c.moveTo(x,y1); c.lineTo(x,y2); c.strokeStyle=col||BROWN2; c.lineWidth=lw||1; c.stroke(); }
     function txt(str,x,y,font,fill,align,baseline){
-      c.font = font; c.fillStyle = fill||DARK;
-      c.textAlign = align||'left'; c.textBaseline = baseline||'top';
+      c.font=font; c.fillStyle=fill||DARK;
+      c.textAlign=align||'left'; c.textBaseline=baseline||'top';
       c.fillText(str,x,y);
     }
-    function circle(x,y,r,fill){
+    function circle(x,y,r,fill,stroke,slw){
       c.beginPath(); c.arc(x,y,r,0,Math.PI*2);
       c.fillStyle=fill; c.fill();
+      if(stroke){ c.strokeStyle=stroke; c.lineWidth=slw||1.5; c.stroke(); }
     }
-    // 竖向写字（逐字向下）
     function vtxt(str,x,startY,font,fill,lineH){
       c.font=font; c.fillStyle=fill||DARK; c.textAlign='center'; c.textBaseline='top';
-      var lh = lineH || 22;
-      for(var i=0;i<str.length;i++){
-        c.fillText(str[i], x, startY + i*lh);
-      }
+      var lh=lineH||22;
+      for(var i=0;i<str.length;i++) c.fillText(str[i],x,startY+i*lh);
     }
-    // 太极圆（简版）
     function yin_yang(cx,cy,r){
-      // 外圆白底
-      c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.fillStyle='#fff'; c.fill();
-      // 右半黑
+      c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.fillStyle='#e8d9b0'; c.fill();
       c.beginPath(); c.arc(cx,cy,r,-Math.PI/2,Math.PI/2); c.fillStyle=BROWN; c.fill();
-      // 上小白圆
-      c.beginPath(); c.arc(cx,cy-r/2,r/2,0,Math.PI*2); c.fillStyle='#fff'; c.fill();
-      // 下小黑圆
+      c.beginPath(); c.arc(cx,cy-r/2,r/2,0,Math.PI*2); c.fillStyle='#e8d9b0'; c.fill();
       c.beginPath(); c.arc(cx,cy+r/2,r/2,0,Math.PI*2); c.fillStyle=BROWN; c.fill();
-      // 上小黑点
-      circle(cx,cy-r/2,r/6,BROWN);
-      // 下小白点
-      circle(cx,cy+r/2,r/6,'#fff');
-      // 外圆边
-      c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.strokeStyle=BROWN; c.lineWidth=1.5; c.stroke();
+      circle(cx,cy-r/2,r/6,BROWN); circle(cx,cy+r/2,r/6,'#e8d9b0');
+      c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.strokeStyle='#e8d9b0'; c.lineWidth=2; c.stroke();
     }
 
-    // 解析数据
+    // ── 解析数据 ──
     var d = new Date(day.date+'T00:00:00');
     var WD = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
     var YR = d.getFullYear();
     var MO = (d.getMonth()+1)+'月';
     var DN = d.getDate();
-    // 农历解析 —— 只取月份和日期，去掉年份
-    // lunar_ymd 可能是 "2026年二月初五" 或 "二〇二六年二月初五" 等格式
-    var lunarStr = day.lunar_ymd || '';
-    // 去掉阿拉伯数字年份（如 "2026年"）和中文数字年份（如 "二〇二六年"）
-    lunarStr = lunarStr.replace(/^[^月]+年/, '');
-    var lunarM='',lunarD='';
+    var lunarStr = day.lunar_ymd||'';
+    lunarStr = lunarStr.replace(/^[^月]+年/,'');
+    var lunarM='', lunarD='';
     var lm = lunarStr.match(/^(.{1,4})[月](.+)$/);
-    if(lm){lunarM=lm[1]+'月';lunarD=lm[2];}else{lunarD=lunarStr;}
+    if(lm){lunarM=lm[1]+'月'; lunarD=lm[2];}else{lunarD=lunarStr;}
     var ZIRAN={'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
-    var yZhi = (day.year_gz||'').length>=2?(day.year_gz)[1]:'';
-    var yearBadge = (day.year_gz||'')+(ZIRAN[yZhi]||'')+'年';
-    var yi = (personal && personal.personal_yi && personal.personal_yi.length) ? personal.personal_yi : (day.yi || []);
-    var ji = (personal && personal.personal_ji && personal.personal_ji.length) ? personal.personal_ji : (day.ji || []);
-    var chong = day.chong_desc || '—';
+    var yZhi=(day.year_gz||'').length>=2?day.year_gz[1]:'';
+    var yearBadge=(day.year_gz||'')+(ZIRAN[yZhi]||'')+'年';
+    var yi  =(personal&&personal.personal_yi&&personal.personal_yi.length)?personal.personal_yi:(day.yi||[]);
+    var ji  =(personal&&personal.personal_ji&&personal.personal_ji.length)?personal.personal_ji:(day.ji||[]);
+    var chong=day.chong_desc||'—';
 
-    // ════════════════════════════════
-    // 1. 整体背景
+    // ════════════════════════════════════════════════
+    // ── 比例系统（全部按 W/H 推导，无写死像素）──
+    // ════════════════════════════════════════════════
+    var BX   = Math.round(W*0.015);          // 左右边距 ~20
+    var TB_H = Math.round(H*0.090);          // 顶部标题栏高度 ~173
+    // 无页脚：内容区直接到底部，留少量底边距
+    var BY   = TB_H + Math.round(H*0.007);
+    var BW   = W - BX*2;
+    var BH   = H - BY - Math.round(H*0.010);
+    // 各行高度（按比例）
+    var R1H  = Math.round(H*0.062);          // 日期行
+    var R2H  = Math.round(H*0.205);          // 主日期区
+    var R3H  = Math.round(H*0.090);          // 方位栏
+    var R1Y  = BY;
+    var R2Y  = R1Y+R1H;
+    var R3Y  = R2Y+R2H;
+    var R4Y  = R3Y+R3H;
+    var R4H  = BH-(R4Y-BY);
+    // 宽度分配
+    var LW      = Math.round(BW*0.215);      // 左农历区
+    var RW      = Math.round(BW*0.225);      // 右干支区
+    var YI_W    = Math.round(BW*0.210);      // 宜栏宽
+    var JI_W    = Math.round(BW*0.210);      // 忌栏宽
+    var MID_W   = BW-YI_W-JI_W;             // 中间宽
+    var dirLblW = Math.round(BW*0.088);      // 方位标签宽
+    var D_LW    = Math.round(BW*0.112);      // 日期行左宽
+    var D_RW    = Math.round(BW*0.112);      // 日期行右宽
+
+    // ════════ 1. 整体背景 ════════
     rect(0,0,W,H,BG);
 
-    // ════════════════════════════════
-    // 2. 顶部标题栏
-    var TB_H = 64;
+    // ════════ 2. 顶部标题栏（匾额感） ════════
     rect(0,0,W,TB_H,BROWN);
-    // 太极
-    yin_yang(44, TB_H/2, 20);
-    yin_yang(W-44, TB_H/2, 20);
-    // 标题
-    var titleText = titleOverride ? '新西兰财神庙 · ' + titleOverride : '新西兰财神庙';
-    var titleFontSize = titleOverride ? 22 : 28;
-    txt(titleText, W/2, TB_H/2, 'bold ' + titleFontSize + 'px "PingFang SC","STSong","SimSun",serif', GOLD, 'center', 'middle');
+    hline(TB_H,   0, W, '#2a1800', 4);
+    hline(TB_H+4, 0, W, '#8a6030', 1.5);
+    var yy_r=Math.round(W*0.024);
+    var yy_x=Math.round(W*0.050);
+    yin_yang(yy_x, TB_H/2, yy_r);
+    yin_yang(W-yy_x, TB_H/2, yy_r);
+    if(titleOverride){
+      // 个性化：主标题正常大小，副标题弱化
+      txt('新西兰财神庙', W/2, TB_H/2-Math.round(TB_H*0.18),
+          'bold '+Math.round(TB_H*0.36)+'px "STKaiti","STSong","PingFang SC",serif', GOLD, 'center','middle');
+      txt('· '+titleOverride+' ·', W/2, TB_H/2+Math.round(TB_H*0.17),
+          Math.round(TB_H*0.16)+'px "STKaiti","PingFang SC",serif', '#c8b060', 'center','middle');
+    } else {
+      txt('新西兰财神庙', W/2, TB_H/2,
+          'bold '+Math.round(TB_H*0.42)+'px "STKaiti","STSong","PingFang SC",serif', GOLD, 'center','middle');
+    }
 
-    // ════════════════════════════════
-    // 3. 外框
-    var BX=14, BY=TB_H+10, BW=W-28, BH=H-TB_H-20;
-    rect(BX,BY,BW,BH,null,BROWN,2);
+    // ════════ 3. 外框（整体轮廓，不含顶栏） ════════
+    rect(BX,BY,BW,BH,null,BROWN,3);
 
-    // ════════════════════════════════
-    // 4. 日期行（星期 | 年份 | 月份）
-    var R1Y=BY, R1H=48;
-    // 竖分割
-    vline(BX+130, R1Y, R1Y+R1H, BROWN, 1.5);
-    vline(BX+BW-130, R1Y, R1Y+R1H, BROWN, 1.5);
-    hline(R1Y+R1H, BX, BX+BW, BROWN, 1.5);
-    txt(WD, BX+65, R1Y+R1H/2, 'bold 20px "PingFang SC",serif', DARK, 'center','middle');
-    txt(String(YR), BX+BW/2, R1Y+R1H/2, 'bold 26px "PingFang SC",serif', DARK, 'center','middle');
-    txt(MO, BX+BW-65, R1Y+R1H/2, 'bold 20px "PingFang SC",serif', DARK, 'center','middle');
+    // ════════ 4. 日期行：整体区域，只画左右分隔线 ════════
+    // 修正1：不画额外小框，只保留两条竖线 + 底部横线
+    hline(R1Y+R1H, BX, BX+BW, BROWN, 2.5);
+    var r1FontBig = Math.round(R1H*0.52);
+    var r1FontSm  = Math.round(R1H*0.44);
+    txt(WD,        BX+D_LW/2,                    R1Y+R1H/2, 'bold '+r1FontSm+'px "STKaiti","PingFang SC",serif', DARK, 'center','middle');
+    txt(String(YR),BX+D_LW+(BW-D_LW-D_RW)/2,    R1Y+R1H/2, 'bold '+r1FontBig+'px "STKaiti","PingFang SC",serif', DARK, 'center','middle');
+    txt(MO,        BX+BW-D_RW/2,                 R1Y+R1H/2, 'bold '+r1FontSm+'px "STKaiti","PingFang SC",serif', DARK, 'center','middle');
 
-    // ════════════════════════════════
-    // 5. 主区（农历 | 大数字 | 干支）
-    var R2Y=R1Y+R1H, R2H=180;
-    var LW=110, RW=130; // 左右列宽
-    vline(BX+LW, R2Y, R2Y+R2H, BROWN, 1.5);
-    vline(BX+BW-RW, R2Y, R2Y+R2H, BROWN, 1.5);
-    hline(R2Y+R2H, BX, BX+BW, BROWN, 1.5);
+    // ════════ 5. 主日期区 ════════
+    vline(BX+LW,     R2Y, R2Y+R2H, BROWN, 2.5);
+    vline(BX+BW-RW,  R2Y, R2Y+R2H, BROWN, 2.5);
+    hline(R2Y+R2H,   BX,  BX+BW,   BROWN, 2.5);
 
-    // 农历（左列）
-    var lx = BX+LW/2;
-    // "农历"标签
-    rect(lx-22, R2Y+12, 44, 22, BROWN);
-    txt('农历', lx, R2Y+12+11, 'bold 12px "PingFang SC",serif', GOLD, 'center','middle');
-    vtxt(lunarM, lx, R2Y+44, 'bold 16px "PingFang SC",serif', DARK, 24);
-    vtxt(lunarD, lx, R2Y+44+(lunarM.length*24)+8, 'bold 16px "PingFang SC",serif', DARK, 24);
+    // ── 左：农历区（改1：左右两列并排竖写）──
+    // 左小列："农历"两字竖排
+    // 右大列：农历日期（月+日）竖排
+    // 两列横向并排，不是上下结构
+    var lColX  = BX + Math.round(LW*0.22);   // "农历"两字中心x
+    var rColX  = BX + Math.round(LW*0.68);   // 日期列中心x
+    var lunarTopY = R2Y + Math.round(R2H*0.22);
+    // 左列：深棕小标签底 + "农历"竖排
+    var lblSz  = Math.round(LW*0.115);
+    var lblLnH = Math.round(lblSz*1.30);
+    var lblTagH2 = lblSz*2 + Math.round(lblSz*0.4);
+    var lblTagW2 = Math.round(LW*0.30);
+    var lblBoxH = lblTagH2+Math.round(lblSz*0.2);
+    rect(lColX-lblTagW2/2, lunarTopY, lblTagW2, lblBoxH, BROWN);
+    // "农历"在框内垂直居中：总高=lblSz*2+间距，框中心对齐
+    var lblGap   = Math.round(lblSz*0.30);
+    var lblTotalH= lblSz*2 + lblGap;
+    var lblStartY= lunarTopY + (lblBoxH - lblTotalH)/2;
+    txt('农', lColX, lblStartY,
+        'bold '+lblSz+'px "STKaiti","PingFang SC",serif', GOLD, 'center','top');
+    txt('历', lColX, lblStartY+lblSz+lblGap,
+        'bold '+lblSz+'px "STKaiti","PingFang SC",serif', GOLD, 'center','top');
+    // 右列：日期竖排，大字
+    var lunarFontSz = Math.round(LW*0.195);
+    var lunarLineH  = Math.round(lunarFontSz*1.36);
+    var lunarStartY = lunarTopY;
+    var isRun = lunarM.indexOf('闰')===0;
+    if(isRun){
+      var runSz=Math.round(lunarFontSz*0.68);
+      txt('闰', rColX, lunarStartY, 'bold '+runSz+'px "STKaiti","PingFang SC",serif', DARK, 'center','top');
+      lunarStartY+=Math.round(runSz*1.3);
+      vtxt(lunarM.replace('闰',''), rColX, lunarStartY, 'bold '+lunarFontSz+'px "STKaiti","PingFang SC",serif', DARK, lunarLineH);
+      lunarStartY+=lunarM.replace('闰','').length*lunarLineH+Math.round(lunarLineH*0.25);
+    } else {
+      vtxt(lunarM, rColX, lunarStartY, 'bold '+lunarFontSz+'px "STKaiti","PingFang SC",serif', DARK, lunarLineH);
+      lunarStartY+=lunarM.length*lunarLineH+Math.round(lunarLineH*0.25);
+    }
+    vtxt(lunarD, rColX, lunarStartY, 'bold '+lunarFontSz+'px "STKaiti","PingFang SC",serif', DARK, lunarLineH);
 
-    // 大数字（中间列）
-    var midX = BX+LW + (BW-LW-RW)/2;
-    // 水印"财神黄历"
+    // ── 中：大数字 + 水印（改2：左右更散开，更淡）──
+    var midX      = BX+LW+(BW-LW-RW)/2;
+    var midCenterY= R2Y+R2H/2;
+    var midColW2  = BW-LW-RW;
     c.save();
-    c.globalAlpha=0.06;
-    txt('财神黄历', midX, R2Y+R2H/2, 'bold 56px "PingFang SC",serif', BROWN, 'center','middle');
+    var wmFontSz=Math.round(R2H*0.38);
+    c.font='bold '+wmFontSz+'px "STKaiti","STSong","PingFang SC",serif';
+    c.fillStyle=BROWN2; c.textAlign='center'; c.textBaseline='middle';
+    // 改2："财神"贴左边界，"日历"贴右边界，两边尽量散开，更淡
+    var wmLeft  = BX+LW + Math.round(midColW2*0.13);   // 左半区内部，不贴边
+    var wmRight = BX+LW + Math.round(midColW2*0.87);   // 右半区内部，不贴边
+    c.globalAlpha=0.040;
+    c.fillText('财', wmLeft,  midCenterY-Math.round(wmFontSz*0.42));
+    c.fillText('神', wmLeft,  midCenterY+Math.round(wmFontSz*0.48));
+    c.globalAlpha=0.032;
+    c.fillText('日', wmRight, midCenterY-Math.round(wmFontSz*0.42));
+    c.fillText('历', wmRight, midCenterY+Math.round(wmFontSz*0.48));
     c.restore();
     // 大数字
-    txt(String(DN), midX, R2Y+R2H/2, 'bold 130px "Georgia","Times New Roman",serif', DARK, 'center','middle');
+    var bigFontSz=Math.round(R2H*0.70);
+    txt(String(DN), midX, midCenterY+Math.round(R2H*0.01),
+        'bold '+bigFontSz+'px "Georgia","Times New Roman",serif', DARK, 'center','middle');
 
-    // 干支（右列）
-    var rzx = BX+BW-RW/2;
-    var rzY = R2Y+14;
-    txt('年柱', rzx, rzY, '11px "PingFang SC",serif', BROWN2, 'center','top');
-    txt(day.year_gz||'—', rzx, rzY+16, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
-    txt('月柱', rzx, rzY+40, '11px "PingFang SC",serif', BROWN2, 'center','top');
-    txt(day.month_gz||'—', rzx, rzY+56, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
-    txt('日柱', rzx, rzY+80, '11px "PingFang SC",serif', BROWN2, 'center','top');
-    txt(day.day_gz||'—', rzx, rzY+96, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
-    // 年份标签
-    var badgeW=c.measureText(yearBadge).width+16; c.font='bold 11px "PingFang SC",serif';
-    badgeW=c.measureText(yearBadge).width+16;
-    rect(rzx-badgeW/2, rzY+126, badgeW, 22, null, BROWN2, 1);
-    txt(yearBadge, rzx, rzY+126+11, 'bold 11px "PingFang SC",serif', DARK, 'center','middle');
+    // ── 右：干支两列竖排（改3：左月日/右什么年，无小标题，纯竖排大字）──
+    var rzAreaX  = BX+BW-RW;
+    var rzCol1X  = rzAreaX+Math.round(RW*0.27);  // 左列（月柱+日柱连排）
+    var rzCol2X  = rzAreaX+Math.round(RW*0.73);  // 右列（年干支+生肖年连排）
+    var rzFontSz = Math.round(RW*0.190);
+    var rzLineH  = Math.round(rzFontSz*1.36);
+    var rzStartY = R2Y+Math.round(R2H*0.050);
+    var ygz=day.year_gz||'', mgz=day.month_gz||'', dgz=day.day_gz||'';
+    // 左列：月柱直接连日柱，中间留0.5行间隙，像书法竖排
+    vtxt(mgz, rzCol1X, rzStartY, 'bold '+rzFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, rzLineH);
+    var rzDgzY=rzStartY + mgz.length*rzLineH + Math.round(rzLineH*0.50);
+    vtxt(dgz, rzCol1X, rzDgzY, 'bold '+rzFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, rzLineH);
+    // 右列：年干支连生肖年
+    vtxt(ygz, rzCol2X, rzStartY, 'bold '+rzFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, rzLineH);
+    var rzSxY = rzStartY + ygz.length*rzLineH + Math.round(rzLineH*0.50);
+    var sxStr = (ZIRAN[yZhi]||'')+'年';
+    vtxt(sxStr, rzCol2X, rzSxY, 'bold '+rzFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, rzLineH);
+    // badge：小一点，放在右列生肖年下方（竖排之后的badge感觉）
+    var rzBadgeY = rzSxY + sxStr.length*rzLineH + Math.round(rzLineH*0.35);
+    if(rzBadgeY + Math.round(rzFontSz*0.8) < R2Y+R2H){
+      var rzSmSz = Math.round(rzFontSz*0.52);
+      c.font='bold '+rzSmSz+'px "STKaiti","PingFang SC",serif';
+      var bwB = c.measureText(yearBadge).width+Math.round(rzSmSz*1.0);
+      var bwBH= Math.round(rzSmSz*1.65);
+      rect(rzCol2X-bwB/2, rzBadgeY, bwB, bwBH, '#ede0c0', BROWN2, 1.5);
+      txt(yearBadge, rzCol2X, rzBadgeY+bwBH/2,
+          'bold '+rzSmSz+'px "STKaiti","PingFang SC",serif', DARK, 'center','middle');
+    }
 
-    // ════════════════════════════════
-    // 6. 方位行
-    var R3Y=R2Y+R2H, R3H=46;
-    hline(R3Y+R3H, BX, BX+BW, BROWN, 1.5);
-    // "诸神方位"标签（深棕竖块）
-    var lblW=36;
-    rect(BX, R3Y, lblW, R3H, BROWN);
-    vtxt('方位', BX+lblW/2, R3Y+4, 'bold 11px "PingFang SC",serif', GOLD, 18);
-    // 方位条目
-    var dirs=[
+    // ════════ 6. 方位栏（修正5：整体信息条，无小框感） ════════
+    hline(R3Y+R3H, BX, BX+BW, BROWN, 2.5);
+    // 左标签块：深棕底，"诸神"+"方位"两行（不是四字竖列）
+    rect(BX, R3Y, dirLblW, R3H, BROWN);
+    vline(BX+dirLblW, R3Y, R3Y+R3H, BROWN, 2.5);
+    var dlbSz = Math.round(R3H*0.22);
+    var dlbGap = Math.round(R3H*0.08);
+    var dlbTotalH = dlbSz*2+dlbGap;
+    var dlbStartY = R3Y+(R3H-dlbTotalH)/2;
+    txt('诸神', BX+dirLblW/2, dlbStartY,
+        'bold '+dlbSz+'px "STKaiti","PingFang SC",serif', GOLD, 'center','top');
+    txt('方位', BX+dirLblW/2, dlbStartY+dlbSz+dlbGap,
+        'bold '+dlbSz+'px "STKaiti","PingFang SC",serif', GOLD, 'center','top');
+    // 4列方位（改4：去掉中间竖线，靠位置和留白分开）
+    var dirs4=[
       ['财神', day.dir&&day.dir.cai],
       ['喜神', day.dir&&day.dir.xi],
       ['福神', day.dir&&day.dir.fu],
       ['阳贵', day.dir&&day.dir.yanggui],
-      ['阴贵', day.dir&&day.dir.yingui],
     ];
-    var dColW=(BW-lblW)/dirs.length;
-    dirs.forEach(function(dr,i){
-      var dx=BX+lblW+i*dColW+dColW/2;
-      if(i>0) vline(BX+lblW+i*dColW, R3Y, R3Y+R3H, BROWN2, 1);
-      txt(dr[0], dx, R3Y+6, '11px "PingFang SC",serif', BROWN2, 'center','top');
-      txt(dr[1]||'—', dx, R3Y+22, 'bold 15px "PingFang SC",serif', DARK, 'center','top');
+    var dColW=(BW-dirLblW)/4;
+    dirs4.forEach(function(dr,i){
+      var dx=BX+dirLblW+i*dColW+dColW/2;
+      // 改4：不画竖分隔线
+      var nameSz=Math.round(R3H*0.175);
+      var valSz =Math.round(R3H*0.285);
+      txt(dr[0], dx, R3Y+Math.round(R3H*0.10),
+          nameSz+'px "STKaiti","PingFang SC",serif', BROWN2, 'center','top');
+      txt(dr[1]||'—', dx, R3Y+Math.round(R3H*0.42),
+          'bold '+valSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','top');
     });
 
-    // ════════════════════════════════
-    // 7. 底部三列（宜 | 中间 | 忌）
-    var R4Y=R3Y+R3H;
-    var R4H=BH-(R4Y-BY);
-    var YI_W=78, JI_W=78;
-    var MID_W=BW-YI_W-JI_W;
-    vline(BX+YI_W, R4Y, R4Y+R4H, BROWN, 1.5);
-    vline(BX+YI_W+MID_W, R4Y, R4Y+R4H, BROWN, 1.5);
+    // ════════ 7. 宜 | 中间 | 忌 ════════
+    vline(BX+YI_W,        R4Y, R4Y+R4H, BROWN, 2.5);
+    vline(BX+YI_W+MID_W,  R4Y, R4Y+R4H, BROWN, 2.5);
 
-    // ── 宜列 ──
-    var yiCX=BX+YI_W/2;
-    // 宜 圆
-    circle(yiCX, R4Y+22, 14, GREEN_C);
-    txt('宜', yiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
-    // 宜内容竖排（每条取前2字，多条依次往下）
-    var yiCurY=R4Y+46;
-    var yiLineH=18;
-    var yiMaxY=R4Y+R4H-10;
-    yi.forEach(function(t){
-      if(yiCurY >= yiMaxY) return;
-      var clean = t.replace(/[·・\s]/g,'').slice(0,3);
-      vtxt(clean, yiCX, yiCurY, '13px "PingFang SC",serif', DARK, yiLineH);
-      yiCurY += clean.length * yiLineH + 6;
-    });
-
-    // ── 忌列 ──
-    var jiCX=BX+YI_W+MID_W+JI_W/2;
-    circle(jiCX, R4Y+22, 14, RED_C);
-    txt('忌', jiCX, R4Y+22, 'bold 15px "PingFang SC",serif', '#fff', 'center','middle');
-    var jiCurY=R4Y+46;
-    var jiLineH=18;
-    var jiMaxY=R4Y+R4H-10;
-    ji.forEach(function(t){
-      if(jiCurY >= jiMaxY) return;
-      var clean = t.replace(/[·・\s]/g,'').slice(0,3);
-      vtxt(clean, jiCX, jiCurY, '13px "PingFang SC",serif', DARK, jiLineH);
-      jiCurY += clean.length * jiLineH + 6;
-    });
-
-    // ── 中间列 ──
-    var midColX=BX+YI_W;
-    var midColW=MID_W;
-    // 冲煞
-    var chongH=52;
-    hline(R4Y+chongH, midColX, midColX+midColW, BROWN2, 1);
-    txt('冲煞', midColX+midColW/2, R4Y+6, 'bold 14px "PingFang SC",serif', DARK, 'center','top');
-    txt(chong, midColX+midColW/2, R4Y+26, '12px "PingFang SC",serif', DARK, 'center','top');
-
-    // 今日时运标题
-    var tsY=R4Y+chongH+4;
-    txt('今日时运', midColX+midColW/2, tsY, 'bold 14px "PingFang SC",serif', DARK, 'center','top');
-    tsY+=22;
-    hline(tsY, midColX, midColX+midColW, BROWN2, 1);
-    tsY+=4;
-
-    // 12时辰表格：每列 midColW/12
-    var hColW=midColW/12;
-    var hAreaH=R4H-chongH-30;
-    hours.forEach(function(h,i){
-      var hx=midColX+i*hColW+hColW/2;
-      if(i>0) vline(midColX+i*hColW, tsY, R4Y+R4H, BROWN2, 0.8);
-      var hLuck = (personal && h.personal && h.personal.luck) ? h.personal.luck : h.luck;
-      // 背景（凶=淡红）
-      if(hLuck==='凶'){
-        rect(midColX+i*hColW, tsY, hColW, hAreaH, 'rgba(139,26,26,0.06)');
+    // ── 宜栏（改6：两列横向并排竖写，位置固定，顶部对齐）──
+    var yiCX    = BX+YI_W/2;
+    var yiCircR = Math.round(YI_W*0.112);
+    var yiCircY = R4Y+Math.round(R4H*0.042);
+    circle(yiCX, yiCircY, yiCircR, GREEN_C, '#1a4a1c', 2.5);
+    txt('宜', yiCX, yiCircY,
+        'bold '+Math.round(yiCircR*1.20)+'px "STKaiti","PingFang SC",serif', '#fff', 'center','middle');
+    // 两列固定x坐标（不随内容浮动）
+    var yiC1X   = BX + Math.round(YI_W*0.255);  // 左列固定
+    var yiC2X   = BX + Math.round(YI_W*0.745);  // 右列固定
+    var yiFontSz= Math.round(YI_W*0.105);
+    var yiLineH = Math.round(yiFontSz*1.36);
+    var yiStartY= yiCircY+yiCircR+Math.round(R4H*0.020);  // 两列顶部对齐，从同一y开始
+    var yiMaxY  = R4Y+R4H-Math.round(R4H*0.015);
+    var yiFlat=[];
+    yi.forEach(function(t){ yiFlat.push(t.replace(/[·・\s]/g,'').slice(0,4)); });
+    // 平均分配：前半到左列，后半到右列
+    var yiHalf=Math.ceil(yiFlat.length/2);
+    // 左列从yiStartY开始，每词横着写，整列往下排
+    var cyA=yiStartY;
+    yiFlat.slice(0,yiHalf).forEach(function(s){
+      if(cyA+yiLineH<yiMaxY){
+        txt(s, yiC1X, cyA, yiFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','top');
+        cyA+=yiLineH+Math.round(yiLineH*0.12);
       }
-      // 时辰名（子丑寅…）
-      vtxt(h.label, hx, tsY+4, 'bold 13px "PingFang SC",serif', DARK, 18);
-      // 干支
-      vtxt(h.gz, hx, tsY+4+h.label.length*18+4, '11px "PingFang SC",serif', BROWN2, 16);
-      // 吉凶圆点
-      var dotY=tsY+4+h.label.length*18+4+h.gz.length*16+6;
-      var dotCol=hLuck==='吉'?GREEN_C:hLuck==='凶'?RED_C:AMBER;
-      circle(hx, dotY+8, 8, dotCol);
-      c.font='bold 10px "PingFang SC",serif';
+    });
+    // 右列从同一yiStartY开始，每词横着写，整列往下排
+    var cyB=yiStartY;
+    yiFlat.slice(yiHalf).forEach(function(s){
+      if(cyB+yiLineH<yiMaxY){
+        txt(s, yiC2X, cyB, yiFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','top');
+        cyB+=yiLineH+Math.round(yiLineH*0.12);
+      }
+    });
+
+    // ── 忌栏（修正7+9：词组双列竖排 + 右下角独立logo）──
+    var jiBaseX = BX+YI_W+MID_W;
+    var jiCX    = jiBaseX+JI_W/2;
+    var jiCircR = Math.round(JI_W*0.112);
+    var jiCircY = R4Y+Math.round(R4H*0.042);
+    circle(jiCX, jiCircY, jiCircR, RED_C, '#5a0c0c', 2.5);
+    txt('忌', jiCX, jiCircY,
+        'bold '+Math.round(jiCircR*1.20)+'px "STKaiti","PingFang SC",serif', '#fff', 'center','middle');
+    // logo区在忌栏右下角
+    var logoH   = Math.round(R4H*0.115);
+    var logoY   = R4Y+R4H-logoH;
+    // 不画 hline 分隔线，logo 直接放在右栏底部区域
+    var logoR   = Math.round(logoH*0.28);
+    var logoCY  = logoY+logoH/2;
+    var logoIX  = jiBaseX+Math.round(JI_W*0.30);
+    yin_yang(logoIX, logoCY, logoR);
+    var logoFSz = Math.round(logoH*0.155);
+    txt('新西兰',    jiBaseX+Math.round(JI_W*0.62), logoCY-Math.round(logoFSz*0.65),
+        'bold '+logoFSz+'px "STKaiti","PingFang SC",serif', BROWN2, 'center','middle');
+    txt('道教联合会', jiBaseX+Math.round(JI_W*0.62), logoCY+Math.round(logoFSz*0.65),
+        'bold '+logoFSz+'px "STKaiti","PingFang SC",serif', BROWN2, 'center','middle');
+    // 忌内容（字符区：logo上方）
+    var jiFontSz  = Math.round(JI_W*0.108);
+    var jiLineH   = Math.round(jiFontSz*1.35);
+    var jiStartY  = jiCircY+jiCircR+Math.round(R4H*0.022);
+    var jiMaxY    = logoY-Math.round(R4H*0.010);
+    var jiC1X     = jiBaseX+Math.round(JI_W*0.270);
+    var jiC2X     = jiBaseX+Math.round(JI_W*0.730);
+    var jiFlat=[];
+    ji.forEach(function(t){ jiFlat.push(t.replace(/[·・\s]/g,'').slice(0,4)); });
+    var jiHalf=Math.ceil(jiFlat.length/2);
+    var jcyA=jiStartY, jcyB=jiStartY;
+    jiFlat.slice(0,jiHalf).forEach(function(s){
+      if(jcyA+jiLineH<jiMaxY){
+        txt(s, jiC1X, jcyA, jiFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','top');
+        jcyA+=jiLineH+Math.round(jiLineH*0.15);
+      }
+    });
+    jiFlat.slice(jiHalf).forEach(function(s){
+      if(jcyB+jiLineH<jiMaxY){
+        txt(s, jiC2X, jcyB, jiFontSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','top');
+        jcyB+=jiLineH+Math.round(jiLineH*0.15);
+      }
+    });
+
+    // ── 中间列（修正6+8：冲煞/时运分区清晰，无NZ窄条） ──
+    var midColX = BX+YI_W;
+    var midColW = MID_W;
+
+    // 冲煞区（改5：底色和背景BG一样，不加额外偏黄底色）
+    var chongH = Math.round(R4H*0.100);
+    rect(midColX, R4Y, midColW, chongH, BG); // 和整体背景一样
+    hline(R4Y+chongH, midColX, midColX+midColW, BROWN2, 1.5);
+    var chongTSz = Math.round(chongH*0.36);
+    txt('冲煞', midColX+midColW/2, R4Y+Math.round(chongH*0.07),
+        'bold '+chongTSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','top');
+    var chongBSz = Math.round(chongH*0.26);
+    var chongParts = chong.split(/[（(]/);
+    if(chongParts.length>1){
+      txt(chongParts[0].trim(), midColX+midColW/2, R4Y+Math.round(chongH*0.43),
+          chongBSz+'px "STKaiti","PingFang SC",serif', DARK, 'center','top');
+      txt('（'+chongParts[1], midColX+midColW/2, R4Y+Math.round(chongH*0.66),
+          Math.round(chongBSz*0.88)+'px "STKaiti","PingFang SC",serif', BROWN2, 'center','top');
+    } else {
+      txt(chong, midColX+midColW/2, R4Y+chongH/2,
+          chongBSz+'px "STKaiti","PingFang SC",serif', DARK, 'center','middle');
+    }
+
+    // 今日时运区（改5：底色和背景BG一样）
+    var tsAreaY  = R4Y+chongH;
+    var tsAreaH  = R4H-chongH;
+    var tsTitleH = Math.round(tsAreaH*0.075);
+    rect(midColX, tsAreaY, midColW, tsTitleH, BG); // 和背景色一样
+    hline(tsAreaY+tsTitleH, midColX, midColX+midColW, BROWN2, 1.5);
+    var tsTSz = Math.round(tsTitleH*0.62);
+    txt('今日时运', midColX+midColW/2, tsAreaY+tsTitleH/2,
+        'bold '+tsTSz+'px "STKaiti","STSong","PingFang SC",serif', DARK, 'center','middle');
+
+    // 12时辰列（修正8：删除NZ窄条，12列均分全部宽度）
+    var tsColY  = tsAreaY+tsTitleH;
+    var tsColH  = tsAreaH-tsTitleH;
+    var hColW   = midColW/12;   // 12列均分，无旁注条
+    var hBotY   = tsColY+tsColH;
+
+    hours.forEach(function(h,i){
+      var hx     = midColX+i*hColW+hColW/2;
+      var hLuck  = (personal&&h.personal&&h.personal.luck)?h.personal.luck:h.luck;
+      // 列背景
+      if(hLuck==='凶') rect(midColX+i*hColW+1, tsColY, hColW-2, tsColH, 'rgba(122,16,16,0.06)');
+      else if(hLuck==='吉') rect(midColX+i*hColW+1, tsColY, hColW-2, tsColH, 'rgba(30,92,32,0.05)');
+      // 分隔线
+      if(i>0) vline(midColX+i*hColW, tsColY, hBotY, BROWN2, 1);
+
+      var cy = tsColY+Math.round(tsColH*0.018);
+      var hFSz  = Math.round(hColW*0.28);
+      var hLnH  = Math.round(hFSz*1.32);
+
+      // 时辰名竖排（粗体）
+      vtxt(h.label, hx, cy, 'bold '+hFSz+'px "STKaiti","PingFang SC",serif', DARK, hLnH);
+      cy+=h.label.length*hLnH+Math.round(hLnH*0.22);
+
+      // 时间段竖排（参考图12小时制）
+      var hrsMap=[
+        ['23:00','01:00'],['01:00','03:00'],['03:00','05:00'],['05:00','07:00'],
+        ['07:00','09:00'],['09:00','11:00'],['11:00','13:00'],['13:00','15:00'],
+        ['15:00','17:00'],['17:00','19:00'],['19:00','21:00'],['21:00','23:00']
+      ];
+      var zhi12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+      var tIdx=zhi12.indexOf((h.gz||'')[1]);
+      var tRange=tIdx>=0?hrsMap[tIdx]:hrsMap[i%12];
+      var tFSz=Math.round(hFSz*0.62);
+      var tLnH=Math.round(tFSz*1.22);
+      vtxt(tRange[0], hx, cy, tFSz+'px "STKaiti","PingFang SC",serif', BROWN2, tLnH);
+      cy+=tRange[0].length*tLnH;
+      vtxt(tRange[1], hx, cy, tFSz+'px "STKaiti","PingFang SC",serif', BROWN2, tLnH);
+      cy+=tRange[1].length*tLnH+Math.round(hLnH*0.25);
+
+      // 干支竖排
+      var gz2=(h.gz||'').slice(0,2);
+      var gFSz=Math.round(hFSz*0.78);
+      var gLnH=Math.round(gFSz*1.30);
+      vtxt(gz2, hx, cy, gFSz+'px "STKaiti","PingFang SC",serif', BROWN2, gLnH);
+      cy+=gz2.length*gLnH+Math.round(hLnH*0.22);
+
+      // 吉凶圆印
+      var dotR   = Math.round(hColW*0.170);
+      var dotCol = hLuck==='吉'?GREEN_C:hLuck==='凶'?RED_C:AMBER;
+      var dotBdr = hLuck==='吉'?'#1a4a1c':hLuck==='凶'?'#5a0c0c':BROWN;
+      circle(hx, cy+dotR, dotR, dotCol, dotBdr, 2);
+      c.font='bold '+Math.round(dotR*1.05)+'px "STKaiti","PingFang SC",serif';
       c.fillStyle='#fff'; c.textAlign='center'; c.textBaseline='middle';
-      c.fillText(hLuck, hx, dotY+8);
-      // 宜/忌小字（各1条，竖排，9px，不超出格子）
-      var yiItems = (personal && h.personal && h.personal.yi && h.personal.yi.length) ? h.personal.yi.slice(0,1) : (h.yi||[]).slice(0,1);
-      var jiItems = (personal && h.personal && h.personal.ji && h.personal.ji.length) ? h.personal.ji.slice(0,1) : (h.ji||[]).slice(0,1);
-      var smallY = dotY+20;
-      var smallLH = 12;
-      // 宜（绿色）
-      yiItems.forEach(function(t){
-        vtxt(t, hx, smallY, '9px "PingFang SC",serif', GREEN_C, smallLH);
-        smallY += t.length * smallLH + 3;
+      c.fillText(hLuck, hx, cy+dotR);
+      cy+=dotR*2+Math.round(hLnH*0.26);
+
+      // 宜短语（最多2条，竖排绿色）
+      var yiIt=(personal&&h.personal&&h.personal.yi&&h.personal.yi.length)?h.personal.yi.slice(0,2):(h.yi||[]).slice(0,2);
+      var yFSz=Math.round(hFSz*0.70);
+      var yLnH=Math.round(yFSz*1.22);
+      yiIt.forEach(function(t){
+        var ct=t.replace(/[·・\s]/g,'').slice(0,3);
+        if(cy+ct.length*yLnH<hBotY-4){
+          vtxt(ct, hx, cy, yFSz+'px "STKaiti","PingFang SC",serif', GREEN_C, yLnH);
+          cy+=ct.length*yLnH+Math.round(yLnH*0.18);
+        }
       });
-      // 忌（红色）
-      jiItems.forEach(function(t){
-        vtxt(t, hx, smallY, '9px "PingFang SC",serif', RED_C, smallLH);
+      // 忌短语（最多1条，竖排红色）
+      var jiIt=(personal&&h.personal&&h.personal.ji&&h.personal.ji.length)?h.personal.ji.slice(0,1):(h.ji||[]).slice(0,1);
+      var jFSz=Math.round(hFSz*0.70);
+      var jLnH=Math.round(jFSz*1.22);
+      jiIt.forEach(function(t){
+        var ct=t.replace(/[·・\s]/g,'').slice(0,3);
+        if(cy+ct.length*jLnH<hBotY-4){
+          vtxt(ct, hx, cy, jFSz+'px "STKaiti","PingFang SC",serif', RED_C, jLnH);
+        }
       });
     });
 
-    // ════════════════════════════════
-    // 8. 页脚
-    rect(0, H-30, W, 30, BROWN);
-    txt('nztemple.com', W/2-80, H-15, '11px "PingFang SC",serif', GOLD, 'right','middle');
-    txt('财神黄历  '+day.date, W/2+10, H-15, '11px "PingFang SC",serif', GOLD, 'left','middle');
+    // 无底部footer（修正10：页面自然结束）
 
     return cv.toDataURL('image/png');
   }
 
   // ── 个性化黄历 Canvas（含八字四柱+十神+总结+个性化时辰）────
   function drawHuangliCanvasPersonal(day, hours, bazi, personal){
-    var W = 800, H = 1280;
+    var W = 800, H = 1320;
     var cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     var c = cv.getContext('2d');
 
     var BG    = '#f5f0e6';
-    var BROWN = '#5c3d1e';
-    var BROWN2= '#8b6340';
-    var DARK  = '#2c1a00';
-    var GOLD  = '#f5e6b3';
-    var GREEN_C='#2d6a30';
-    var RED_C  ='#8b1a1a';
-    var AMBER  ='#8b6340';
+    var BROWN = '#4a2e0e';
+    var BROWN2= '#7a5230';
+    var DARK  = '#1e1000';
+    var GOLD  = '#f0dfa0';
+    var GREEN_C='#1e5c20';
+    var RED_C  ='#7a1010';
+    var AMBER  ='#7a5230';
 
     function rect(x,y,w,h,fill,stroke,lw){
       c.beginPath();c.rect(x,y,w,h);
@@ -1554,8 +1819,9 @@
       c.textAlign=align||'left';c.textBaseline=baseline||'top';
       c.fillText(str,x,y);
     }
-    function circle(x,y,r,fill){
+    function circle(x,y,r,fill,stroke,slw){
       c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=fill;c.fill();
+      if(stroke){c.strokeStyle=stroke;c.lineWidth=slw||1.5;c.stroke();}
     }
     function vtxt(str,x,startY,font,fill,lineH){
       c.font=font;c.fillStyle=fill||DARK;c.textAlign='center';c.textBaseline='top';
@@ -1563,12 +1829,12 @@
       for(var i=0;i<str.length;i++) c.fillText(str[i],x,startY+i*lh);
     }
     function yin_yang(cx,cy,r){
-      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fillStyle='#fff';c.fill();
+      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fillStyle='#e8d9b0';c.fill();
       c.beginPath();c.arc(cx,cy,r,-Math.PI/2,Math.PI/2);c.fillStyle=BROWN;c.fill();
-      c.beginPath();c.arc(cx,cy-r/2,r/2,0,Math.PI*2);c.fillStyle='#fff';c.fill();
+      c.beginPath();c.arc(cx,cy-r/2,r/2,0,Math.PI*2);c.fillStyle='#e8d9b0';c.fill();
       c.beginPath();c.arc(cx,cy+r/2,r/2,0,Math.PI*2);c.fillStyle=BROWN;c.fill();
-      circle(cx,cy-r/2,r/6,BROWN);circle(cx,cy+r/2,r/6,'#fff');
-      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.strokeStyle=BROWN;c.lineWidth=1.5;c.stroke();
+      circle(cx,cy-r/2,r/6,BROWN);circle(cx,cy+r/2,r/6,'#e8d9b0');
+      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.strokeStyle='#e8d9b0';c.lineWidth=1.5;c.stroke();
     }
 
     // 解析日期
@@ -1589,73 +1855,78 @@
     rect(0,0,W,H,BG);
 
     // 2. 顶部标题栏
-    var TB_H=64;
+    var TB_H=76;
     rect(0,0,W,TB_H,BROWN);
-    yin_yang(44,TB_H/2,20); yin_yang(W-44,TB_H/2,20);
-    txt('新西兰财神庙 · 个性化黄历', W/2, TB_H/2, 'bold 24px "PingFang SC","STSong",serif', GOLD, 'center','middle');
+    hline(TB_H,0,W,BROWN2,2);
+    yin_yang(52,TB_H/2,24); yin_yang(W-52,TB_H/2,24);
+    txt('新西兰财神庙 · 个性化黄历', W/2, TB_H/2, 'bold 26px "STKaiti","STSong","PingFang SC",serif', GOLD, 'center','middle');
 
     // 3. 外框
-    var BX=14, BY=TB_H+10, BW=W-28;
+    var BX=12, BY=TB_H+8, BW=W-24;
+    var lblW=48;
 
     // 4. 日期行
-    var R1Y=BY, R1H=48;
-    vline(BX+130,R1Y,R1Y+R1H,BROWN,1.5); vline(BX+BW-130,R1Y,R1Y+R1H,BROWN,1.5);
-    hline(R1Y+R1H,BX,BX+BW,BROWN,1.5);
-    rect(BX,R1Y,BW,R1H,null,BROWN,2);
-    txt(WD,BX+65,R1Y+R1H/2,'bold 20px "PingFang SC",serif',DARK,'center','middle');
-    txt(String(YR),BX+BW/2,R1Y+R1H/2,'bold 26px "PingFang SC",serif',DARK,'center','middle');
-    txt(MO,BX+BW-65,R1Y+R1H/2,'bold 20px "PingFang SC",serif',DARK,'center','middle');
+    var R1Y=BY, R1H=52, D_LW=100, D_RW=100;
+    rect(BX,R1Y,BW,R1H,null,BROWN,3);
+    vline(BX+D_LW,R1Y,R1Y+R1H,BROWN,2); vline(BX+BW-D_RW,R1Y,R1Y+R1H,BROWN,2);
+    hline(R1Y+R1H,BX,BX+BW,BROWN,2);
+    txt(WD,BX+D_LW/2,R1Y+R1H/2,'bold 22px "STKaiti","PingFang SC",serif',DARK,'center','middle');
+    txt(String(YR),BX+D_LW+(BW-D_LW-D_RW)/2,R1Y+R1H/2,'bold 32px "STKaiti","PingFang SC",serif',DARK,'center','middle');
+    txt(MO,BX+BW-D_RW/2,R1Y+R1H/2,'bold 22px "STKaiti","PingFang SC",serif',DARK,'center','middle');
 
     // 5. 主区（农历|大数字|干支）
-    var R2Y=R1Y+R1H, R2H=150, LW=110, RW=130;
+    var R2Y=R1Y+R1H, R2H=200, LW=120, RW=140;
     rect(BX,R2Y,BW,R2H,null,BROWN,2);
-    vline(BX+LW,R2Y,R2Y+R2H,BROWN,1.5); vline(BX+BW-RW,R2Y,R2Y+R2H,BROWN,1.5);
-    hline(R2Y+R2H,BX,BX+BW,BROWN,1.5);
+    vline(BX+LW,R2Y,R2Y+R2H,BROWN,2); vline(BX+BW-RW,R2Y,R2Y+R2H,BROWN,2);
+    hline(R2Y+R2H,BX,BX+BW,BROWN,2);
     var lx=BX+LW/2;
-    rect(lx-22,R2Y+10,44,20,BROWN);
-    txt('农历',lx,R2Y+10+10,'bold 11px "PingFang SC",serif',GOLD,'center','middle');
-    vtxt(lunarM,lx,R2Y+38,'bold 15px "PingFang SC",serif',DARK,22);
-    vtxt(lunarD,lx,R2Y+38+(lunarM.length*22)+6,'bold 15px "PingFang SC",serif',DARK,22);
+    var lblTagW=46,lblTagH=24;
+    rect(lx-lblTagW/2,R2Y+14,lblTagW,lblTagH,BROWN);
+    txt('农历',lx,R2Y+14+lblTagH/2,'bold 13px "STKaiti","PingFang SC",serif',GOLD,'center','middle');
+    vtxt(lunarM,lx,R2Y+50,'bold 18px "STKaiti","PingFang SC",serif',DARK,26);
+    vtxt(lunarD,lx,R2Y+50+(lunarM.length*26)+10,'bold 18px "STKaiti","PingFang SC",serif',DARK,26);
     var midX=BX+LW+(BW-LW-RW)/2;
-    c.save();c.globalAlpha=0.06;
-    txt('财神黄历',midX,R2Y+R2H/2,'bold 50px "PingFang SC",serif',BROWN,'center','middle');
+    c.save();c.globalAlpha=0.04;
+    c.font='bold 90px "STKaiti","PingFang SC",serif';
+    c.fillStyle=BROWN2; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText('财神',midX-20,R2Y+R2H/2-28);
+    c.fillText('日历',midX+20,R2Y+R2H/2+28);
     c.restore();
-    txt(String(DN),midX,R2Y+R2H/2,'bold 110px "Georgia",serif',DARK,'center','middle');
-    var rzx=BX+BW-RW/2, rzY=R2Y+12;
-    txt('年柱',rzx,rzY,'11px "PingFang SC",serif',BROWN2,'center','top');
-    txt(day.year_gz||'—',rzx,rzY+14,'bold 14px "PingFang SC",serif',DARK,'center','top');
-    txt('月柱',rzx,rzY+34,'11px "PingFang SC",serif',BROWN2,'center','top');
-    txt(day.month_gz||'—',rzx,rzY+48,'bold 14px "PingFang SC",serif',DARK,'center','top');
-    txt('日柱',rzx,rzY+68,'11px "PingFang SC",serif',BROWN2,'center','top');
-    txt(day.day_gz||'—',rzx,rzY+82,'bold 14px "PingFang SC",serif',DARK,'center','top');
-    c.font='bold 11px "PingFang SC",serif';
-    var bw=c.measureText(yearBadge).width+16;
-    rect(rzx-bw/2,rzY+104,bw,20,null,BROWN2,1);
-    txt(yearBadge,rzx,rzY+104+10,'bold 11px "PingFang SC",serif',DARK,'center','middle');
+    txt(String(DN),midX,R2Y+R2H/2,'bold 150px "Georgia",serif',DARK,'center','middle');
+    var rzx=BX+BW-RW/2, rzY=R2Y+16;
+    txt('年柱',rzx,rzY,'12px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
+    txt(day.year_gz||'—',rzx,rzY+18,'bold 18px "STKaiti","PingFang SC",serif',DARK,'center','top');
+    txt('月柱',rzx,rzY+50,'12px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
+    txt(day.month_gz||'—',rzx,rzY+68,'bold 18px "STKaiti","PingFang SC",serif',DARK,'center','top');
+    txt('日柱',rzx,rzY+100,'12px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
+    txt(day.day_gz||'—',rzx,rzY+118,'bold 18px "STKaiti","PingFang SC",serif',DARK,'center','top');
+    c.font='bold 12px "STKaiti","PingFang SC",serif';
+    var bw=c.measureText(yearBadge).width+18;
+    rect(rzx-bw/2,rzY+152,bw,24,'#ede0c0',BROWN2,1.5);
+    txt(yearBadge,rzx,rzY+152+12,'bold 12px "STKaiti","PingFang SC",serif',DARK,'center','middle');
 
     // 6. 方位行
-    var R3Y=R2Y+R2H, R3H=40;
+    var R3Y=R2Y+R2H, R3H=50;
     rect(BX,R3Y,BW,R3H,null,BROWN,2);
-    hline(R3Y+R3H,BX,BX+BW,BROWN,1.5);
-    var lblW=36;
+    hline(R3Y+R3H,BX,BX+BW,BROWN,2);
     rect(BX,R3Y,lblW,R3H,BROWN);
-    vtxt('方位',BX+lblW/2,R3Y+3,'bold 11px "PingFang SC",serif',GOLD,16);
+    vtxt('诸神',BX+lblW/2,R3Y+3,'bold 12px "STKaiti","PingFang SC",serif',GOLD,16);
+    vtxt('方位',BX+lblW/2,R3Y+3+2*16,'bold 12px "STKaiti","PingFang SC",serif',GOLD,16);
     var dirs=[['财神',day.dir&&day.dir.cai],['喜神',day.dir&&day.dir.xi],['福神',day.dir&&day.dir.fu],['阳贵',day.dir&&day.dir.yanggui],['阴贵',day.dir&&day.dir.yingui]];
     var dColW=(BW-lblW)/dirs.length;
     dirs.forEach(function(dr,i){
       var dx=BX+lblW+i*dColW+dColW/2;
       if(i>0)vline(BX+lblW+i*dColW,R3Y,R3Y+R3H,BROWN2,1);
-      txt(dr[0],dx,R3Y+4,'11px "PingFang SC",serif',BROWN2,'center','top');
-      txt(dr[1]||'—',dx,R3Y+18,'bold 14px "PingFang SC",serif',DARK,'center','top');
+      txt(dr[0],dx,R3Y+8,'12px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
+      txt(dr[1]||'—',dx,R3Y+26,'bold 17px "STKaiti","PingFang SC",serif',DARK,'center','top');
     });
 
     // 7. 八字四柱行
-    var R4Y=R3Y+R3H, R4H=80;
+    var R4Y=R3Y+R3H, R4H=84;
     rect(BX,R4Y,BW,R4H,null,BROWN,2);
-    hline(R4Y+R4H,BX,BX+BW,BROWN,1.5);
-    // 标题
+    hline(R4Y+R4H,BX,BX+BW,BROWN,2);
     rect(BX,R4Y,lblW,R4H,BROWN);
-    vtxt('八字',BX+lblW/2,R4Y+3,'bold 11px "PingFang SC",serif',GOLD,16);
+    vtxt('八字',BX+lblW/2,R4Y+4,'bold 12px "STKaiti","PingFang SC",serif',GOLD,18);
     var pillars=[
       {l:'年柱',d:bazi.year},{l:'月柱',d:bazi.month},
       {l:'日柱',d:bazi.day},{l:'时柱',d:bazi.time}
@@ -1664,47 +1935,43 @@
     pillars.forEach(function(p,i){
       var px=BX+lblW+i*pColW+pColW/2;
       if(i>0)vline(BX+lblW+i*pColW,R4Y,R4Y+R4H,BROWN2,1);
-      txt(p.l,px,R4Y+6,'11px "PingFang SC",serif',BROWN2,'center','top');
-      txt(p.d.gz||'—',px,R4Y+22,'bold 22px "PingFang SC",serif','#5c3d1e','center','top');
-      if(p.d.nayin) txt(p.d.nayin,px,R4Y+52,'10px "PingFang SC",serif',BROWN2,'center','top');
+      txt(p.l,px,R4Y+7,'12px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
+      txt(p.d.gz||'—',px,R4Y+25,'bold 24px "STKaiti","PingFang SC",serif',BROWN,'center','top');
+      if(p.d.nayin) txt(p.d.nayin,px,R4Y+58,'11px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
     });
 
-    // 8. 十神+总结行
-    var R5Y=R4Y+R4H, R5H=70;
+    // 8. 十神行
+    var R5Y=R4Y+R4H, R5H=72;
     rect(BX,R5Y,BW,R5H,null,BROWN,2);
-    hline(R5Y+R5H,BX,BX+BW,BROWN,1.5);
-    // 十神（流年/月/日）
+    hline(R5Y+R5H,BX,BX+BW,BROWN,2);
     var ftg=personal.flow_ten_gods||[];
-    var tgColW=BW/4;
-    // 左侧标题
+    var tgColW=(BW-lblW)/Math.max(ftg.length,1);
     rect(BX,R5Y,lblW,R5H,BROWN);
-    vtxt('十神',BX+lblW/2,R5Y+3,'bold 11px "PingFang SC",serif',GOLD,16);
+    vtxt('十神',BX+lblW/2,R5Y+4,'bold 12px "STKaiti","PingFang SC",serif',GOLD,18);
     ftg.forEach(function(f,i){
       var fx=BX+lblW+i*tgColW+tgColW/2;
       if(i>0)vline(BX+lblW+i*tgColW,R5Y,R5Y+R5H,BROWN2,1);
-      txt(f.level,fx,R5Y+6,'11px "PingFang SC",serif',BROWN2,'center','top');
-      txt(f.flow_gz||'—',fx,R5Y+20,'bold 16px "PingFang SC",serif',DARK,'center','top');
-      txt(f.ten_god||'',fx,R5Y+40,'bold 13px "PingFang SC",serif','#8b1a1a','center','top');
-      if(f.keyword) txt(f.keyword.split('与')[0],fx,R5Y+56,'9px "PingFang SC",serif',BROWN2,'center','top');
+      txt(f.level,fx,R5Y+7,'12px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
+      txt(f.flow_gz||'—',fx,R5Y+22,'bold 17px "STKaiti","PingFang SC",serif',DARK,'center','top');
+      txt(f.ten_god||'',fx,R5Y+44,'bold 14px "STKaiti","PingFang SC",serif',RED_C,'center','top');
+      if(f.keyword) txt(f.keyword.split('与')[0],fx,R5Y+60,'10px "STKaiti","PingFang SC",serif',BROWN2,'center','top');
     });
 
     // 9. 总结行
-    var R6Y=R5Y+R5H, R6H=54;
+    var R6Y=R5Y+R5H, R6H=56;
     rect(BX,R6Y,BW,R6H,null,BROWN,2);
-    hline(R6Y+R6H,BX,BX+BW,BROWN,1.5);
+    hline(R6Y+R6H,BX,BX+BW,BROWN,2);
     rect(BX,R6Y,lblW,R6H,BROWN);
-    vtxt('总结',BX+lblW/2,R6Y+6,'bold 11px "PingFang SC",serif',GOLD,16);
+    vtxt('总结',BX+lblW/2,R6Y+8,'bold 12px "STKaiti","PingFang SC",serif',GOLD,18);
     var summaryText=personal.summary||'';
-    // 自动换行
-    c.font='12px "PingFang SC",serif';
+    c.font='13px "STKaiti","PingFang SC",serif';
     c.fillStyle=DARK; c.textAlign='left'; c.textBaseline='top';
-    var sw=BW-lblW-16, sx=BX+lblW+8, sy=R6Y+8, lineH2=18;
+    var sw=BW-lblW-18, sx=BX+lblW+10, sy=R6Y+9, lineH2=19;
     var words=summaryText.split(''), line='', lineY=sy;
     for(var wi=0;wi<words.length;wi++){
       var test=line+words[wi];
       if(c.measureText(test).width>sw && line!==''){
-        c.fillText(line,sx,lineY);
-        line=words[wi]; lineY+=lineH2;
+        c.fillText(line,sx,lineY); line=words[wi]; lineY+=lineH2;
         if(lineY>R6Y+R6H-lineH2) break;
       } else { line=test; }
     }
@@ -1712,66 +1979,87 @@
 
     // 10. 宜忌+冲煞+个性化时辰
     var R7Y=R6Y+R6H;
-    var R7H=H-R7Y-40;
+    var R7H=H-R7Y-42;
     rect(BX,R7Y,BW,R7H,null,BROWN,2);
-    var YI_W=72, JI_W=72, MID_W=BW-YI_W-JI_W;
-    vline(BX+YI_W,R7Y,R7Y+R7H,BROWN,1.5);
-    vline(BX+YI_W+MID_W,R7Y,R7Y+R7H,BROWN,1.5);
+    var YI_W=88, JI_W=88, MID_W=BW-YI_W-JI_W;
+    vline(BX+YI_W,R7Y,R7Y+R7H,BROWN,2);
+    vline(BX+YI_W+MID_W,R7Y,R7Y+R7H,BROWN,2);
 
     // 宜列
     var yiCX=BX+YI_W/2;
-    circle(yiCX,R7Y+18,13,GREEN_C);
-    txt('宜',yiCX,R7Y+18,'bold 14px "PingFang SC",serif','#fff','center','middle');
-    yi.forEach(function(t,i){ txt(t,yiCX,R7Y+38+i*22,'13px "PingFang SC",serif',DARK,'center','top'); });
+    circle(yiCX,R7Y+28,18,GREEN_C,'#1a4a1c',1.5);
+    txt('宜',yiCX,R7Y+28,'bold 17px "STKaiti","PingFang SC",serif','#fff','center','middle');
+    var yiCurY2=R7Y+56, yiLineH2=20, yiMaxY2=R7Y+R7H-12;
+    yi.forEach(function(t){
+      if(yiCurY2>=yiMaxY2) return;
+      var clean=t.replace(/[·・\s]/g,'').slice(0,4);
+      vtxt(clean,yiCX,yiCurY2,'14px "STKaiti","PingFang SC",serif',DARK,yiLineH2);
+      yiCurY2+=clean.length*yiLineH2+8;
+    });
 
     // 忌列
     var jiCX=BX+YI_W+MID_W+JI_W/2;
-    circle(jiCX,R7Y+18,13,RED_C);
-    txt('忌',jiCX,R7Y+18,'bold 14px "PingFang SC",serif','#fff','center','middle');
-    ji.forEach(function(t,i){ txt(t,jiCX,R7Y+38+i*22,'13px "PingFang SC",serif',DARK,'center','top'); });
+    circle(jiCX,R7Y+28,18,RED_C,'#5a0c0c',1.5);
+    txt('忌',jiCX,R7Y+28,'bold 17px "STKaiti","PingFang SC",serif','#fff','center','middle');
+    var jiCurY2=R7Y+56, jiLineH2=20, jiMaxY2=R7Y+R7H-12;
+    ji.forEach(function(t){
+      if(jiCurY2>=jiMaxY2) return;
+      var clean=t.replace(/[·・\s]/g,'').slice(0,4);
+      vtxt(clean,jiCX,jiCurY2,'14px "STKaiti","PingFang SC",serif',DARK,jiLineH2);
+      jiCurY2+=clean.length*jiLineH2+8;
+    });
 
     // 中间：冲煞 + 个性化12时辰
     var midColX=BX+YI_W, midColW=MID_W;
-    var chongH=46;
+    var chongH=62;
     hline(R7Y+chongH,midColX,midColX+midColW,BROWN2,1);
-    txt('冲煞',midColX+midColW/2,R7Y+5,'bold 13px "PingFang SC",serif',DARK,'center','top');
-    txt(chong,midColX+midColW/2,R7Y+22,'11px "PingFang SC",serif',DARK,'center','top');
-    var tsY2=R7Y+chongH+4;
-    txt('个性化时运',midColX+midColW/2,tsY2,'bold 13px "PingFang SC",serif',DARK,'center','top');
-    tsY2+=20; hline(tsY2,midColX,midColX+midColW,BROWN2,1); tsY2+=3;
+    txt('冲煞',midColX+midColW/2,R7Y+8,'bold 16px "STKaiti","PingFang SC",serif',DARK,'center','top');
+    txt(chong,midColX+midColW/2,R7Y+32,'13px "STKaiti","PingFang SC",serif',DARK,'center','top');
+    var tsY2=R7Y+chongH+6;
+    txt('个性化时运',midColX+midColW/2,tsY2,'bold 16px "STKaiti","PingFang SC",serif',DARK,'center','top');
+    tsY2+=24; hline(tsY2,midColX,midColX+midColW,BROWN2,1); tsY2+=4;
     var hColW2=midColW/12;
+    var hBottomY2=R7Y+R7H;
     hours.forEach(function(h,i){
       var hx=midColX+i*hColW2+hColW2/2;
-      if(i>0)vline(midColX+i*hColW2,tsY2,R7Y+R7H,BROWN2,0.8);
+      if(i>0)vline(midColX+i*hColW2,tsY2,hBottomY2,BROWN2,0.8);
       var p=h.personal||{};
-      // 个性化吉凶：有关系取关系，否则用基础吉凶
       var luckShow=h.luck;
       var dotCol=luckShow==='吉'?GREEN_C:luckShow==='凶'?RED_C:AMBER;
-      if(h.luck==='凶') rect(midColX+i*hColW2,tsY2,hColW2,R7Y+R7H-tsY2,'rgba(139,26,26,0.06)');
-      vtxt(h.label,hx,tsY2+3,'bold 12px "PingFang SC",serif',DARK,17);
-      vtxt(h.gz,hx,tsY2+3+h.label.length*17+3,'10px "PingFang SC",serif',BROWN2,15);
-      var dotY2=tsY2+3+h.label.length*17+3+h.gz.length*15+4;
-      circle(hx,dotY2+7,7,dotCol);
-      c.font='bold 9px "PingFang SC",serif';
+      var dotBorder=luckShow==='吉'?'#1a4a1c':luckShow==='凶'?'#5a0c0c':BROWN;
+      if(h.luck==='凶') rect(midColX+i*hColW2+1,tsY2,hColW2-1,hBottomY2-tsY2,'rgba(122,16,16,0.05)');
+      else if(h.luck==='吉') rect(midColX+i*hColW2+1,tsY2,hColW2-1,hBottomY2-tsY2,'rgba(30,92,32,0.04)');
+      var cy2=tsY2+5;
+      vtxt(h.label,hx,cy2,'bold 12px "STKaiti","PingFang SC",serif',DARK,17);
+      cy2+=h.label.length*17+5;
+      var gz2=(h.gz||'').slice(0,2);
+      vtxt(gz2,hx,cy2,'11px "STKaiti","PingFang SC",serif',BROWN2,15);
+      cy2+=gz2.length*15+5;
+      circle(hx,cy2+9,9,dotCol,dotBorder,1);
+      c.font='bold 10px "STKaiti","PingFang SC",serif';
       c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';
-      c.fillText(luckShow,hx,dotY2+7);
-      // 个性化关系小字
+      c.fillText(luckShow,hx,cy2+9);
+      cy2+=22;
       if(p.relations&&p.relations.length>0){
         var rel=p.relations[0];
         var relStr=rel.with.slice(0,1)+rel.type;
-        vtxt(relStr,hx,dotY2+18,'8px "PingFang SC",serif','#8b1a1a',11);
+        if(cy2+relStr.length*12<hBottomY2-4){
+          vtxt(relStr,hx,cy2,'9px "STKaiti","PingFang SC",serif',RED_C,12);
+          cy2+=relStr.length*12+3;
+        }
       }
-      // 十神
-      if(p.ten_god){
-        var tgY=dotY2+30;
-        vtxt(p.ten_god,hx,tgY,'8px "PingFang SC",serif','#5c3d1e',11);
+      if(p.ten_god&&cy2+p.ten_god.length*12<hBottomY2-4){
+        vtxt(p.ten_god,hx,cy2,'9px "STKaiti","PingFang SC",serif',BROWN,12);
       }
     });
 
     // 11. 页脚
-    rect(0,H-30,W,30,BROWN);
-    txt('nztemple.com',W/2-80,H-15,'11px "PingFang SC",serif',GOLD,'right','middle');
-    txt('个性化黄历  '+day.date,W/2+10,H-15,'11px "PingFang SC",serif',GOLD,'left','middle');
+    var FT_H=42;
+    rect(0,H-FT_H,W,FT_H,BROWN);
+    hline(H-FT_H,0,W,BROWN2,1.5);
+    txt('nztemple.com',BX+10,H-FT_H/2,'12px "STKaiti","PingFang SC",serif',GOLD,'left','middle');
+    txt('个性化黄历  '+day.date,W/2,H-FT_H/2,'12px "STKaiti","PingFang SC",serif',GOLD,'center','middle');
+    yin_yang(W-BX-20,H-FT_H/2,12);
 
     return cv.toDataURL('image/png');
   }
@@ -1789,6 +2077,210 @@
     }
   }
   autoLoad();
+
+  // ══════════════════════════════════════════════
+  // 五行穿衣催财
+  // ══════════════════════════════════════════════
+  function loadWardrobe(day) {
+    if (!day || !day.day_gz) return;
+    var dateObj = new Date(day.date);
+    var month   = dateObj.getMonth() + 1;
+    var payload = { day_gz: day.day_gz, month: month, hemisphere: 'south' };
+    fetch(API_BASE + '/api/wardrobe', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if (!d) return;
+      var lang = document.documentElement.getAttribute('data-lang') || 'zh';
+      var isZh = lang !== 'en';
+      var wuxingLabel   = isZh ? ('今日五行：' + d.wuxing)          : ('Today\'s Element: ' + d.wuxing_en);
+      var mainColors    = isZh ? d.main_color    : d.main_color_en;
+      var supportColors = isZh ? d.support_color : d.support_color_en;
+      var avoidColors   = isZh ? d.avoid_color   : d.avoid_color_en;
+      var seasonNote    = isZh ? d.season_note_zh : d.season_note_en;
+      var hemiNote      = isZh ? d.hemisphere_note_zh : d.hemisphere_note_en;
+
+      function chips(arr, cls) {
+        return arr.map(function(c){ return '<span class="color-chip '+cls+'">'+c+'</span>'; }).join('');
+      }
+      var html = '<div class="wardrobe-card">' +
+        '<div style="font-weight:800;color:var(--gold2);margin-bottom:12px;">'+wuxingLabel+'</div>' +
+        '<div class="wardrobe-row">' +
+          '<span class="wardrobe-label"><span class="lang-zh">主穿</span><span class="lang-en">Wear</span></span>' +
+          '<div class="wardrobe-chips">'+chips(mainColors,'main')+'</div>' +
+        '</div>' +
+        '<div class="wardrobe-row">' +
+          '<span class="wardrobe-label"><span class="lang-zh">辅助</span><span class="lang-en">Support</span></span>' +
+          '<div class="wardrobe-chips">'+chips(supportColors,'support')+'</div>' +
+        '</div>' +
+        '<div class="wardrobe-row">' +
+          '<span class="wardrobe-label"><span class="lang-zh">少穿</span><span class="lang-en">Avoid</span></span>' +
+          '<div class="wardrobe-chips">'+chips(avoidColors,'avoid')+'</div>' +
+        '</div>' +
+        '<div class="wardrobe-note">'+seasonNote+'<br><span style="opacity:.75">'+hemiNote+'</span></div>' +
+      '</div>';
+
+      var sec = document.getElementById('secWardrobe');
+      var content = document.getElementById('wardrobeContent');
+      if (sec && content) {
+        content.innerHTML = html;
+        sec.style.display = '';
+      }
+    })
+    .catch(function(){});
+  }
+
+  // ══════════════════════════════════════════════
+  // AI时辰总结（异步批量，不阻塞主页面）
+  // ══════════════════════════════════════════════
+  function loadAiSummaries(personalHours) {
+    if (!personalHours || !personalHours.length) return;
+    // 先在每张卡片底部占位
+    var cards = document.querySelectorAll('#persHourGrid .hour-card');
+    cards.forEach(function(card) {
+      var bar = document.createElement('div');
+      bar.className = 'ai-summary-bar loading';
+      bar.setAttribute('data-ai-bar', '1');
+      var lang = document.documentElement.getAttribute('data-lang') || 'zh';
+      bar.textContent = lang === 'en' ? 'AI summary loading…' : 'AI 总结加载中…';
+      card.appendChild(bar);
+    });
+
+    fetch(API_BASE + '/api/ai_summary', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ hours: personalHours })
+    })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if (!d || !d.items || !d.items.length) {
+        // AI不可用，移除占位
+        document.querySelectorAll('[data-ai-bar]').forEach(function(el){ el.remove(); });
+        return;
+      }
+      // 按 zhi 建立索引
+      var summaryMap = {};
+      d.items.forEach(function(item){ if(item.zhi) summaryMap[item.zhi] = item.ai_summary; });
+
+      // 把总结注入对应卡片
+      var updatedCards = document.querySelectorAll('#persHourGrid .hour-card');
+      updatedCards.forEach(function(card, idx) {
+        var bar = card.querySelector('[data-ai-bar]');
+        if (!bar) return;
+        var zhi = personalHours[idx] ? personalHours[idx].zhi : null;
+        var summary = zhi ? summaryMap[zhi] : null;
+        if (summary) {
+          bar.className = 'ai-summary-bar';
+          bar.innerHTML = '<div class="ai-summary-label">AI ✦</div>' + summary;
+        } else {
+          bar.remove();
+        }
+      });
+    })
+    .catch(function(){
+      document.querySelectorAll('[data-ai-bar]').forEach(function(el){ el.remove(); });
+    });
+  }
+
+  // ══════════════════════════════════════════════
+  // AI财富问答
+  // ══════════════════════════════════════════════
+  function buildVisiblePrompt() {
+    var parts = [];
+    // 日期
+    var alDate = document.getElementById('alDate');
+    var alLunar = document.getElementById('alLunar');
+    var alGz = document.getElementById('alGz');
+    if (alDate && alDate.textContent) parts.push('日期：' + alDate.textContent);
+    if (alLunar && alLunar.textContent) parts.push('农历：' + alLunar.textContent);
+    if (alGz && alGz.textContent) parts.push('干支：' + alGz.textContent);
+    // 宜忌
+    var alYi = document.getElementById('alYi');
+    var alJi = document.getElementById('alJi');
+    if (alYi && alYi.textContent) parts.push('宜：' + alYi.textContent.trim());
+    if (alJi && alJi.textContent) parts.push('忌：' + alJi.textContent.trim());
+    // 方位
+    var alDir = document.getElementById('alDir');
+    if (alDir && alDir.textContent) parts.push('财神方位：' + alDir.textContent.replace(/\s+/g,' ').trim());
+    // 个性化总结
+    var sumText = document.getElementById('summaryText');
+    if (sumText && sumText.textContent) parts.push('当日总结：' + sumText.textContent.trim());
+    // 行动建议
+    var actList = document.getElementById('actionList');
+    if (actList && actList.textContent) parts.push('行动建议：' + actList.textContent.replace(/\s+/g,' ').trim());
+    // 五行穿衣
+    var ward = document.getElementById('wardrobeContent');
+    if (ward && ward.textContent) parts.push('五行穿衣：' + ward.textContent.replace(/\s+/g,' ').trim().slice(0,120));
+    return parts.join('\n');
+  }
+
+  var aiQaModal  = document.getElementById('aiQaModal');
+  var aiQaClose  = document.getElementById('aiQaClose');
+  var aiQaInput  = document.getElementById('aiQaInput');
+  var aiQaSend   = document.getElementById('aiQaSend');
+  var aiQaAnswer = document.getElementById('aiQaAnswer');
+  var aiQaAnswerWrap = document.getElementById('aiQaAnswerWrap');
+
+  function openAiQa() { aiQaModal.classList.remove('hidden'); aiQaInput.focus(); }
+  function closeAiQa(){ aiQaModal.classList.add('hidden'); }
+
+  if (aiQaClose)  aiQaClose.addEventListener('click', closeAiQa);
+  aiQaModal.addEventListener('click', function(e){ if(e.target===aiQaModal) closeAiQa(); });
+
+  // 导航按钮
+  var navAiQaBtn     = document.getElementById('navAiQaBtn');
+  var sidebarAiQaBtn = document.getElementById('sidebarAiQaBtn');
+  if (navAiQaBtn)     navAiQaBtn.addEventListener('click', openAiQa);
+  if (sidebarAiQaBtn) sidebarAiQaBtn.addEventListener('click', function(){ closeAiQa(); openAiQa(); });
+
+  // 快捷问题chips
+  var aiQaChips = document.querySelectorAll('.aiqa-chip');
+  aiQaChips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var lang = document.documentElement.getAttribute('data-lang') || 'zh';
+      aiQaInput.value = lang === 'en' ? (chip.dataset.en||'') : (chip.dataset.zh||'');
+      sendAiQa();
+    });
+  });
+
+  function sendAiQa() {
+    var q = (aiQaInput.value || '').trim();
+    if (!q) return;
+    var lang = document.documentElement.getAttribute('data-lang') || 'zh';
+    aiQaSend.disabled = true;
+    aiQaAnswerWrap.style.display = 'block';
+    aiQaAnswer.className = 'aiqa-answer loading';
+    aiQaAnswer.textContent = lang === 'en' ? 'Thinking…' : '思考中…';
+
+    var payload = {
+      question: q,
+      visible_prompt: buildVisiblePrompt(),
+      lang: lang
+    };
+    fetch(API_BASE + '/api/ai_qa', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      aiQaAnswer.className = 'aiqa-answer';
+      aiQaAnswer.textContent = d.answer || (lang==='en' ? 'No response.' : '暂无回答。');
+    })
+    .catch(function(){
+      aiQaAnswer.className = 'aiqa-answer';
+      aiQaAnswer.textContent = lang==='en' ? 'Network error. Please try again.' : '网络错误，请稍后再试。';
+    })
+    .finally(function(){ aiQaSend.disabled = false; });
+  }
+
+  if (aiQaSend) aiQaSend.addEventListener('click', sendAiQa);
+  if (aiQaInput) aiQaInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') sendAiQa();
+  });
 
 })();
 </script>
