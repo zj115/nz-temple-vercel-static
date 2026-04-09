@@ -75,7 +75,7 @@
 
 /* ── 时辰表格 ── */
 .hour-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.hour-card{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,.02);}
+.hour-card{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,.02);display:flex;flex-direction:column;}
 .hour-card.luck-ji{border-color:var(--red-bd);background:var(--red-bg);}
 .hour-card.luck-ji .hour-gz{color:rgba(220,90,90,.9);}
 .hour-card.luck-ji .hour-label{color:rgba(220,90,90,.9);}
@@ -366,12 +366,12 @@
     <a href="index.html"><span class="lang-zh">主页</span><span class="lang-en">Home</span></a>
     <a href="calendar.html" class="nav-active"><span class="lang-zh">财神黄历</span><span class="lang-en">Almanac</span></a>
     <a href="southern.html"><span class="lang-zh">南半球</span><span class="lang-en">Southern</span></a>
+    <a href="wealth-ai.html"><span class="lang-zh">ai财神问答</span><span class="lang-en">AI Fortune Q&A</span></a>
     <a href="courses.html"><span class="lang-zh">课程</span><span class="lang-en">Courses</span></a>
     <a href="booking.html"><span class="lang-zh">法事预约</span><span class="lang-en">Ritual Booking</span></a>
     <a href="shop.html"><span class="lang-zh">法物商城</span><span class="lang-en">Shop</span></a>
     <a href="profile.html"><span class="lang-zh">资料</span><span class="lang-en">Profile</span></a>
     <a href="login.html" id="sidebarLoginLink"><span class="lang-zh">登录</span><span class="lang-en">Login</span></a>
-    <a href="wealth-ai.html" class="wealth-qa-nav-link">✦ <span class="lang-zh">财富问答</span><span class="lang-en">Wealth Q&amp;A</span></a>
   </nav>
   <div class="sidebar-foot">
     <button class="btn btn-ghost btn-lang" type="button" id="langToggleSidebar">
@@ -404,11 +404,11 @@
       <a href="index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a>
       <a href="calendar.html" class="nav-active"><span class="lang-en">Almanac</span><span class="lang-zh">财神黄历</span></a>
       <a href="southern.html"><span class="lang-en">Southern</span><span class="lang-zh">南半球</span></a>
+      <a href="wealth-ai.html"><span class="lang-en">AI Fortune Q&A</span><span class="lang-zh">ai财神问答</span></a>
       <a href="courses.html"><span class="lang-en">Courses</span><span class="lang-zh">课程</span></a>
       <a href="booking.html"><span class="lang-en">Ritual Booking</span><span class="lang-zh">法事预约</span></a>
       <a href="shop.html"><span class="lang-en">Shop</span><span class="lang-zh">法物商城</span></a>
       <a href="profile.html"><span class="lang-en">Profile</span><span class="lang-zh">资料</span></a>
-      <a href="wealth-ai.html" class="wealth-qa-nav-link">✦ <span class="lang-zh">财富问答</span><span class="lang-en">Wealth Q&amp;A</span></a>
     </nav>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-lang" type="button" id="langToggle" aria-label="Toggle language">
