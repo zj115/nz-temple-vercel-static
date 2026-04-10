@@ -2291,3 +2291,93 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator {
   border-color: rgba(220,90,90,.15);
   color: rgba(255,160,160,.75);
 }
+
+/* ────────────────────────────────────────────
+   MOBILE ENHANCEMENTS (global, max-width: 380px)
+   Ultra-narrow phone screens
+──────────────────────────────────────────── */
+@media (max-width: 380px) {
+  /* Ensure btn-lang meets 44px touch target */
+  .btn-lang { min-height: 44px; padding: 10px 14px; }
+
+  /* Topbar tighter */
+  .topbar-inner { height: 52px; gap: 12px; }
+  .brand-title { font-size: 12px; }
+  .brand-subtitle { display: none; }
+
+  /* Services grid to single column */
+  .services-grid { grid-template-columns: 1fr; }
+
+  /* Trust grid single column already at 640px — keep */
+
+  /* KPI row reduce gap */
+  .wd-kpi-row { gap: 8px; }
+  .wd-kpi { padding: 12px 10px; }
+  .wd-kpi-value { font-size: 15px; }
+
+  /* Hero gap tighter */
+  .hero { gap: 16px; }
+
+  /* Footer single col already at 640px — keep */
+
+  /* Reduce section padding */
+  .wealth-dashboard { padding: 16px 12px; }
+  .outfit-main-card { padding: 16px 12px; }
+  .ai-card { padding: 16px 12px; }
+  .southern-card { padding: 20px 14px; }
+}
+
+/* ────────────────────────────────────────────
+   MOBILE ENHANCEMENTS (max-width: 640px)
+   Supplement existing rules
+──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Ensure btn-lang meets 44px touch target on mobile */
+  .btn-lang { min-height: 42px; }
+
+  /* Hero title tighter gap */
+  .hero { gap: 20px; }
+
+  /* KPI gap tighter */
+  .wd-kpi-row { gap: 10px; }
+
+  /* Topbar brand subtitle hidden on small phones */
+  .brand-subtitle { font-size: 10px; }
+
+  /* Sidebar nav items bigger tap target */
+  .sidebar-nav a { padding: 15px 20px; min-height: 48px; }
+
+  /* Footer bottom column on small */
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  /* Booking form grid single col on mobile */
+  .booking-form-grid { grid-template-columns: 1fr !important; }
+
+  /* South/north page section headers */
+  .sp-section-header { margin-bottom: 20px; }
+
+  /* sp-compare card padding tighter */
+  .sp-compare-card { padding: 20px 14px; }
+
+  /* Reduce section-gap-sm further on very small */
+  :root { --content-pad: 14px; }
+}
+
+/* ────────────────────────────────────────────
+   WEALTH-AI PAGE MOBILE (wa- classes)
+──────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .wa-chip { min-height: 44px; padding: 10px 14px; font-size: 12px; }
+  .wa-chips { gap: 6px; }
+}
+
+/* ────────────────────────────────────────────
+   INDEX PAGE — small screen touch improvements
+──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* AI quick buttons easier to tap */
+  .ai-quick-btn { min-height: 42px; }
+
+  /* Scene cards in outfit section */
+  .scene-tip { display: none; } /* hide tips on very small — icon+name enough */
+}

@@ -303,6 +303,14 @@
   .hl-card{padding:12px;}
   .section-title{font-size:14px;}
 }
+@media(max-width:380px){
+  .hl-controls{grid-template-columns:1fr;}
+  .hl-controls .btn{width:100%;justify-content:center;}
+  .hl-grid-4,.hl-grid-6,.hour-grid,.dir-grid{grid-template-columns:1fr 1fr;}
+  .bazi-grid{grid-template-columns:1fr;}
+  .hl-card{padding:10px;}
+  .aiqa-chip{font-size:11px;padding:6px 10px;}
+}
 
 /* ── 五行穿衣 ── */
 .wardrobe-card{border:1px solid rgba(255,213,122,.18);border-radius:16px;padding:16px;background:rgba(255,213,122,.04);margin-top:14px;}
@@ -471,7 +479,7 @@
       <button class="btn btn-gold" id="btnSouth">
         <span id="btnSouthLabel">
           <span class="lang-zh">我的南半球黄历</span><span class="lang-en">My Southern Almanac</span>
-        </span> ✦
+        </span>
       </button>
       <button class="btn btn-ghost" id="btnNorth">
         <span id="btnNorthLabel">
@@ -483,9 +491,6 @@
       </button>
       <button class="btn btn-ghost" id="btnDownloadPng" style="margin-left:auto;">
         <span class="lang-zh">⬇ 下载 PNG</span><span class="lang-en">⬇ Download PNG</span>
-      </button>
-      <button class="btn btn-ghost" id="btnOpenAiQa" type="button">
-        ✦ <span class="lang-zh">问答</span><span class="lang-en">Q&amp;A</span>
       </button>
     </div>
 

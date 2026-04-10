@@ -421,21 +421,39 @@
   </section>
 
   <script>
-    // Keep the same responsive behavior as other pages
+    // Responsive grids
     (function(){
       function responsive(){
-        var mq = window.matchMedia('(max-width: 900px)');
-        var grids = document.querySelectorAll('[data-course-grid]');
-        if (!grids || !grids.length) return;
-        grids.forEach(function(el){
-          el.style.gridTemplateColumns = mq.matches ? '1fr' : 'repeat(3,1fr)';
+        var mq640 = window.matchMedia('(max-width: 640px)');
+        var mq900 = window.matchMedia('(max-width: 900px)');
+        // Handle all 3-column inline grids
+        document.querySelectorAll('[data-course-grid]').forEach(function(el){
+          if (mq640.matches) {
+            el.style.gridTemplateColumns = '1fr';
+          } else if (mq900.matches) {
+            el.style.gridTemplateColumns = '1fr 1fr';
+          } else {
+            el.style.gridTemplateColumns = 'repeat(3,1fr)';
+          }
         });
       }
-      // Mark the main grid for optional responsive tweaks
-      var mainGrid = document.querySelector('main .container > section:nth-of-type(3) div[style*="grid-template-columns:repeat(3,1fr)"]');
-      if (mainGrid) mainGrid.setAttribute('data-course-grid','1');
+      // Mark all 3-column grids
+      document.querySelectorAll('div[style*="grid-template-columns:repeat(3,1fr)"]').forEach(function(el){
+        el.setAttribute('data-course-grid','1');
+      });
+      // Also handle the 2-column price grid
+      document.querySelectorAll('div[style*="grid-template-columns:1.1fr .9fr"]').forEach(function(el){
+        el.setAttribute('data-price-grid','1');
+      });
+      function responsivePrice(){
+        var mq640 = window.matchMedia('(max-width: 640px)');
+        document.querySelectorAll('[data-price-grid]').forEach(function(el){
+          el.style.gridTemplateColumns = mq640.matches ? '1fr' : '1.1fr .9fr';
+        });
+      }
       responsive();
-      window.addEventListener('resize', responsive);
+      responsivePrice();
+      window.addEventListener('resize', function(){ responsive(); responsivePrice(); });
     })();
   </script>
 </main>
