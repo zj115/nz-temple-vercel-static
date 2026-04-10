@@ -245,8 +245,8 @@
       </h1>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0;">
         <a class="btn btn-gold" href="calendar.html">
-          <span class="lang-en">✦ Open Almanac Calendar</span>
-          <span class="lang-zh">✦ 打开财神黄历</span>
+          <span class="lang-en">Open Almanac Calendar</span>
+          <span class="lang-zh">打开财神黄历</span>
         </a>
         <a class="btn btn-ghost" href="fortune.html">
           <span class="lang-en">Daily Fortune</span>
@@ -279,8 +279,8 @@
         <span id="luckyHoursText" style="color:var(--gold2);font-weight:700;font-size:14px;"></span>
       </div>
       <a class="btn btn-gold" style="margin-top:14px;width:100%;" href="calendar.html">
-        <span class="lang-en">Open Almanac Calendar ✦</span>
-        <span class="lang-zh">打开财神黄历 ✦</span>
+        <span class="lang-en">Open Almanac Calendar</span>
+        <span class="lang-zh">打开财神黄历</span>
       </a>
     </div>
   </section>
@@ -512,7 +512,7 @@
         <div class="ai-left">
           <div class="ai-header">
             <div class="ai-badge">
-              <span class="ai-badge-icon">✦</span>
+              <span class="ai-badge-icon">AI</span>
               <span class="lang-zh">财神智能顾问</span>
               <span class="lang-en">Wealth AI Advisor</span>
             </div>
@@ -570,7 +570,7 @@
             <div class="ai-chat-messages" id="aiChatMessages">
               <!-- Initial AI greeting -->
               <div class="chat-msg ai" id="aiGreeting">
-                <div class="chat-avatar chat-avatar-ai">✦</div>
+                <div class="chat-avatar chat-avatar-ai">AI</div>
                 <div class="chat-bubble chat-bubble-ai" id="aiGreetingText">
                   <span class="lang-zh">你好！我是新西兰财神庙的 AI 财运顾问。<br>今日黄历已更新，你有什么想问的吗？</span>
                   <span class="lang-en">Hello! I'm the NZ Temple AI Wealth Advisor.<br>Today's almanac is ready — what would you like to know?</span>
@@ -1085,7 +1085,7 @@
 
   // Advice database (pick 3 by rng)
   var adviceDB = [
-    { icon:'✦', zh:'上装选旺财色，下装可搭百搭深色，重点在上身展示', en:'Choose the wealth color for your top — dark neutrals for bottoms' },
+    { icon:'👔', zh:'上装选旺财色，下装可搭百搭深色，重点在上身展示', en:'Choose the wealth color for your top — dark neutrals for bottoms' },
     { icon:'💼', zh:'商务约见建议全身旺财色系，配件可点缀今日旺色', en:'For business meetings, dress head-to-toe in today\'s wealth palette' },
     { icon:'🧣', zh:'若不便全身换色，可加一条今日旺色围巾或包包', en:'If you can\'t change your outfit, add a scarf or bag in today\'s color' },
     { icon:'💍', zh:'佩戴对应五行材质饰品增强财运：金克木宜金饰，水旺宜蓝石', en:'Wear five-element jewelry to amplify: gold for Metal days, blue stones for Water' },
@@ -1331,7 +1331,7 @@
       msg.innerHTML = '<div class="chat-avatar chat-avatar-user">你</div>'
         + '<div class="chat-bubble chat-bubble-user">' + escHtml(text) + '</div>';
     } else {
-      msg.innerHTML = '<div class="chat-avatar chat-avatar-ai">✦</div>'
+      msg.innerHTML = '<div class="chat-avatar chat-avatar-ai">AI</div>'
         + '<div class="chat-bubble chat-bubble-ai">' + text + '</div>';
     }
     msgs.appendChild(msg);
@@ -1348,7 +1348,7 @@
     if (!msgs) return null;
     var typingEl = document.createElement('div');
     typingEl.className = 'chat-msg ai';
-    typingEl.innerHTML = '<div class="chat-avatar chat-avatar-ai">✦</div>'
+    typingEl.innerHTML = '<div class="chat-avatar chat-avatar-ai">AI</div>'
       + '<div class="chat-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
     msgs.appendChild(typingEl);
     msgs.scrollTop = msgs.scrollHeight;

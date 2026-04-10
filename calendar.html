@@ -762,7 +762,7 @@
 <div id="aiQaModal" class="hidden" role="dialog" aria-modal="true">
   <div id="aiQaSheet">
     <div class="aiqa-header">
-      <div class="aiqa-title">✦ <span class="lang-zh">AI 财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></div>
+      <div class="aiqa-title"><span class="lang-zh">AI 财富问答</span><span class="lang-en">AI Wealth Q&amp;A</span></div>
       <button class="aiqa-close" id="aiQaClose" aria-label="Close">✕</button>
     </div>
     <p style="font-size:13px;opacity:.65;margin-bottom:14px;line-height:1.6;">
@@ -2322,7 +2322,7 @@
         var summary = zhi ? summaryMap[zhi] : null;
         if (summary) {
           bar.className = 'ai-summary-bar';
-          bar.innerHTML = '<div class="ai-summary-label">AI ✦</div>' + summary;
+          bar.innerHTML = '<div class="ai-summary-label">AI</div>' + summary;
         } else {
           bar.remove();
         }
