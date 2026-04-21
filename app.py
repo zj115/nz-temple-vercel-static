@@ -138,6 +138,7 @@ def api_personal_day_birth():
         "personal":            personal,
         "basic_hour_table":    personal["basic_hour_table"],
         "personal_hour_table": personal["personal_hour_table"],
+        "hour_luck_chart":     personal.get("hour_luck_chart"),
     })
 
 
@@ -166,6 +167,7 @@ def api_personal_day_manual():
         "personal":            personal,
         "basic_hour_table":    personal["basic_hour_table"],
         "personal_hour_table": personal["personal_hour_table"],
+        "hour_luck_chart":     personal.get("hour_luck_chart"),
     })
 
 

@@ -450,6 +450,9 @@ def build_personal_hour_table(date_: dt.date, bazi: Dict) -> List[Dict]:
                 if item not in p_ji:
                     p_ji.append(item)
 
+        # 计算时运评分
+        hour_luck_score = _build_hour_luck_metrics(row, stem_rels, rels)
+
         row2 = dict(row)
         row2["personal"] = {
             "ten_god":   ten_god(day_master, hg) if hg else None,
@@ -457,6 +460,7 @@ def build_personal_hour_table(date_: dt.date, bazi: Dict) -> List[Dict]:
             "luck":      p_luck,
             "yi":        p_yi,
             "ji":        p_ji,
+            "hour_luck_score": hour_luck_score,
         }
         out.append(row2)
     return out
