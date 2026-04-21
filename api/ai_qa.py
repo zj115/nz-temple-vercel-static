@@ -85,7 +85,9 @@ Rules:
             max_tokens=400,
         )
         return (resp.choices[0].message.content or "").strip()
-    except Exception:
+    except Exception as e:
+        # 记录错误但不暴露给用户
+        print(f"OpenAI API error: {e}", file=sys.stderr)
         return ""
 
 

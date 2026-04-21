@@ -897,6 +897,17 @@
     String(today.getDate()).padStart(2,'0');
   dateInput.value = todayStr;
 
+  // ── HTML 转义函数 ─────────────────────────────
+  function esc(value) {
+    if (value == null) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ── 八字 localStorage ─────────────────────────
   function loadSavedBazi(){
     try {
