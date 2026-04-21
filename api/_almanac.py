@@ -260,10 +260,128 @@ def compute_basic_hour_table(date_: dt.date) -> List[Dict]:
 
 # ── 个性化时辰表 ──────────────────────────────────────────
 
+# ── 时运 K 线评分 ─────────────────────────────────────────
+
+STEM_RELATION_WEIGHTS = {"合": 4, "冲": -4, "同气": 2}
+BRANCH_RELATION_WEIGHTS = {
+    "三合": 8, "三会": 8, "合": 6, "同气": 4,
+    "冲": -9, "刑": -7, "害": -6, "破": -5,
+}
+PILLAR_WEIGHTS = {
+    "日支": 1.6, "日干": 1.5, "月支": 1.25, "月干": 1.15,
+    "时支": 1.1, "时干": 1.0, "年支": 0.9, "年干": 0.85,
+}
+
+
+def _calc_component_score(weight_map: Dict, relation_type: str, pillar: str) -> int:
+    base = weight_map.get(relation_type, 0)
+    score = round(base * PILLAR_WEIGHTS.get(pillar, 1.0))
+    if base > 0: return max(1, score)
+    if base < 0: return min(-1, score)
+    return 0
+
+
+def _hour_base_score(row: Dict):
+    reasons = []
+    score = 50
+    luck = row.get("luck", "")
+    if "吉" in luck:
+        score += 8; reasons.append({"label": f"时神{luck}", "score": 8, "kind": "support"})
+    elif "凶" in luck:
+        score -= 8; reasons.append({"label": f"时神{luck}", "score": -8, "kind": "risk"})
+    yi_count = min(len(row.get("yi", [])), 4)
+    if yi_count:
+        s = yi_count * 2; score += s; reasons.append({"label": f"时宜{yi_count}项", "score": s, "kind": "support"})
+    ji_terms = row.get("ji", [])
+    ji_count = min(len(ji_terms), 4)
+    if ji_count:
+        s = -(ji_count * 3); score += s; reasons.append({"label": f"时忌{ji_count}项", "score": s, "kind": "risk"})
+    if "诸事不宜" in ji_terms:
+        score -= 12; reasons.append({"label": "诸事不宜强约束", "score": -12, "kind": "risk"})
+    return max(0, min(100, score)), reasons
+
+
+def _relation_breakdown(relations: List[Dict], layer: str) -> List[Dict]:
+    weights = STEM_RELATION_WEIGHTS if layer == "stem" else BRANCH_RELATION_WEIGHTS
+    items = []
+    for relation in relations:
+        score = _calc_component_score(weights, relation.get("type", ""), relation.get("with", ""))
+        if not score: continue
+        items.append({"label": f"{relation.get('type','')}{relation.get('with','')}", "score": score,
+                      "kind": "support" if score > 0 else "risk", "layer": layer})
+    return items
+
+
+def _build_hour_luck_metrics(row: Dict, stem_relations: List[Dict], branch_relations: List[Dict]) -> Dict:
+    base_score, base_reasons = _hour_base_score(row)
+    stem_reasons = _relation_breakdown(stem_relations, "stem")
+    branch_reasons = _relation_breakdown(branch_relations, "branch")
+    all_reasons = base_reasons + stem_reasons + branch_reasons
+    support_points = sum(i["score"] for i in all_reasons if i["score"] > 0)
+    risk_points = sum(-i["score"] for i in all_reasons if i["score"] < 0)
+    final_score = max(0, min(100, base_score + sum(i["score"] for i in stem_reasons + branch_reasons)))
+    high = max(final_score, min(100, max(base_score, final_score) + round(support_points * 0.28)))
+    low  = min(final_score, max(0, min(base_score, final_score) - round(risk_points * 0.24)))
+    if final_score >= 75:   level = "强"
+    elif final_score >= 60: level = "稳"
+    elif final_score >= 45: level = "平"
+    else:                   level = "谨慎"
+    rationale = [
+        "底分依据时神吉凶与时宜时忌数量。",
+        "个性化修正依据时干与命局四干、时支与命局四支的合冲刑害破三合三会同气关系。",
+        "日柱权重最高，月柱次之，时柱再次，年柱较轻。",
+        "未引入喜用神强弱判断，因此这是可解释评分，不冒充完整命局断语。",
+    ]
+    return {
+        "base_score": base_score, "score": final_score, "open": base_score, "close": final_score,
+        "high": high, "low": low, "level": level,
+        "support_points": support_points, "risk_points": risk_points,
+        "reasons": all_reasons, "rationale": rationale,
+        "support_tags": [i["label"] for i in all_reasons if i["score"] > 0][:3],
+        "risk_tags":    [i["label"] for i in all_reasons if i["score"] < 0][:3],
+    }
+
+
+def _build_luck_chart_from_hour_table(rows: List[Dict]) -> Dict:
+    items = []
+    for row in rows:
+        m = (row.get("personal") or {}).get("hour_luck_score") or {}
+        items.append({
+            "zhi": row.get("zhi"), "label": row.get("label"), "range": row.get("range"),
+            "gz": row.get("gz"), "luck": row.get("luck"),
+            "score": m.get("score", 50), "open": m.get("open", 50), "close": m.get("close", 50),
+            "high": m.get("high", 50), "low": m.get("low", 50), "base_score": m.get("base_score", 50),
+            "level": m.get("level", "平"), "support_points": m.get("support_points", 0),
+            "risk_points": m.get("risk_points", 0), "support_tags": m.get("support_tags", []),
+            "risk_tags": m.get("risk_tags", []), "reasons": m.get("reasons", []),
+            "rationale": m.get("rationale", []),
+        })
+    peak   = max(items, key=lambda x: x["score"]) if items else None
+    trough = min(items, key=lambda x: x["score"]) if items else None
+    return {
+        "model": "可解释时运评分模型",
+        "description": "以时神吉凶、时宜时忌以及时柱与命局四柱的干支互动关系进行加减分，形成每个时辰的区间分与收盘分。",
+        "notes": [
+            "开盘分代表该时辰在未叠加个人命局前的基础时运。",
+            "收盘分代表叠加个人八字关系后的个性化时运。",
+            "上下影线代表该时辰的助力与风险波动区间，不是预测价格。",
+        ],
+        "peak_hour":   {"zhi": peak["zhi"],   "label": peak["label"],   "score": peak["score"]}   if peak   else None,
+        "trough_hour": {"zhi": trough["zhi"], "label": trough["label"], "score": trough["score"]} if trough else None,
+        "items": items,
+    }
+
+
 def build_personal_hour_table(date_: dt.date, bazi: Dict) -> List[Dict]:
     """生成个性化时辰表，与参考版完全一致。"""
     basic = compute_basic_hour_table(date_)
     day_master = split_gz(bazi["day"]["gz"])[0]
+    natal_gans = [
+        split_gz(bazi["year"]["gz"])[0],
+        split_gz(bazi["month"]["gz"])[0],
+        split_gz(bazi["day"]["gz"])[0],
+        split_gz(bazi["time"]["gz"])[0],
+    ]
     natal_zhis = [
         split_gz(bazi["year"]["gz"])[1],
         split_gz(bazi["month"]["gz"])[1],
@@ -288,6 +406,11 @@ def build_personal_hour_table(date_: dt.date, bazi: Dict) -> List[Dict]:
     out = []
     for row in basic:
         hg, hz = split_gz(row["gz"])
+        stem_rels = []
+        for pillar_label, ng in zip(["年干","月干","日干","时干"], natal_gans):
+            rel = gan_relation(hg, ng)
+            if rel: stem_rels.append({"with": pillar_label, "type": rel[0], "element": rel[1]})
+            if hg == ng: stem_rels.append({"with": pillar_label, "type": "同气"})
         rels = []
         for pillar_label, z in zip(["年支","月支","日支","时支"], natal_zhis):
             if is_chong(hz, z):     rels.append({"with": pillar_label, "type": "冲"})
@@ -438,6 +561,9 @@ def build_personal_analysis(day: Dict, bazi: Dict) -> Dict:
     ]
 
     date_obj = dt.date.fromisoformat(day["date"])
+    personal_hour_table = build_personal_hour_table(date_obj, bazi)
+    hour_luck_chart = _build_luck_chart_from_hour_table(personal_hour_table)
+
     return {
         "summary":       generate_daily_summary(flags, day),
         "tips":          tips,
@@ -458,7 +584,8 @@ def build_personal_analysis(day: Dict, bazi: Dict) -> Dict:
         "explanations":   explanations[:40],
         "hidden_blocks":  hidden_blocks,
         "basic_hour_table":    compute_basic_hour_table(date_obj),
-        "personal_hour_table": build_personal_hour_table(date_obj, bazi),
+        "personal_hour_table": personal_hour_table,
+        "hour_luck_chart":     hour_luck_chart,
         # 兼容旧字段名（calendar.html 用到）
         "gan_relations":       [r for r in flags if r["layer"] == "天干"],
         "zhi_relations":       [r for r in flags if r["layer"] == "地支"],

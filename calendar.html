@@ -95,6 +95,55 @@
 .rel-desc{opacity:.8;font-size:12px;margin-top:4px;line-height:1.7;}
 .rel-note{opacity:.65;font-size:11px;margin-top:4px;}
 
+/* ── 时运 K 线图 ── */
+.luck-chart-shell{padding:0;}
+.luck-chart-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px;}
+.luck-chart-meta{max-width:720px;}
+.luck-chart-title{font-weight:900;color:var(--gold);font-size:16px;}
+.luck-chart-desc{margin-top:6px;color:var(--text);opacity:.75;font-size:13px;line-height:1.55;}
+.luck-chart-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.luck-badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--border);background:rgba(255,213,122,.12);color:var(--gold2);}
+.luck-chart-notes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.luck-note{font-size:11px;opacity:.65;padding:4px 10px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);}
+.luck-chart-wrap{margin-top:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03);padding:8px;overflow:auto;}
+.luck-chart-svg{width:100%;min-width:760px;height:auto;display:block;}
+.luck-grid{stroke:rgba(255,213,122,.2);stroke-width:1;}
+.luck-axis-text{fill:var(--gold2);font-size:11px;font-weight:700;opacity:.7;}
+.luck-line{fill:none;stroke:var(--gold);stroke-width:2;}
+.luck-candle-hit{fill:transparent;cursor:pointer;}
+.luck-candle-wick{stroke:var(--gold2);stroke-width:2;opacity:.6;}
+.luck-candle-up{fill:rgba(70,200,120,.84);stroke:rgba(70,200,120,1);stroke-width:1.5;}
+.luck-candle-down{fill:rgba(220,90,90,.78);stroke:rgba(220,90,90,1);stroke-width:1.5;}
+.luck-candle-flat{fill:rgba(255,213,122,.72);stroke:rgba(255,213,122,1);stroke-width:1.5;}
+.luck-candle-active .luck-candle-up,
+.luck-candle-active .luck-candle-down,
+.luck-candle-active .luck-candle-flat{filter:drop-shadow(0 0 6px rgba(255,213,122,.5));}
+.luck-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.legend-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;opacity:.75;}
+.legend-dot::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;}
+.legend-up::before{background:rgba(70,200,120,.84);}
+.legend-down::before{background:rgba(220,90,90,.78);}
+.legend-line::before{background:var(--gold);}
+.luck-detail{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;padding:14px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.02);}
+.luck-detail-main,.luck-detail-side{display:flex;flex-direction:column;gap:10px;}
+.luck-detail-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+.luck-detail-name{font-weight:900;color:var(--gold);font-size:18px;}
+.luck-detail-sub{color:var(--text);opacity:.7;font-size:13px;}
+.score-large{font-size:28px;font-weight:900;color:var(--gold);}
+.score-good{color:var(--green);}
+.score-bad{color:var(--red);}
+.luck-score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.score-box{border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03);padding:10px;}
+.score-label{font-size:12px;opacity:.65;margin-bottom:4px;}
+.score-value{font-weight:900;color:var(--gold2);}
+.reason-list{display:flex;flex-wrap:wrap;gap:8px;}
+.reason-chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid var(--border);background:rgba(255,255,255,.04);}
+.reason-chip.support{color:var(--green);border-color:var(--green-bd);background:var(--green-bg);}
+.reason-chip.risk{color:var(--red);border-color:var(--red-bd);background:var(--red-bg);}
+.rationale-list,.hour-tag-list{display:flex;flex-direction:column;gap:8px;}
+.rationale-item,.hour-tag{font-size:12px;opacity:.8;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.02);line-height:1.6;}
+.mini{font-size:11px;opacity:.6;}
+
 /* ── 总结卡片 ── */
 .summary-text{line-height:1.9;opacity:.9;font-size:14px;}
 .action-list{margin-top:10px;display:grid;gap:8px;}
@@ -287,6 +336,8 @@
   .pillar-grid{grid-template-columns:repeat(2,1fr);}
   .bazi-grid{grid-template-columns:repeat(2,1fr);}
   .dir-grid{grid-template-columns:repeat(3,1fr);}
+  .luck-detail{grid-template-columns:1fr;}
+  .luck-score-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:600px){
   .hl-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -302,6 +353,8 @@
   .bazi-status-bar{flex-direction:column;align-items:flex-start;gap:8px;}
   .hl-card{padding:12px;}
   .section-title{font-size:14px;}
+  .luck-detail{grid-template-columns:1fr;}
+  .luck-score-grid{grid-template-columns:1fr;}
 }
 @media(max-width:380px){
   .hl-controls{grid-template-columns:1fr;}
@@ -623,6 +676,14 @@
           <span class="lang-zh">个性化时运（12时辰）</span><span class="lang-en">Personal Forecast (12 Periods)</span>
         </div>
         <div class="hour-grid" id="persHourGrid"></div>
+      </div>
+
+      <!-- 时运 K 线图 -->
+      <div class="hl-card" id="secHourLuckChart">
+        <div class="section-title">
+          <span class="lang-zh">时运 K 线图</span><span class="lang-en">Hour Luck Chart</span>
+        </div>
+        <div id="hourLuckChart"></div>
       </div>
 
       <!-- ── 五行穿衣催财 ── -->
@@ -1021,6 +1082,7 @@
       renderPillars(res.bazi);
       renderPersonal(res.personal);
       renderPersonalHours(res.personal_hour_table);
+      renderHourLuckChart(res.personal.hour_luck_chart);
       secBazi.classList.remove('hidden');
       // 更新半球标识横幅
       var banner = document.getElementById('hemiBanner');
@@ -1255,6 +1317,149 @@
       '</div>';
     }).join('');
     document.getElementById('persHourGrid').innerHTML = html;
+  }
+
+  // ── 渲染：时运 K 线图 ─────────────────────────
+  var selectedHourLuckZhi = null;
+  function renderHourLuckChart(chart){
+    var target = document.getElementById('hourLuckChart');
+    if(!chart || !(chart.items || []).length){
+      target.className = 'mutedBox';
+      target.innerHTML = '<div style="text-align:center;padding:20px;opacity:.6;">输入八字后，会在这里展示个性化时运 K 线与评分拆解。</div>';
+      return;
+    }
+
+    target.className = '';
+    var items = chart.items;
+    if(!selectedHourLuckZhi || !items.some(function(item){ return item.zhi === selectedHourLuckZhi; })){
+      selectedHourLuckZhi = items[0].zhi;
+    }
+    var selectedIndex = Math.max(0, items.findIndex(function(item){ return item.zhi === selectedHourLuckZhi; }));
+    var selected = items[selectedIndex] || items[0];
+
+    var width = 820;
+    var height = 300;
+    var left = 44;
+    var right = 20;
+    var top = 20;
+    var bottom = 42;
+    var plotW = width - left - right;
+    var plotH = height - top - bottom;
+    var step = plotW / items.length;
+    var candleWidth = Math.min(26, step * 0.42);
+    var y = function(value){ return top + (100 - value) * plotH / 100; };
+
+    var gridLines = [0, 25, 50, 75, 100].map(function(value){
+      var py = y(value);
+      return '<line class="luck-grid" x1="'+left+'" y1="'+py+'" x2="'+(width-right)+'" y2="'+py+'"></line>' +
+        '<text class="luck-axis-text" x="'+(left-8)+'" y="'+(py+4)+'" text-anchor="end">'+value+'</text>';
+    }).join('');
+
+    var linePath = items.map(function(item, index){
+      var x = left + step * index + step / 2;
+      return (index === 0 ? 'M' : 'L') + ' ' + x + ' ' + y(item.close);
+    }).join(' ');
+
+    var candles = items.map(function(item, index){
+      var x = left + step * index + step / 2;
+      var bodyTop = Math.min(y(item.open), y(item.close));
+      var bodyBottom = Math.max(y(item.open), y(item.close));
+      var bodyHeight = Math.max(4, bodyBottom - bodyTop);
+      var cls = item.close > item.open ? 'luck-candle-up' : item.close < item.open ? 'luck-candle-down' : 'luck-candle-flat';
+      var active = index === selectedIndex ? 'luck-candle-active' : '';
+      return '<g class="'+active+'" data-index="'+index+'">' +
+        '<line class="luck-candle-wick" x1="'+x+'" y1="'+y(item.high)+'" x2="'+x+'" y2="'+y(item.low)+'"></line>' +
+        '<rect class="'+cls+'" x="'+(x - candleWidth/2)+'" y="'+bodyTop+'" width="'+candleWidth+'" height="'+bodyHeight+'" rx="4"></rect>' +
+        '<rect class="luck-candle-hit" data-index="'+index+'" x="'+(x - step/2 + 4)+'" y="'+top+'" width="'+(step - 8)+'" height="'+plotH+'"></rect>' +
+        '<text class="luck-axis-text" x="'+x+'" y="'+(height - 16)+'" text-anchor="middle">'+esc(item.zhi)+'</text>' +
+      '</g>';
+    }).join('');
+
+    var reasons = (selected.reasons || []).map(function(item){
+      return '<span class="reason-chip '+(item.kind === 'risk' ? 'risk' : 'support')+'">'+esc(item.label)+' '+(item.score > 0 ? '+' : '')+esc(item.score)+'</span>';
+    }).join('') || '<span class="mini">暂无拆解</span>';
+
+    var rationale = (selected.rationale || []).map(function(text){
+      return '<div class="rationale-item">'+esc(text)+'</div>';
+    }).join('');
+
+    var supportTags = (selected.support_tags || []).map(function(tag){
+      return '<div class="hour-tag">助力：'+esc(tag)+'</div>';
+    }).join('');
+
+    var riskTags = (selected.risk_tags || []).map(function(tag){
+      return '<div class="hour-tag">风险：'+esc(tag)+'</div>';
+    }).join('');
+
+    var levelText = function(score){
+      if(score >= 75) return '强';
+      if(score >= 60) return '稳';
+      if(score >= 45) return '平';
+      return '谨慎';
+    };
+
+    var scoreClass = function(score){
+      if(score >= 60) return 'score-good';
+      if(score < 45) return 'score-bad';
+      return '';
+    };
+
+    target.innerHTML = '<div class="luck-chart-shell">' +
+      '<div class="luck-chart-top">' +
+        '<div class="luck-chart-meta">' +
+          '<div class="luck-chart-title">'+esc(chart.model || '时运 K 线图')+'</div>' +
+          '<div class="luck-chart-desc">'+esc(chart.description || '')+'</div>' +
+          '<div class="luck-chart-notes">'+(chart.notes || []).map(function(note){ return '<span class="luck-note">'+esc(note)+'</span>'; }).join('')+'</div>' +
+        '</div>' +
+        '<div class="luck-chart-badges">' +
+          (chart.peak_hour ? '<span class="luck-badge">峰值：'+esc(chart.peak_hour.label)+' '+esc(chart.peak_hour.score)+'</span>' : '') +
+          (chart.trough_hour ? '<span class="luck-badge">低点：'+esc(chart.trough_hour.label)+' '+esc(chart.trough_hour.score)+'</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="luck-chart-wrap">' +
+        '<svg class="luck-chart-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="时运K线图">' +
+          gridLines +
+          '<path class="luck-line" d="'+linePath+'"></path>' +
+          candles +
+        '</svg>' +
+      '</div>' +
+      '<div class="luck-legend">' +
+        '<span class="legend-dot legend-up">收盘高于开盘：个人命局加分占优</span>' +
+        '<span class="legend-dot legend-down">收盘低于开盘：个人命局牵制更强</span>' +
+        '<span class="legend-dot legend-line">折线：各时辰个性化收盘分</span>' +
+      '</div>' +
+      '<div class="luck-detail">' +
+        '<div class="luck-detail-main">' +
+          '<div class="luck-detail-head">' +
+            '<div>' +
+              '<div class="luck-detail-name">'+esc(selected.label)+' · '+esc(selected.gz)+'</div>' +
+              '<div class="luck-detail-sub">'+esc(selected.range)+' · '+esc(levelText(selected.score))+'</div>' +
+            '</div>' +
+            '<div class="score-large '+scoreClass(selected.score)+'">'+esc(selected.score)+'</div>' +
+          '</div>' +
+          '<div class="luck-score-grid">' +
+            '<div class="score-box"><div class="score-label">基础开盘分</div><div class="score-value">'+esc(selected.open)+'</div></div>' +
+            '<div class="score-box"><div class="score-label">个性化收盘分</div><div class="score-value">'+esc(selected.close)+'</div></div>' +
+            '<div class="score-box"><div class="score-label">上影区间</div><div class="score-value">'+esc(selected.high)+'</div></div>' +
+            '<div class="score-box"><div class="score-label">下影区间</div><div class="score-value">'+esc(selected.low)+'</div></div>' +
+          '</div>' +
+          '<div class="mini">评分依据按"时神吉凶 + 时宜时忌 + 时柱与命局四柱关系"逐项加减分。点击不同蜡烛可查看该时辰的理论拆解。</div>' +
+          '<div class="reason-list">'+reasons+'</div>' +
+        '</div>' +
+        '<div class="luck-detail-side">' +
+          '<div class="rationale-list">'+rationale+'</div>' +
+          '<div class="hour-tag-list">'+supportTags+riskTags+'</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+    target.querySelectorAll('[data-index]').forEach(function(node){
+      node.addEventListener('click', function(){
+        var index = Number(node.getAttribute('data-index'));
+        selectedHourLuckZhi = items[index].zhi;
+        renderHourLuckChart(chart);
+      });
+    });
   }
 
   // ── 渲染：四柱 ───────────────────────────────
