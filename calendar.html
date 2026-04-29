@@ -865,6 +865,7 @@
   // 当前模式：'personal' | 'daozhang'
   var currentMode = 'daozhang';
   var currentUserName = '';
+  var currentHemisphere = 'south'; // 默认南半球（新西兰）
 
   // ── DOM 引用 ─────────────────────────────────
   var dateInput       = document.getElementById('dateInput');
@@ -1262,7 +1263,7 @@
         '<div style="font-size:11px;opacity:.7;">忌：'+(h.ji||[]).join(' ')+'</div>' +
         (h.chong_desc ? '<div style="font-size:10px;opacity:.55;margin-top:2px;">'+h.chong_desc+'</div>' : '') +
         persHtml +
-        '<div class="hour-tip">'+generateShichenSummary(h, currentHemisphere)+'</div>' +
+        '<div class="hour-tip">'+generateShichenSummary(h, '')+'</div>' +
       '</div>';
     }).join('');
     document.getElementById('hourGrid').innerHTML = html;
@@ -1296,7 +1297,7 @@
         (persHtml || '<div style="font-size:11px;opacity:.5;margin-top:4px;">无命局关系</div>') +
         (pYi.length ? '<div style="margin-top:4px;font-size:11px;opacity:.85;color:var(--green);">宜：'+pYi.join(' · ')+'</div>' : '') +
         (pJi.length ? '<div style="font-size:11px;opacity:.85;color:var(--red);">忌：'+pJi.join(' · ')+'</div>' : '') +
-        '<div class="hour-tip">'+generateShichenSummary(h, currentHemisphere)+'</div>' +
+        '<div class="hour-tip">'+generateShichenSummary(h, '')+'</div>' +
       '</div>';
     }).join('');
     document.getElementById('persHourGrid').innerHTML = html;
