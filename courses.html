@@ -1129,33 +1129,10 @@
         openModal(lockedModal);
         return;
       }
-      // 已登录且有权限 → 获取签名 URL 并播放
-      const videoUrl = await buildVideoUrl(course);
-      if (!videoUrl) return; // API 失败，已弹窗提示
 
-      console.log('[openCourse] 签名 URL 获取成功:', videoUrl);
-      video.src = videoUrl;
-      video.load();
-      console.log('[openCourse] video.src 已设置:', video.src);
-
-      titleEl.innerHTML =
-        '<span class="lang-zh">'+ course.titleZh +'</span>' +
-        '<span class="lang-en">'+ course.titleEn +'</span>';
-      chapterEl.innerHTML =
-        '<span class="lang-zh">'+ course.chapterZh +'</span>' +
-        '<span class="lang-en">'+ course.chapterEn +'</span>';
-      descEl.innerHTML =
-        '<span class="lang-zh">'+ course.descZh +'</span>' +
-        '<span class="lang-en">'+ course.descEn +'</span>';
-      console.log('[openCourse] 弹窗内容已设置');
-
-      console.log('[openCourse] 准备调用 openModal(modal)');
-      openModal(modal);
-      console.log('[openCourse] openModal(modal) 调用完成');
-
-      // Try autoplay (browsers may block until user interacts)
-      video.play().catch(() => {});
-      console.log('[openCourse] video.play() 调用完成');
+      // 已登录且有权限 → 跳转到专业播放页面
+      const courseIndex = FENG_SHUI_COURSES.indexOf(course) + 1;
+      window.location.href = `video-player.html?id=${courseIndex}`;
     };
 
     function closeVideoModal() {

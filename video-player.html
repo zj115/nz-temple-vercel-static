@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风水课程 - 新西兰道观</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+        }
+
+        /* 顶部导航栏 */
+        .video-header {
+            background: #212121;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #303030;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #3f3f3f;
+        }
+
+        .video-title-header {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* 主容器 */
+        .video-container {
+            display: flex;
+            max-width: 1920px;
+            margin: 0 auto;
+            height: calc(100vh - 57px);
+        }
+
+        /* 左侧视频区域 */
+        .video-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: #0f0f0f;
+        }
+
+        /* 视频播放器 */
+        .video-player-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16 / 9;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        /* 视频信息区 */
+        .video-info {
+            padding: 20px 24px;
+        }
+
+        .video-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .video-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .video-description {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* 右侧播放列表 */
+        .playlist-sidebar {
+            width: 400px;
+            background: #212121;
+            border-left: 1px solid #303030;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .playlist-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #303030;
+        }
+
+        .playlist-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .playlist-count {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .playlist-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .playlist-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #303030;
+        }
+
+        .playlist-item:hover {
+            background: #3f3f3f;
+        }
+
+        .playlist-item.active {
+            background: #3f3f3f;
+            border-left: 3px solid #3ea6ff;
+        }
+
+        .playlist-item-index {
+            color: #aaa;
+            font-size: 14px;
+            min-width: 30px;
+        }
+
+        .playlist-item.active .playlist-item-index {
+            color: #3ea6ff;
+        }
+
+        .playlist-item-thumbnail {
+            width: 120px;
+            height: 68px;
+            background: #000;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+        }
+
+        .playlist-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .playlist-item-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .playlist-item-duration {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        /* 加载状态 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #3f3f3f;
+            border-top-color: #3ea6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 错误提示 */
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            padding: 20px 30px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 11;
+        }
+
+        .error-message h3 {
+            color: #ff4444;
+            margin-bottom: 10px;
+        }
+
+        .error-message p {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .playlist-sidebar {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .video-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .playlist-sidebar {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #303030;
+                max-height: 400px;
+            }
+
+            .video-player-wrapper {
+                aspect-ratio: 16 / 9;
+            }
+        }
+
+        /* 滚动条样式 */
+        .playlist-items::-webkit-scrollbar,
+        .video-main::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .playlist-items::-webkit-scrollbar-track,
+        .video-main::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+
+        .playlist-items::-webkit-scrollbar-thumb,
+        .video-main::-webkit-scrollbar-thumb {
+            background: #3f3f3f;
+            border-radius: 4px;
+        }
+
+        .playlist-items::-webkit-scrollbar-thumb:hover,
+        .video-main::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="video-header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="video-title-header" id="headerTitle">加载中...</div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="video-container">
+        <!-- 左侧视频区 -->
+        <div class="video-main">
+            <div class="video-player-wrapper">
+                <video id="videoPlayer" class="video-player" controls autoplay>
+                    您的浏览器不支持视频播放。
+                </video>
+                <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                    <div class="loading-spinner"></div>
+                </div>
+                <div id="errorMessage" class="error-message" style="display: none;">
+                    <h3>加载失败</h3>
+                    <p id="errorText"></p>
+                </div>
+            </div>
+
+            <div class="video-info">
+                <h1 class="video-title" id="videoTitle">加载中...</h1>
+                <div class="video-meta">
+                    <span id="videoChapter">第 1 集</span>
+                    <span>•</span>
+                    <span id="videoDuration">--:--</span>
+                </div>
+                <div class="video-description" id="videoDescription">
+                    加载中...
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧播放列表 -->
+        <div class="playlist-sidebar">
+            <div class="playlist-header">
+                <div class="playlist-title">玄空风水课程</div>
+                <div class="playlist-count" id="playlistCount">共 29 集</div>
+            </div>
+            <div class="playlist-items" id="playlistItems">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://iqxqxqxqxqxqxqxqxq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxeHF4cXhxeHF4cXhxeHF4cSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NzU5NjAwLCJleHAiOjIwNTIzMzU2MDB9.placeholder';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 课程数据
+        const FENG_SHUI_COURSES = [
+            { id: 1, title: "玄空风水基础理论", chapter: "第 1 集", file: "玄空风水1.mp4", duration: "45:30", description: "介绍玄空风水的基本概念、历史渊源和核心理论体系。学习风水的基本原理和应用方法。" },
+            { id: 2, title: "九宫飞星入门", chapter: "第 2 集", file: "玄空风水2.mp4", duration: "42:15", description: "详解九宫飞星的排布规律、吉凶判断和实际应用。掌握飞星的基本运算方法。" },
+            { id: 3, title: "罗盘使用技巧", chapter: "第 3 集", file: "玄空风水3.mp4", duration: "38:20", description: "学习罗盘的构造、使用方法和测量技巧。了解如何准确测定方位和角度。" },
+            { id: 4, title: "阳宅风水布局", chapter: "第 4 集", file: "玄空风水4.mp4", duration: "50:10", description: "讲解住宅风水的布局原则、吉凶方位和化解方法。学习如何优化居住环境。" },
+            { id: 5, title: "阴宅风水选址", chapter: "第 5 集", file: "玄空风水5.mp4", duration: "47:25", description: "介绍墓地风水的选址原则、龙脉走向和穴位判断。了解阴宅风水的重要性。" },
+            { id: 6, title: "八卦与五行", chapter: "第 6 集", file: "玄空风水6.mp4", duration: "44:30", description: "深入讲解八卦的含义、五行的生克关系和在风水中的应用。掌握基础理论知识。" },
+            { id: 7, title: "山水形势分析", chapter: "第 7 集", file: "玄空风水7.mp4", duration: "41:50", description: "学习如何观察和分析地形地貌、山水走向对风水的影响。培养实地勘察能力。" },
+            { id: 8, title: "城市风水规划", chapter: "第 8 集", file: "玄空风水8.mp4", duration: "46:15", description: "探讨现代城市环境下的风水应用、建筑布局和环境优化方法。" },
+            { id: 9, title: "办公室风水布局", chapter: "第 9 集", file: "玄空风水9.mp4", duration: "39:40", description: "讲解办公空间的风水布局、座位选择和财运提升方法。助力事业发展。" },
+            { id: 10, title: "商铺风水选址", chapter: "第 10 集", file: "玄空风水10.mp4", duration: "43:20", description: "分析商业场所的风水要点、客流动线和财位布局。提升生意兴隆。" },
+            { id: 11, title: "风水化煞方法", chapter: "第 11 集", file: "玄空风水11.mp4", duration: "48:10", description: "介绍各种煞气的识别方法和化解技巧。学习如何改善不良风水。" },
+            { id: 12, title: "催财旺运布局", chapter: "第 12 集", file: "玄空风水12.mp4", duration: "45:55", description: "讲解如何通过风水布局提升财运、事业运和贵人运。实用催旺方法。" },
+            { id: 13, title: "桃花姻缘风水", chapter: "第 13 集", file: "玄空风水13.mp4", duration: "40:30", description: "分析感情婚姻的风水布局、桃花位的确定和催旺方法。改善人际关系。" },
+            { id: 14, title: "子女学业风水", chapter: "第 14 集", file: "玄空风水14.mp4", duration: "42:45", description: "讲解有利于子女学习的风水布局、文昌位的应用和学业提升方法。" },
+            { id: 15, title: "健康养生风水", chapter: "第 15 集", file: "玄空风水15.mp4", duration: "44:20", description: "介绍影响健康的风水因素、疾病方位和养生布局方法。促进身心健康。" },
+            { id: 16, title: "流年飞星应用", chapter: "第 16 集", file: "玄空风水16.mp4", duration: "46:50", description: "学习每年飞星的变化规律、吉凶方位和趋吉避凶方法。掌握年运调整。" },
+            { id: 17, title: "玄空大卦详解", chapter: "第 17 集", file: "玄空风水17.mp4", duration: "49:15", description: "深入讲解玄空大卦的理论体系、卦象分析和实际应用方法。" },
+            { id: 18, title: "三元九运理论", chapter: "第 18 集", file: "玄空风水18.mp4", duration: "47:30", description: "介绍三元九运的时间周期、运势变化和风水调整方法。了解大运流转。" },
+            { id: 19, title: "风水案例分析（上）", chapter: "第 19 集", file: "玄空风水19.mp4", duration: "51:20", description: "通过实际案例分析风水布局的成功经验和失败教训。学习实战技巧。" },
+            { id: 20, title: "风水案例分析（下）", chapter: "第 20 集", file: "玄空风水20.mp4", duration: "48:40", description: "继续分析更多实际案例，深入探讨风水调整的方法和效果验证。" },
+            { id: 21, title: "风水与建筑设计", chapter: "第 21 集", file: "玄空风水21.mp4", duration: "45:10", description: "讲解风水理论在建筑设计中的应用、户型选择和空间规划方法。" },
+            { id: 22, title: "风水与园林景观", chapter: "第 22 集", file: "玄空风水22.mp4", duration: "43:35", description: "介绍园林景观的风水布局、植物选择和水景设计方法。营造和谐环境。" },
+            { id: 23, title: "风水与室内装修", chapter: "第 23 集", file: "玄空风水23.mp4", duration: "41:50", description: "分析室内装修的风水要点、色彩搭配和家具摆放方法。优化居住体验。" },
+            { id: 24, title: "风水与现代科学", chapter: "第 24 集", file: "玄空风水24.mp4", duration: "46:25", description: "探讨风水理论与现代科学的关系、环境心理学和生态学的联系。" },
+            { id: 25, title: "风水师职业发展", chapter: "第 25 集", file: "玄空风水25.mp4", duration: "44:15", description: "介绍风水师的职业道路、专业素养和实践经验积累方法。" },
+            { id: 26, title: "风水咨询实务", chapter: "第 26 集", file: "玄空风水26.mp4", duration: "47:50", description: "讲解风水咨询的流程、沟通技巧和方案制定方法。提升服务质量。" },
+            { id: 27, title: "风水与传统文化", chapter: "第 27 集", file: "玄空风水27.mp4", duration: "45:30", description: "探讨风水在中国传统文化中的地位、哲学思想和文化传承。" },
+            { id: 28, title: "风水误区与辟谣", chapter: "第 28 集", file: "玄空风水28.mp4", duration: "42:20", description: "澄清常见的风水误区、迷信观念和伪科学说法。树立正确认识。" },
+            { id: 29, title: "风水学习总结", chapter: "第 29 集", file: "玄空风水29.mp4", duration: "50:05", description: "总结课程要点、学习方法和实践建议。规划未来学习路径。" }
+        ];
+
+        let currentCourse = null;
+        let currentUser = null;
+
+        // 初始化
+        async function init() {
+            // 检查登录状态
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                alert('请先登录后观看课程');
+                window.location.href = 'courses.html';
+                return;
+            }
+            currentUser = user;
+
+            // 获取 URL 参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseId = parseInt(urlParams.get('id')) || 1;
+
+            // 渲染播放列表
+            renderPlaylist();
+
+            // 加载视频
+            await loadVideo(courseId);
+        }
+
+        // 渲染播放列表
+        function renderPlaylist() {
+            const container = document.getElementById('playlistItems');
+            container.innerHTML = FENG_SHUI_COURSES.map(course => `
+                <div class="playlist-item ${currentCourse?.id === course.id ? 'active' : ''}"
+                     onclick="loadVideo(${course.id})"
+                     data-course-id="${course.id}">
+                    <div class="playlist-item-index">${course.id}</div>
+                    <div class="playlist-item-thumbnail">▶</div>
+                    <div class="playlist-item-info">
+                        <div class="playlist-item-title">${course.title}</div>
+                        <div class="playlist-item-duration">${course.duration}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载视频
+        async function loadVideo(courseId) {
+            const course = FENG_SHUI_COURSES.find(c => c.id === courseId);
+            if (!course) {
+                showError('课程不存在');
+                return;
+            }
+
+            currentCourse = course;
+
+            // 更新 URL（不刷新页面）
+            const newUrl = `${window.location.pathname}?id=${courseId}`;
+            window.history.pushState({ courseId }, '', newUrl);
+
+            // 更新页面信息
+            document.getElementById('headerTitle').textContent = course.title;
+            document.getElementById('videoTitle').textContent = course.title;
+            document.getElementById('videoChapter').textContent = course.chapter;
+            document.getElementById('videoDuration').textContent = course.duration;
+            document.getElementById('videoDescription').textContent = course.description;
+
+            // 更新播放列表高亮
+            document.querySelectorAll('.playlist-item').forEach(item => {
+                item.classList.toggle('active', parseInt(item.dataset.courseId) === courseId);
+            });
+
+            // 滚动到当前项
+            const activeItem = document.querySelector('.playlist-item.active');
+            if (activeItem) {
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // 显示加载状态
+            showLoading();
+
+            try {
+                // 获取签名 URL
+                const signedUrl = await getSignedUrl(course.file);
+
+                // 加载视频
+                const video = document.getElementById('videoPlayer');
+                video.src = signedUrl;
+                video.load();
+
+                // 自动播放
+                try {
+                    await video.play();
+                } catch (e) {
+                    console.log('自动播放被阻止，需要用户交互');
+                }
+
+                hideLoading();
+            } catch (error) {
+                console.error('加载视频失败:', error);
+                showError(error.message || '视频加载失败，请稍后重试');
+            }
+        }
+
+        // 获取签名 URL
+        async function getSignedUrl(videoFile) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                throw new Error('未登录');
+            }
+
+            const response = await fetch('/api/get_video_url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({
+                    video_file: videoFile
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || '获取视频失败');
+            }
+
+            const data = await response.json();
+            return data.url;
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // 显示错误
+        function showError(message) {
+            hideLoading();
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        // 返回课程列表
+        function goBack() {
+            window.location.href = 'courses.html';
+        }
+
+        // 监听视频播放结束，自动播放下一集
+        document.getElementById('videoPlayer').addEventListener('ended', () => {
+            if (currentCourse && currentCourse.id < FENG_SHUI_COURSES.length) {
+                loadVideo(currentCourse.id + 1);
+            }
+        });
+
+        // 监听浏览器前进/后退
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.courseId) {
+                loadVideo(event.state.courseId);
+            }
+        });
+
+        // 页面加载完成后初始化
+        init();
+    </script>
+</body>
+</html>
