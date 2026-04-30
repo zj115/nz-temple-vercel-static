@@ -177,6 +177,26 @@
             justify-content: center;
             font-size: 24px;
             color: #666;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .playlist-item-thumbnail video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .playlist-item-thumbnail .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .playlist-item-info {
@@ -264,15 +284,75 @@
                 height: auto;
             }
 
+            .video-header {
+                padding: 10px 16px;
+            }
+
+            .video-title-header {
+                font-size: 16px;
+            }
+
             .playlist-sidebar {
                 width: 100%;
                 border-left: none;
                 border-top: 1px solid #303030;
-                max-height: 400px;
+                max-height: 50vh;
             }
 
             .video-player-wrapper {
                 aspect-ratio: 16 / 9;
+            }
+
+            .video-info {
+                padding: 16px;
+            }
+
+            .video-title {
+                font-size: 18px;
+            }
+
+            .playlist-item {
+                padding: 8px;
+            }
+
+            .playlist-item-thumbnail {
+                width: 100px;
+                height: 56px;
+            }
+
+            .playlist-item-title {
+                font-size: 13px;
+            }
+
+            .playlist-header {
+                padding: 12px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-title {
+                font-size: 16px;
+            }
+
+            .video-meta {
+                font-size: 12px;
+            }
+
+            .video-description {
+                font-size: 13px;
+            }
+
+            .playlist-item-thumbnail {
+                width: 80px;
+                height: 45px;
+            }
+
+            .playlist-item-title {
+                font-size: 12px;
+            }
+
+            .playlist-item-duration {
+                font-size: 11px;
             }
         }
 
@@ -311,7 +391,7 @@
         <!-- 左侧视频区 -->
         <div class="video-main">
             <div class="video-player-wrapper">
-                <video id="videoPlayer" class="video-player" controls autoplay>
+                <video id="videoPlayer" class="video-player" controls autoplay playsinline webkit-playsinline x5-playsinline>
                     您的浏览器不支持视频播放。
                 </video>
                 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
@@ -416,13 +496,70 @@
                      onclick="loadVideo(${course.id})"
                      data-course-id="${course.id}">
                     <div class="playlist-item-index">${course.id}</div>
-                    <div class="playlist-item-thumbnail">▶</div>
+                    <div class="playlist-item-thumbnail" id="thumb-${course.id}">
+                        <div class="play-icon">▶</div>
+                    </div>
                     <div class="playlist-item-info">
                         <div class="playlist-item-title">${course.title}</div>
                         <div class="playlist-item-duration">${course.duration}</div>
                     </div>
                 </div>
             `).join('');
+
+            // 异步加载缩略图
+            loadThumbnails();
+        }
+
+        // 加载视频缩略图（第一帧）
+        async function loadThumbnails() {
+            for (const course of FENG_SHUI_COURSES) {
+                try {
+                    const signedUrl = await getSignedUrl(course.file);
+                    const thumbContainer = document.getElementById(`thumb-${course.id}`);
+                    if (!thumbContainer) continue;
+
+                    // 创建隐藏的 video 元素来获取第一帧
+                    const video = document.createElement('video');
+                    video.src = signedUrl;
+                    video.crossOrigin = 'anonymous';
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
+
+                    video.addEventListener('loadeddata', function() {
+                        // 跳到 0.1 秒处获取第一帧
+                        this.currentTime = 0.1;
+                    });
+
+                    video.addEventListener('seeked', function() {
+                        // 创建 canvas 截取第一帧
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 120;
+                        canvas.height = 68;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                        // 转换为图片并显示
+                        const img = document.createElement('img');
+                        img.src = canvas.toDataURL('image/jpeg', 0.7);
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+
+                        thumbContainer.innerHTML = '';
+                        thumbContainer.appendChild(img);
+
+                        // 添加播放图标
+                        const playIcon = document.createElement('div');
+                        playIcon.className = 'play-icon';
+                        playIcon.textContent = '▶';
+                        thumbContainer.appendChild(playIcon);
+                    });
+
+                } catch (error) {
+                    console.error(`加载缩略图失败 (${course.file}):`, error);
+                }
+            }
         }
 
         // 加载视频
