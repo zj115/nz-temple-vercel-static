@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>风水课程 - 新西兰道观</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
         * {
             margin: 0;
@@ -349,14 +348,9 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
     <script>
-        // Supabase 配置
-        const SUPABASE_URL = 'https://iqxqxqxqxqxqxqxqxq.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxeHF4cXhxeHF4cXhxeHF4cSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NzU5NjAwLCJleHAiOjIwNTIzMzU2MDB9.placeholder';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // 课程数据
         const FENG_SHUI_COURSES = [
             { id: 1, title: "玄空风水基础理论", chapter: "第 1 集", file: "玄空风水1.mp4", duration: "45:30", description: "介绍玄空风水的基本概念、历史渊源和核心理论体系。学习风水的基本原理和应用方法。" },
             { id: 2, title: "九宫飞星入门", chapter: "第 2 集", file: "玄空风水2.mp4", duration: "42:15", description: "详解九宫飞星的排布规律、吉凶判断和实际应用。掌握飞星的基本运算方法。" },
@@ -395,7 +389,7 @@
         // 初始化
         async function init() {
             // 检查登录状态
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await _sb.auth.getUser();
             if (!user) {
                 alert('请先登录后观看课程');
                 window.location.href = 'courses.html';
@@ -491,7 +485,7 @@
 
         // 获取签名 URL
         async function getSignedUrl(videoFile) {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await _sb.auth.getSession();
             if (!session) {
                 throw new Error('未登录');
             }
