@@ -533,16 +533,16 @@
     <div style="padding:30px 24px;text-align:center;">
       <div style="font-size:48px;line-height:1;">🔒</div>
       <h3 style="margin:12px 0 8px;color:var(--gold);font-size:20px;">
-        <span class="lang-zh">付费课程</span><span class="lang-en">Premium course</span>
+        <span class="lang-zh">请先登录</span><span class="lang-en">Login Required</span>
       </h3>
       <p id="lockedModalTitle" style="margin:0 0 14px;font-weight:700;color:var(--gold2);"></p>
       <p style="margin:0 0 18px;opacity:.82;line-height:1.7;font-size:14px;">
-        <span class="lang-zh">此课程需付费解锁，敬请期待。请先预约或联系咨询了解详情。</span>
-        <span class="lang-en">This course requires payment to unlock. Please contact us for details.</span>
+        <span class="lang-zh">观看课程需要登录账号。如果您还没有账号，请先注册。</span>
+        <span class="lang-en">You need to log in to watch this course. If you don't have an account, please register first.</span>
       </p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-        <a class="btn btn-gold" href="booking.html">
-          <span class="lang-zh">联系咨询</span><span class="lang-en">Contact us</span>
+        <a class="btn btn-gold" href="login.html">
+          <span class="lang-zh">立即登录</span><span class="lang-en">Login Now</span>
         </a>
         <button class="btn btn-ghost" id="lockedModalCloseBtn" type="button">
           <span class="lang-zh">关闭</span><span class="lang-en">Close</span>
@@ -925,16 +925,43 @@
   // Helpers
   // ────────────────────────────────────────────────────────────────
 
-  // Build a full S3 URL from base + filename. Pre-encodes Chinese / spaces.
-  function buildVideoUrl(course) {
-    return COURSE_VIDEO_BASE + encodeURIComponent(course.videoFile);
+  // 鉴权：必须登录才能观看
+  async function userHasAccess(course) {
+    // 检查是否登录
+    const session = await getSession();
+    if (!session) {
+      return false; // 未登录 → 显示锁定弹窗
+    }
+    // 已登录 → 检查课程是否锁定（未来可扩展为付费检查）
+    return !course.locked;
   }
 
-  // Hook for future paywall: replace this with a real check
-  // (e.g. against Supabase, Stripe entitlement, etc.).
-  // Returning true = "user has access". Today: just !locked.
-  function userHasAccess(course) {
-    return !course.locked;
+  // 获取签名 URL（从后端 API）
+  async function buildVideoUrl(course) {
+    try {
+      const session = await getSession();
+      const token = session?.access_token || '';
+
+      const response = await fetch('/api/get_video_url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ video_file: course.videoFile })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (err) {
+      console.error('Failed to get video URL:', err);
+      alert('视频加载失败，请刷新页面重试 / Failed to load video, please refresh');
+      return '';
+    }
   }
 
   // ────────────────────────────────────────────────────────────────
@@ -1071,18 +1098,21 @@
     }
 
     // Open the right modal based on access
-    window.openCourse = function(course) {
-      if (!userHasAccess(course)) {
-        // locked → show paywall placeholder
-        // Show course title in both langs (we just put zh; lang attr handles visibility)
+    window.openCourse = async function(course) {
+      const hasAccess = await userHasAccess(course);
+      if (!hasAccess) {
+        // 未登录或锁定 → 显示锁定弹窗
         lockedTitle.innerHTML =
           '<span class="lang-zh">'+ course.titleZh +'</span>' +
           '<span class="lang-en">'+ course.titleEn +'</span>';
         openModal(lockedModal);
         return;
       }
-      // unlocked → play
-      video.src = buildVideoUrl(course);
+      // 已登录且有权限 → 获取签名 URL 并播放
+      const videoUrl = await buildVideoUrl(course);
+      if (!videoUrl) return; // API 失败，已弹窗提示
+
+      video.src = videoUrl;
       video.load();
       titleEl.innerHTML =
         '<span class="lang-zh">'+ course.titleZh +'</span>' +
