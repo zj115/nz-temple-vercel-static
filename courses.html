@@ -190,12 +190,42 @@
     </div>
   </section>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       Feng Shui Courses — data-driven, lock-ready, modal player.
+       All cards are rendered from FENG_SHUI_COURSES[] in <script> below.
+       To add / remove / re-order videos — only touch the array.
+       To enable a paywall later — set `locked: true` on a course.
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="fengshui-courses" style="padding:6px 0 22px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 14px;">
+      <div>
+        <div style="font-weight:900;color:var(--gold);font-size:22px;letter-spacing:.4px;">
+          <span class="lang-en">Feng Shui Courses</span>
+          <span class="lang-zh">风水课程</span>
+        </div>
+        <div style="opacity:.72;font-size:13px;margin-top:4px;">
+          <span class="lang-en">Xuan Kong Feng Shui — 29 video lessons · Free preview</span>
+          <span class="lang-zh">玄空风水大师班 · 29 集视频 · 免费试播</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <input id="courseSearch" type="search" placeholder="搜索 / Search..."
+               style="padding:8px 12px;background:rgba(0,0,0,.25);border:1px solid rgba(255,213,122,.22);border-radius:10px;color:#f5e6b3;font-size:13px;outline:none;min-width:200px;"/>
+        <span id="courseCount" style="font-size:12px;color:var(--gold2);padding:6px 10px;background:rgba(255,213,122,.08);border-radius:999px;white-space:nowrap;"></span>
+      </div>
+    </div>
+    <!-- Course cards rendered by JS into this grid -->
+    <div id="courseGrid"
+         style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;"
+         data-course-grid-fs="1"></div>
+  </section>
+
   <!-- Course List -->
   <section style="padding:6px 0 22px;">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px;">
       <div style="font-weight:900;color:var(--gold);letter-spacing:.3px;">
-        <span class="lang-en">Featured courses</span>
-        <span class="lang-zh">精选课程</span>
+        <span class="lang-en">More courses</span>
+        <span class="lang-zh">更多课程</span>
       </div>
       <div style="opacity:.72;font-size:13px;">
         <span class="lang-en">Beginner-friendly · Structured · High-end experience</span>
@@ -451,11 +481,643 @@
           el.style.gridTemplateColumns = mq640.matches ? '1fr' : '1.1fr .9fr';
         });
       }
+      function responsiveFeature(){
+        var mq820 = window.matchMedia('(max-width: 820px)');
+        document.querySelectorAll('[data-feature-grid]').forEach(function(el){
+          el.style.gridTemplateColumns = mq820.matches ? '1fr' : '1.3fr 1fr';
+        });
+      }
+      function responsiveFs(){
+        var mq640 = window.matchMedia('(max-width: 640px)');
+        var mq900 = window.matchMedia('(max-width: 900px)');
+        document.querySelectorAll('[data-course-grid-fs]').forEach(function(el){
+          if (mq640.matches)      el.style.gridTemplateColumns = '1fr';
+          else if (mq900.matches) el.style.gridTemplateColumns = '1fr 1fr';
+          else                    el.style.gridTemplateColumns = 'repeat(3,1fr)';
+        });
+      }
       responsive();
       responsivePrice();
-      window.addEventListener('resize', function(){ responsive(); responsivePrice(); });
+      responsiveFeature();
+      responsiveFs();
+      window.addEventListener('resize', function(){ responsive(); responsivePrice(); responsiveFeature(); responsiveFs(); });
     })();
   </script>
 </main>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Video player modal (hidden by default).
+     Opens when a course card is clicked. ESC or backdrop closes it.
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="courseModal" class="course-modal" aria-hidden="true">
+  <div class="course-modal-backdrop"></div>
+  <div class="course-modal-content" role="dialog" aria-modal="true">
+    <button class="course-modal-close" id="courseModalClose" aria-label="Close">✕</button>
+    <div class="course-modal-video-wrap">
+      <video id="courseModalVideo" controls playsinline preload="metadata"
+             controlsList="nodownload" oncontextmenu="return false;"></video>
+    </div>
+    <div class="course-modal-meta">
+      <div id="courseModalChapter" style="font-size:12px;color:var(--gold2);opacity:.85;letter-spacing:.5px;text-transform:uppercase;"></div>
+      <h3 id="courseModalTitle" style="margin:6px 0 6px;color:var(--gold);font-size:18px;"></h3>
+      <p id="courseModalDesc"  style="margin:0;opacity:.82;line-height:1.6;font-size:13px;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- "Locked" / paywall modal (shown when clicking a locked course) -->
+<div id="lockedModal" class="course-modal" aria-hidden="true">
+  <div class="course-modal-backdrop"></div>
+  <div class="course-modal-content course-modal-content-sm" role="dialog" aria-modal="true">
+    <button class="course-modal-close" id="lockedModalClose" aria-label="Close">✕</button>
+    <div style="padding:30px 24px;text-align:center;">
+      <div style="font-size:48px;line-height:1;">🔒</div>
+      <h3 style="margin:12px 0 8px;color:var(--gold);font-size:20px;">
+        <span class="lang-zh">付费课程</span><span class="lang-en">Premium course</span>
+      </h3>
+      <p id="lockedModalTitle" style="margin:0 0 14px;font-weight:700;color:var(--gold2);"></p>
+      <p style="margin:0 0 18px;opacity:.82;line-height:1.7;font-size:14px;">
+        <span class="lang-zh">此课程需付费解锁，敬请期待。请先预约或联系咨询了解详情。</span>
+        <span class="lang-en">This course requires payment to unlock. Please contact us for details.</span>
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a class="btn btn-gold" href="booking.html">
+          <span class="lang-zh">联系咨询</span><span class="lang-en">Contact us</span>
+        </a>
+        <button class="btn btn-ghost" id="lockedModalCloseBtn" type="button">
+          <span class="lang-zh">关闭</span><span class="lang-en">Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ─── Course cards ─────────────────────────────────────────── */
+  .course-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,213,122,.16);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255,255,255,.03);
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s, box-shadow .15s;
+  }
+  .course-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,213,122,.42);
+    box-shadow: 0 12px 32px -10px rgba(255,213,122,.18);
+  }
+  .course-card.is-locked { cursor: pointer; }
+  .course-cover {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background:
+      linear-gradient(135deg, rgba(255,213,122,.18), rgba(255,184,48,.05)),
+      radial-gradient(circle at 30% 30%, rgba(255,213,122,.25), transparent 60%),
+      linear-gradient(180deg, #1a1c34 0%, #08080e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .course-cover img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .course-cover-fallback {
+    text-align: center;
+    color: var(--gold2);
+    text-shadow: 0 4px 24px rgba(255,213,122,.4);
+  }
+  .course-cover-fallback .ccf-mark {
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 700;
+  }
+  .course-cover-fallback .ccf-num {
+    margin-top: 6px;
+    letter-spacing: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    opacity: .85;
+  }
+  .course-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.65);
+    color: var(--gold2);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .5px;
+  }
+  .course-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,.18), rgba(0,0,0,.42));
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .course-card:hover .course-play-overlay { opacity: 1; }
+  .course-play-overlay .cpo-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd57a, #ffb830);
+    color: #1a1206;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 8px 28px rgba(255,184,48,.35);
+  }
+  .course-lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--gold2);
+    backdrop-filter: blur(2px);
+  }
+  .course-lock-overlay .clo-icon { font-size: 32px; }
+  .course-lock-overlay .clo-text {
+    margin-top: 6px;
+    font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  }
+  .course-info { padding: 12px 14px 6px; }
+  .course-info .course-chapter {
+    font-size: 11px; color: var(--gold2); opacity: .85;
+    letter-spacing: .5px; text-transform: uppercase; font-weight: 700;
+  }
+  .course-info h3 {
+    margin: 4px 0 4px;
+    color: var(--gold);
+    font-size: 15px;
+    line-height: 1.35;
+    letter-spacing: .2px;
+  }
+  .course-info p {
+    margin: 0; opacity: .72; font-size: 12.5px; line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .course-action {
+    padding: 8px 14px 14px;
+    display: flex; gap: 8px; justify-content: space-between; align-items: center;
+  }
+  .course-action .ca-tag {
+    font-size: 11px; opacity: .65;
+  }
+  .course-action .ca-btn {
+    font-size: 12px; font-weight: 800;
+    color: var(--gold2);
+  }
+
+  /* ─── Modal ────────────────────────────────────────────────── */
+  .course-modal {
+    position: fixed; inset: 0;
+    z-index: 9000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .course-modal.open { display: flex; }
+  .course-modal-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.78);
+    backdrop-filter: blur(4px);
+  }
+  .course-modal-content {
+    position: relative;
+    z-index: 1;
+    width: min(960px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    background: #0d0d18;
+    border: 1px solid rgba(255,213,122,.22);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px -10px rgba(0,0,0,.6);
+  }
+  .course-modal-content-sm { width: min(440px, 100%); }
+  .course-modal-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 36px; height: 36px;
+    border: none; border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    color: var(--gold2);
+    font-size: 18px; line-height: 1;
+    cursor: pointer; z-index: 2;
+    transition: background .15s;
+  }
+  .course-modal-close:hover { background: rgba(255,213,122,.18); }
+  .course-modal-video-wrap {
+    background: #000;
+    aspect-ratio: 16 / 9;
+  }
+  .course-modal-video-wrap video {
+    width: 100%; height: 100%; display: block;
+  }
+  .course-modal-meta { padding: 16px 20px 20px; }
+</style>
+
+<script>
+  // ════════════════════════════════════════════════════════════════
+  //  Feng Shui Courses — DATA + LOGIC
+  //  All 29 lessons live in this array. To add/remove/edit a course,
+  //  only modify here. The grid renders automatically.
+  //
+  //  To enable paywall on a course later: set `locked: true`.
+  //  Until you wire up payments, locked cards just open the
+  //  "premium course" modal instead of playing.
+  // ════════════════════════════════════════════════════════════════
+
+  // Base URL of your S3 bucket folder. Change if you switch bucket / region
+  // or move to CloudFront. Each course's videoUrl is built by joining
+  // this base with the course's `videoFile` (URL-encoded automatically).
+  const COURSE_VIDEO_BASE = 'https://nz-temple-media-nz.s3.amazonaws.com/fengshui/';
+  // ↑ Path-style works for any region but redirects. If you know the region,
+  //   prefer the regional form, e.g.:
+  //   'https://nz-temple-media-nz.s3.ap-southeast-2.amazonaws.com/fengshui/'
+
+  const FENG_SHUI_COURSES = [
+    { id:'fs-01', chapterZh:'基础入门',     chapterEn:'Foundations',
+      titleZh:'玄空风水 第一讲', titleEn:'Xuan Kong Feng Shui — Lesson 1',
+      descZh:'入门第一讲：理论框架与基本概念。',
+      descEn:'Opening lesson: theoretical framework and basic concepts.',
+      cover:'', videoFile:'玄空风水1.mp4', locked:false },
+
+    { id:'fs-02', chapterZh:'基础入门',     chapterEn:'Foundations',
+      titleZh:'玄空风水 第二讲', titleEn:'Xuan Kong Feng Shui — Lesson 2',
+      descZh:'基础理论 (二)：核心要素继续展开。',
+      descEn:'Core foundations continued.',
+      cover:'', videoFile:'玄空风水2.mp4', locked:false },
+
+    { id:'fs-03', chapterZh:'基础入门',     chapterEn:'Foundations',
+      titleZh:'玄空风水 第三讲', titleEn:'Xuan Kong Feng Shui — Lesson 3',
+      descZh:'基础理论 (三)：盘面解读入门。',
+      descEn:'Reading the chart — first steps.',
+      cover:'', videoFile:'玄空风水3.mp4', locked:false },
+
+    { id:'fs-04', chapterZh:'基础入门',     chapterEn:'Foundations',
+      titleZh:'玄空风水 第四讲（上）', titleEn:'Lesson 4 — Part 1',
+      descZh:'第四讲上半部分。',
+      descEn:'Part 1 of Lesson 4.',
+      cover:'', videoFile:'玄空风水4（1）.mp4', locked:false },
+
+    { id:'fs-05', chapterZh:'基础入门',     chapterEn:'Foundations',
+      titleZh:'玄空风水 第四讲（下）', titleEn:'Lesson 4 — Part 2',
+      descZh:'第四讲下半部分，承接上集案例。',
+      descEn:'Part 2 of Lesson 4, continuing the case study.',
+      cover:'', videoFile:'玄空风水4（2）.mp4', locked:false },
+
+    { id:'fs-06', chapterZh:'88 煞',       chapterEn:'88 Sha',
+      titleZh:'88 煞 (一)', titleEn:'88 Sha — Part 1',
+      descZh:'88 煞首讲：识别与分类。',
+      descEn:'Identifying and classifying the 88 Sha.',
+      cover:'', videoFile:'玄空风水5 88煞.mp4', locked:false },
+
+    { id:'fs-07', chapterZh:'88 煞',       chapterEn:'88 Sha',
+      titleZh:'88 煞 (二)', titleEn:'88 Sha — Part 2',
+      descZh:'88 煞续讲：常见组合解读。',
+      descEn:'Common patterns and how to read them.',
+      cover:'', videoFile:'玄空风水6 88煞.mp4', locked:false },
+
+    { id:'fs-08', chapterZh:'88 煞',       chapterEn:'88 Sha',
+      titleZh:'88 煞 (三)', titleEn:'88 Sha — Part 3',
+      descZh:'88 煞实战案例分析。',
+      descEn:'Real-world case analysis.',
+      cover:'', videoFile:'玄空风水7 88煞.mp4', locked:false },
+
+    { id:'fs-09', chapterZh:'88 煞',       chapterEn:'88 Sha',
+      titleZh:'88 煞 (四)', titleEn:'88 Sha — Part 4',
+      descZh:'88 煞化解之法。',
+      descEn:'Remedies and counter-techniques.',
+      cover:'', videoFile:'玄空风水8 88煞.mp4', locked:false },
+
+    { id:'fs-10', chapterZh:'88 煞',       chapterEn:'88 Sha',
+      titleZh:'88 煞 (五)', titleEn:'88 Sha — Part 5',
+      descZh:'88 煞总结与综合应用。',
+      descEn:'Synthesis and applied practice.',
+      cover:'', videoFile:'玄空风水9 88煞.mp4', locked:false },
+
+    { id:'fs-11', chapterZh:'法事流程',     chapterEn:'Ritual Procedures',
+      titleZh:'法事流程',     titleEn:'Ritual Procedures',
+      descZh:'完整法事流程讲解：准备、执行、收尾。',
+      descEn:'Full ritual workflow: preparation, execution, closing.',
+      cover:'', videoFile:'玄空风水10 法事流程.mp4', locked:false },
+
+    { id:'fs-12', chapterZh:'风水秘术',     chapterEn:'Secret Techniques',
+      titleZh:'风水秘术',     titleEn:'Secret Techniques',
+      descZh:'秘传技法：师门所授核心要诀。',
+      descEn:'Inherited secret techniques and core formulas.',
+      cover:'', videoFile:'玄空风水11 风水秘术.mp4', locked:false },
+
+    { id:'fs-13', chapterZh:'进阶讲解',     chapterEn:'Advanced',
+      titleZh:'玄空风水 第十二讲', titleEn:'Lesson 12',
+      descZh:'进阶讲解 (一)。',
+      descEn:'Advanced lesson 1.',
+      cover:'', videoFile:'玄空风水12.mp4', locked:false },
+
+    { id:'fs-14', chapterZh:'进阶讲解',     chapterEn:'Advanced',
+      titleZh:'玄空风水 第十三讲', titleEn:'Lesson 13',
+      descZh:'进阶讲解 (二)。',
+      descEn:'Advanced lesson 2.',
+      cover:'', videoFile:'玄空风水13.mp4', locked:false },
+
+    { id:'fs-15', chapterZh:'进阶讲解',     chapterEn:'Advanced',
+      titleZh:'玄空风水 第十四讲（上）', titleEn:'Lesson 14 — Part 1',
+      descZh:'第十四讲上半部分。',
+      descEn:'Part 1 of Lesson 14.',
+      cover:'', videoFile:'玄空风水14 上.mp4', locked:false },
+
+    { id:'fs-16', chapterZh:'进阶讲解',     chapterEn:'Advanced',
+      titleZh:'玄空风水 第十四讲（下）', titleEn:'Lesson 14 — Part 2',
+      descZh:'第十四讲下半部分。',
+      descEn:'Part 2 of Lesson 14.',
+      cover:'', videoFile:'玄空风水14 下.mp4', locked:false },
+
+    { id:'fs-17', chapterZh:'进阶讲解',     chapterEn:'Advanced',
+      titleZh:'玄空风水 第十五讲', titleEn:'Lesson 15',
+      descZh:'进阶讲解 (五)。',
+      descEn:'Advanced lesson 5.',
+      cover:'', videoFile:'玄空风水15.mp4', locked:false },
+
+    { id:'fs-18', chapterZh:'进阶讲解',     chapterEn:'Advanced',
+      titleZh:'玄空风水 第十六讲', titleEn:'Lesson 16',
+      descZh:'进阶讲解 (六)。',
+      descEn:'Advanced lesson 6.',
+      cover:'', videoFile:'玄空风水16.mp4', locked:false },
+
+    { id:'fs-19', chapterZh:'第十七讲（四集）', chapterEn:'Lesson 17 (4 parts)',
+      titleZh:'玄空风水 第十七讲（上）', titleEn:'Lesson 17 — Part 1',
+      descZh:'第十七讲第一部分。',
+      descEn:'Part 1 of 4.',
+      cover:'', videoFile:'玄空风水17（上）.mp4', locked:false },
+
+    { id:'fs-20', chapterZh:'第十七讲（四集）', chapterEn:'Lesson 17 (4 parts)',
+      titleZh:'玄空风水 第十七讲（中）', titleEn:'Lesson 17 — Part 2',
+      descZh:'第十七讲第二部分。',
+      descEn:'Part 2 of 4.',
+      cover:'', videoFile:'玄空风水17（中）.mp4', locked:false },
+
+    { id:'fs-21', chapterZh:'第十七讲（四集）', chapterEn:'Lesson 17 (4 parts)',
+      titleZh:'玄空风水 第十七讲（中下）', titleEn:'Lesson 17 — Part 3',
+      descZh:'第十七讲第三部分。',
+      descEn:'Part 3 of 4.',
+      cover:'', videoFile:'玄空风水17（中下）.mp4', locked:false },
+
+    { id:'fs-22', chapterZh:'第十七讲（四集）', chapterEn:'Lesson 17 (4 parts)',
+      titleZh:'玄空风水 第十七讲（下）', titleEn:'Lesson 17 — Part 4',
+      descZh:'第十七讲完结篇。',
+      descEn:'Part 4 of 4 — closing.',
+      cover:'', videoFile:'玄空风水17（下）.mp4', locked:false },
+
+    { id:'fs-23', chapterZh:'第十八讲（两集）', chapterEn:'Lesson 18 (2 parts)',
+      titleZh:'玄空风水 第十八讲（上）', titleEn:'Lesson 18 — Part 1',
+      descZh:'第十八讲上半部分。',
+      descEn:'Part 1 of 2.',
+      cover:'', videoFile:'玄空风水18（上）.mp4', locked:false },
+
+    { id:'fs-24', chapterZh:'第十八讲（两集）', chapterEn:'Lesson 18 (2 parts)',
+      titleZh:'玄空风水 第十八讲（下）', titleEn:'Lesson 18 — Part 2',
+      descZh:'第十八讲下半部分。',
+      descEn:'Part 2 of 2.',
+      cover:'', videoFile:'玄空风水18（下）.mp4', locked:false },
+
+    { id:'fs-25', chapterZh:'第十九讲（四集）', chapterEn:'Lesson 19 (4 parts)',
+      titleZh:'玄空风水 第十九讲（上）', titleEn:'Lesson 19 — Part 1',
+      descZh:'第十九讲第一部分。',
+      descEn:'Part 1 of 4.',
+      cover:'', videoFile:'玄空风水19（上）.mp4', locked:false },
+
+    { id:'fs-26', chapterZh:'第十九讲（四集）', chapterEn:'Lesson 19 (4 parts)',
+      titleZh:'玄空风水 第十九讲（中）', titleEn:'Lesson 19 — Part 2',
+      descZh:'第十九讲第二部分。',
+      descEn:'Part 2 of 4.',
+      cover:'', videoFile:'玄空风水19（中）.mp4', locked:false },
+
+    { id:'fs-27', chapterZh:'第十九讲（四集）', chapterEn:'Lesson 19 (4 parts)',
+      titleZh:'玄空风水 第十九讲（中下）', titleEn:'Lesson 19 — Part 3',
+      descZh:'第十九讲第三部分。',
+      descEn:'Part 3 of 4.',
+      cover:'', videoFile:'玄空风水19（中下）.mp4', locked:false },
+
+    { id:'fs-28', chapterZh:'第十九讲（四集）', chapterEn:'Lesson 19 (4 parts)',
+      titleZh:'玄空风水 第十九讲（下）', titleEn:'Lesson 19 — Part 4',
+      descZh:'第十九讲完结篇。',
+      descEn:'Part 4 of 4 — closing.',
+      cover:'', videoFile:'玄空风水19（下）.mp4', locked:false },
+
+    { id:'fs-29', chapterZh:'结业',         chapterEn:'Final',
+      titleZh:'玄空风水 第二十讲（结业）', titleEn:'Lesson 20 — Final',
+      descZh:'结业讲：知识体系总结与下一步。',
+      descEn:'Final lesson: synthesis and what comes next.',
+      cover:'', videoFile:'玄空风水20.mp4', locked:false }
+  ];
+
+  // ────────────────────────────────────────────────────────────────
+  // Helpers
+  // ────────────────────────────────────────────────────────────────
+
+  // Build a full S3 URL from base + filename. Pre-encodes Chinese / spaces.
+  function buildVideoUrl(course) {
+    return COURSE_VIDEO_BASE + encodeURIComponent(course.videoFile);
+  }
+
+  // Hook for future paywall: replace this with a real check
+  // (e.g. against Supabase, Stripe entitlement, etc.).
+  // Returning true = "user has access". Today: just !locked.
+  function userHasAccess(course) {
+    return !course.locked;
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // Render the grid
+  // ────────────────────────────────────────────────────────────────
+  (function renderCourses() {
+    const grid     = document.getElementById('courseGrid');
+    const search   = document.getElementById('courseSearch');
+    const countEl  = document.getElementById('courseCount');
+    if (!grid) return;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function(ch) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+      });
+    }
+
+    function cardHtml(course, i) {
+      const num    = String(i + 1).padStart(2, '0');
+      const locked = course.locked === true;
+      const cover  = course.cover && course.cover.length
+        ? '<img src="'+ escapeHtml(course.cover) +'" alt="" loading="lazy"/>'
+        : '<div class="course-cover-fallback">' +
+            '<div class="ccf-mark">玄</div>' +
+            '<div class="ccf-num">EP '+ num +'</div>' +
+          '</div>';
+
+      const lockOverlay = locked
+        ? '<div class="course-lock-overlay">' +
+            '<div class="clo-icon">🔒</div>' +
+            '<div class="clo-text"><span class="lang-zh">付费解锁</span><span class="lang-en">PREMIUM</span></div>' +
+          '</div>'
+        : '';
+
+      const actionBtn = locked
+        ? '<span class="ca-btn"><span class="lang-zh">🔒 即将上线</span><span class="lang-en">🔒 Locked</span></span>'
+        : '<span class="ca-btn"><span class="lang-zh">▶ 立即观看</span><span class="lang-en">▶ Play</span></span>';
+
+      return ''+
+        '<div class="course-card'+ (locked ? ' is-locked' : '') +'" data-course-id="'+ escapeHtml(course.id) +'" tabindex="0" role="button" aria-label="'+ escapeHtml(course.titleZh) +'">' +
+          '<div class="course-cover">' +
+            cover +
+            '<span class="course-badge">EP '+ num +'</span>' +
+            (locked ? '' : '<div class="course-play-overlay"><div class="cpo-btn">▶</div></div>') +
+            lockOverlay +
+          '</div>' +
+          '<div class="course-info">' +
+            '<div class="course-chapter">' +
+              '<span class="lang-zh">'+ escapeHtml(course.chapterZh) +'</span>' +
+              '<span class="lang-en">'+ escapeHtml(course.chapterEn) +'</span>' +
+            '</div>' +
+            '<h3>' +
+              '<span class="lang-zh">'+ escapeHtml(course.titleZh) +'</span>' +
+              '<span class="lang-en">'+ escapeHtml(course.titleEn) +'</span>' +
+            '</h3>' +
+            '<p>' +
+              '<span class="lang-zh">'+ escapeHtml(course.descZh) +'</span>' +
+              '<span class="lang-en">'+ escapeHtml(course.descEn) +'</span>' +
+            '</p>' +
+          '</div>' +
+          '<div class="course-action">' +
+            '<span class="ca-tag">' +
+              '<span class="lang-zh">'+ escapeHtml(course.chapterZh) +' · 视频</span>' +
+              '<span class="lang-en">'+ escapeHtml(course.chapterEn) +' · Video</span>' +
+            '</span>' +
+            actionBtn +
+          '</div>' +
+        '</div>';
+    }
+
+    function render(filterText) {
+      const q = (filterText || '').toLowerCase().trim();
+      const filtered = !q ? FENG_SHUI_COURSES : FENG_SHUI_COURSES.filter(c => {
+        const hay = (c.titleZh +' '+ c.titleEn +' '+ c.chapterZh +' '+ c.chapterEn +' '+ c.descZh +' '+ c.descEn).toLowerCase();
+        return hay.includes(q);
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;opacity:.6;">' +
+          '<span class="lang-zh">没找到匹配的课程</span><span class="lang-en">No matching courses</span></div>';
+      } else {
+        grid.innerHTML = filtered.map((c, i) => cardHtml(c, FENG_SHUI_COURSES.indexOf(c))).join('');
+      }
+
+      countEl.innerHTML =
+        '<span class="lang-zh">共 '+ filtered.length +' / '+ FENG_SHUI_COURSES.length +' 集</span>' +
+        '<span class="lang-en">'+ filtered.length +' / '+ FENG_SHUI_COURSES.length +' lessons</span>';
+
+      // wire up click handlers
+      grid.querySelectorAll('.course-card').forEach(el => {
+        const id = el.getAttribute('data-course-id');
+        const course = FENG_SHUI_COURSES.find(c => c.id === id);
+        if (!course) return;
+        const handler = () => openCourse(course);
+        el.addEventListener('click', handler);
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+        });
+      });
+    }
+
+    if (search) {
+      search.addEventListener('input', e => render(e.target.value));
+    }
+
+    render('');
+  })();
+
+  // ────────────────────────────────────────────────────────────────
+  // Modal player + locked modal
+  // ────────────────────────────────────────────────────────────────
+  (function modalLogic() {
+    const modal       = document.getElementById('courseModal');
+    const closeBtn    = document.getElementById('courseModalClose');
+    const video       = document.getElementById('courseModalVideo');
+    const titleEl     = document.getElementById('courseModalTitle');
+    const chapterEl   = document.getElementById('courseModalChapter');
+    const descEl      = document.getElementById('courseModalDesc');
+
+    const lockedModal = document.getElementById('lockedModal');
+    const lockedTitle = document.getElementById('lockedModalTitle');
+    const lockedClose = document.getElementById('lockedModalClose');
+    const lockedClose2= document.getElementById('lockedModalCloseBtn');
+
+    function openModal(m) {
+      m.classList.add('open');
+      m.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(m) {
+      m.classList.remove('open');
+      m.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    // Open the right modal based on access
+    window.openCourse = function(course) {
+      if (!userHasAccess(course)) {
+        // locked → show paywall placeholder
+        // Show course title in both langs (we just put zh; lang attr handles visibility)
+        lockedTitle.innerHTML =
+          '<span class="lang-zh">'+ course.titleZh +'</span>' +
+          '<span class="lang-en">'+ course.titleEn +'</span>';
+        openModal(lockedModal);
+        return;
+      }
+      // unlocked → play
+      video.src = buildVideoUrl(course);
+      video.load();
+      titleEl.innerHTML =
+        '<span class="lang-zh">'+ course.titleZh +'</span>' +
+        '<span class="lang-en">'+ course.titleEn +'</span>';
+      chapterEl.innerHTML =
+        '<span class="lang-zh">'+ course.chapterZh +'</span>' +
+        '<span class="lang-en">'+ course.chapterEn +'</span>';
+      descEl.innerHTML =
+        '<span class="lang-zh">'+ course.descZh +'</span>' +
+        '<span class="lang-en">'+ course.descEn +'</span>';
+      openModal(modal);
+      // Try autoplay (browsers may block until user interacts)
+      video.play().catch(() => {});
+    };
+
+    function closeVideoModal() {
+      try { video.pause(); } catch(e) {}
+      try { video.removeAttribute('src'); video.load(); } catch(e) {}
+      closeModal(modal);
+    }
+
+    closeBtn.addEventListener('click', closeVideoModal);
+    modal.querySelector('.course-modal-backdrop').addEventListener('click', closeVideoModal);
+
+    lockedClose .addEventListener('click', () => closeModal(lockedModal));
+    lockedClose2.addEventListener('click', () => closeModal(lockedModal));
+    lockedModal.querySelector('.course-modal-backdrop').addEventListener('click', () => closeModal(lockedModal));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (modal.classList.contains('open')) closeVideoModal();
+        if (lockedModal.classList.contains('open')) closeModal(lockedModal);
+      }
+    });
+  })();
+</script>
 </body>
 </html>
