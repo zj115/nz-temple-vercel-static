@@ -342,6 +342,12 @@
                 padding: 12px;
                 font-size: 20px;
             }
+
+            /* 移动端：视频播放器支持内联播放 */
+            .video-player {
+                -webkit-playsinline: true;
+                playsinline: true;
+            }
         }
 
         @media (max-width: 480px) {
@@ -448,7 +454,7 @@
         <!-- 左侧视频区 -->
         <div class="video-main">
             <div class="video-player-wrapper">
-                <video id="videoPlayer" class="video-player" controls autoplay playsinline webkit-playsinline x5-playsinline>
+                <video id="videoPlayer" class="video-player" controls autoplay playsinline webkit-playsinline x5-playsinline x-webkit-airplay="allow" x5-video-player-type="h5" x5-video-player-fullscreen="true">
                     您的浏览器不支持视频播放。
                 </video>
                 <div id="loadingOverlay" class="loading-overlay" style="display: none;">

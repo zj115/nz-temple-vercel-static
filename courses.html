@@ -1243,12 +1243,22 @@
 
     // Open the right modal based on access
     window.openCourse = async function(course) {
-      const hasAccess = await userHasAccess(course);
-      if (!hasAccess) {
-        // 未登录或锁定 → 显示锁定弹窗
+      const session = await getSession();
+
+      if (!session) {
+        // 未登录 → 显示登录提示弹窗
         lockedTitle.innerHTML =
           '<span class="lang-zh">'+ course.titleZh +'</span>' +
           '<span class="lang-en">'+ course.titleEn +'</span>';
+        openModal(lockedModal);
+        return;
+      }
+
+      if (course.locked) {
+        // 已登录但课程锁定 → 显示付费提示（未来扩展）
+        lockedTitle.innerHTML =
+          '<span class="lang-zh">'+ course.titleZh +' - 付费课程</span>' +
+          '<span class="lang-en">'+ course.titleEn +' - Premium</span>';
         openModal(lockedModal);
         return;
       }
