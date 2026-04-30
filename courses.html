@@ -942,6 +942,10 @@
       const session = await getSession();
       const token = session?.access_token || '';
 
+      console.log('=== 前端请求 API ===');
+      console.log('video_file:', course.videoFile);
+      console.log('token exists:', !!token);
+
       const response = await fetch('/api/get_video_url', {
         method: 'POST',
         headers: {
@@ -951,15 +955,30 @@
         body: JSON.stringify({ video_file: course.videoFile })
       });
 
+      console.log('Response status:', response.status);
+
+      // 先读取响应文本
+      const responseText = await response.text();
+      console.log('Response body:', responseText);
+
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        let errorDetail = responseText;
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorDetail = JSON.stringify(errorJson, null, 2);
+          console.error('后端返回错误:', errorJson);
+        } catch (e) {
+          console.error('后端返回非 JSON:', responseText);
+        }
+        throw new Error(`API error ${response.status}: ${errorDetail}`);
       }
 
-      const data = await response.json();
+      const data = JSON.parse(responseText);
+      console.log('签名 URL 获取成功:', data.url.substring(0, 100) + '...');
       return data.url;
     } catch (err) {
       console.error('Failed to get video URL:', err);
-      alert('视频加载失败，请刷新页面重试 / Failed to load video, please refresh');
+      alert('视频加载失败，请刷新页面重试 / Failed to load video, please refresh\n\n' + err.message);
       return '';
     }
   }
