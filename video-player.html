@@ -169,7 +169,7 @@
         .playlist-item-thumbnail {
             width: 120px;
             height: 68px;
-            background: #000;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             border-radius: 8px;
             flex-shrink: 0;
             display: flex;
@@ -179,12 +179,6 @@
             color: #666;
             position: relative;
             overflow: hidden;
-        }
-
-        .playlist-item-thumbnail video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .playlist-item-thumbnail .play-icon {
@@ -271,6 +265,18 @@
             font-size: 14px;
         }
 
+        /* 缩略图样式 */
+        .playlist-item-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .playlist-item-thumbnail.loading {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .playlist-sidebar {
@@ -301,6 +307,9 @@
 
             .video-player-wrapper {
                 aspect-ratio: 16 / 9;
+                position: sticky;
+                top: 0;
+                z-index: 5;
             }
 
             .video-info {
@@ -312,7 +321,7 @@
             }
 
             .playlist-item {
-                padding: 8px;
+                padding: 10px 12px;
             }
 
             .playlist-item-thumbnail {
@@ -327,19 +336,42 @@
             .playlist-header {
                 padding: 12px 16px;
             }
+
+            /* 移动端优化：更大的触摸区域 */
+            .back-btn {
+                padding: 12px;
+                font-size: 20px;
+            }
         }
 
         @media (max-width: 480px) {
+            .video-header {
+                padding: 8px 12px;
+            }
+
+            .video-title-header {
+                font-size: 14px;
+            }
+
             .video-title {
                 font-size: 16px;
             }
 
             .video-meta {
                 font-size: 12px;
+                flex-wrap: wrap;
             }
 
             .video-description {
                 font-size: 13px;
+            }
+
+            .video-info {
+                padding: 12px;
+            }
+
+            .playlist-item {
+                padding: 8px;
             }
 
             .playlist-item-thumbnail {
@@ -349,10 +381,35 @@
 
             .playlist-item-title {
                 font-size: 12px;
+                -webkit-line-clamp: 2;
             }
 
             .playlist-item-duration {
                 font-size: 11px;
+            }
+
+            .playlist-item-index {
+                font-size: 12px;
+                min-width: 24px;
+            }
+
+            .playlist-header {
+                padding: 10px 12px;
+            }
+
+            .playlist-title {
+                font-size: 15px;
+            }
+
+            .playlist-count {
+                font-size: 13px;
+            }
+        }
+
+        /* iOS Safari 视频全屏优化 */
+        @supports (-webkit-touch-callout: none) {
+            .video-player {
+                -webkit-tap-highlight-color: transparent;
             }
         }
 
@@ -486,6 +543,11 @@
 
             // 加载视频
             await loadVideo(courseId);
+
+            // 异步生成所有缩略图（不阻塞视频播放）
+            generateAllThumbnails().catch(err => {
+                console.error('生成缩略图失败:', err);
+            });
         }
 
         // 渲染播放列表
@@ -496,7 +558,7 @@
                      onclick="loadVideo(${course.id})"
                      data-course-id="${course.id}">
                     <div class="playlist-item-index">${course.id}</div>
-                    <div class="playlist-item-thumbnail" id="thumb-${course.id}">
+                    <div class="playlist-item-thumbnail loading" id="thumb-${course.id}">
                         <div class="play-icon">▶</div>
                     </div>
                     <div class="playlist-item-info">
@@ -505,61 +567,93 @@
                     </div>
                 </div>
             `).join('');
-
-            // 异步加载缩略图
-            loadThumbnails();
         }
 
-        // 加载视频缩略图（第一帧）
-        async function loadThumbnails() {
-            for (const course of FENG_SHUI_COURSES) {
-                try {
-                    const signedUrl = await getSignedUrl(course.file);
-                    const thumbContainer = document.getElementById(`thumb-${course.id}`);
-                    if (!thumbContainer) continue;
+        // 生成视频缩略图（第一帧）
+        async function generateThumbnail(courseId, videoUrl) {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.crossOrigin = 'anonymous';
+                video.preload = 'metadata';
 
-                    // 创建隐藏的 video 元素来获取第一帧
-                    const video = document.createElement('video');
-                    video.src = signedUrl;
-                    video.crossOrigin = 'anonymous';
-                    video.muted = true;
-                    video.playsInline = true;
-                    video.preload = 'metadata';
+                video.addEventListener('loadeddata', () => {
+                    // 跳到第1秒（避免黑屏）
+                    video.currentTime = 1;
+                });
 
-                    video.addEventListener('loadeddata', function() {
-                        // 跳到 0.1 秒处获取第一帧
-                        this.currentTime = 0.1;
-                    });
-
-                    video.addEventListener('seeked', function() {
-                        // 创建 canvas 截取第一帧
+                video.addEventListener('seeked', () => {
+                    try {
                         const canvas = document.createElement('canvas');
                         canvas.width = 120;
                         canvas.height = 68;
                         const ctx = canvas.getContext('2d');
+
+                        // 绘制视频帧
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                        // 转换为图片并显示
-                        const img = document.createElement('img');
-                        img.src = canvas.toDataURL('image/jpeg', 0.7);
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.objectFit = 'cover';
+                        // 转换为 data URL
+                        const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.7);
 
-                        thumbContainer.innerHTML = '';
-                        thumbContainer.appendChild(img);
+                        // 更新缩略图
+                        const thumbElement = document.getElementById(`thumb-${courseId}`);
+                        if (thumbElement) {
+                            const img = document.createElement('img');
+                            img.src = thumbnailUrl;
+                            img.alt = `视频 ${courseId} 缩略图`;
+                            thumbElement.innerHTML = '';
+                            thumbElement.appendChild(img);
 
-                        // 添加播放图标
-                        const playIcon = document.createElement('div');
-                        playIcon.className = 'play-icon';
-                        playIcon.textContent = '▶';
-                        thumbContainer.appendChild(playIcon);
-                    });
+                            // 添加播放图标
+                            const playIcon = document.createElement('div');
+                            playIcon.className = 'play-icon';
+                            playIcon.textContent = '▶';
+                            thumbElement.appendChild(playIcon);
 
+                            thumbElement.classList.remove('loading');
+                        }
+
+                        resolve(thumbnailUrl);
+                    } catch (error) {
+                        console.error(`生成缩略图失败 (课程 ${courseId}):`, error);
+                        resolve(null);
+                    } finally {
+                        video.remove();
+                    }
+                });
+
+                video.addEventListener('error', (e) => {
+                    console.error(`加载视频失败 (课程 ${courseId}):`, e);
+                    resolve(null);
+                    video.remove();
+                });
+
+                video.src = videoUrl;
+            });
+        }
+
+        // 批量生成缩略图（限制并发数）
+        async function generateAllThumbnails() {
+            const concurrency = 3; // 同时生成3个缩略图
+            const queue = [...FENG_SHUI_COURSES];
+
+            async function processNext() {
+                if (queue.length === 0) return;
+
+                const course = queue.shift();
+                try {
+                    const signedUrl = await getSignedUrl(course.file);
+                    await generateThumbnail(course.id, signedUrl);
                 } catch (error) {
-                    console.error(`加载缩略图失败 (${course.file}):`, error);
+                    console.error(`处理课程 ${course.id} 缩略图失败:`, error);
                 }
+
+                // 继续处理下一个
+                await processNext();
             }
+
+            // 启动并发任务
+            const workers = Array(concurrency).fill(null).map(() => processNext());
+            await Promise.all(workers);
         }
 
         // 加载视频
