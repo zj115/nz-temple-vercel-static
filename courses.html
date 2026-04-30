@@ -1106,9 +1106,11 @@
     const lockedClose2= document.getElementById('lockedModalCloseBtn');
 
     function openModal(m) {
+      console.log('[openModal] Opening modal:', m.id);
       m.classList.add('open');
       m.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      console.log('[openModal] Modal classes:', m.className);
     }
     function closeModal(m) {
       m.classList.remove('open');
@@ -1131,8 +1133,11 @@
       const videoUrl = await buildVideoUrl(course);
       if (!videoUrl) return; // API 失败，已弹窗提示
 
+      console.log('[openCourse] 签名 URL 获取成功:', videoUrl);
       video.src = videoUrl;
       video.load();
+      console.log('[openCourse] video.src 已设置:', video.src);
+
       titleEl.innerHTML =
         '<span class="lang-zh">'+ course.titleZh +'</span>' +
         '<span class="lang-en">'+ course.titleEn +'</span>';
@@ -1142,9 +1147,15 @@
       descEl.innerHTML =
         '<span class="lang-zh">'+ course.descZh +'</span>' +
         '<span class="lang-en">'+ course.descEn +'</span>';
+      console.log('[openCourse] 弹窗内容已设置');
+
+      console.log('[openCourse] 准备调用 openModal(modal)');
       openModal(modal);
+      console.log('[openCourse] openModal(modal) 调用完成');
+
       // Try autoplay (browsers may block until user interacts)
       video.play().catch(() => {});
+      console.log('[openCourse] video.play() 调用完成');
     };
 
     function closeVideoModal() {
