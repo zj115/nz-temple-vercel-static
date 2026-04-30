@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>固定母版 DEBUG 测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin: 0 0 15px 0; color: #333; }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-right: 10px;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .debug-btn {
+      background: #ff6b6b;
+      color: white;
+    }
+    .debug-btn:hover {
+      background: #ff5252;
+    }
+    .normal-btn {
+      background: #4CAF50;
+      color: white;
+    }
+    .normal-btn:hover {
+      background: #45a049;
+    }
+    #preview {
+      max-width: 100%;
+      border: 2px solid #ccc;
+      margin-top: 20px;
+      display: block;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .error {
+      color: #d32f2f;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .info {
+      color: #1976d2;
+      margin-top: 10px;
+    }
+    .success {
+      color: #388e3c;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h1>🔧 固定母版 DEBUG 测试</h1>
+    <p style="color: #666; margin-bottom: 15px;">
+      DEBUG模式会用彩色框标出所有box边界，帮助调整坐标
+    </p>
+    <button class="debug-btn" id="debugBtn">🔍 DEBUG模式（显示所有box）</button>
+    <button class="normal-btn" id="normalBtn">✅ 正常模式（填充文字）</button>
+    <div id="error" class="error"></div>
+    <div id="info" class="info"></div>
+    <div id="success" class="success"></div>
+  </div>
+  <img id="preview" style="display:none;">
+
+  <script>
+    // 测试数据
+    var testDay = {
+      date: '2026-04-29',
+      lunar_ymd: '三月十二',
+      year_gz: '丙午',
+      month_gz: '壬辰',
+      day_gz: '甲子',
+      dir: {
+        cai: '正南',
+        xi: '东南',
+        fu: '东南',
+        yanggui: '东南'
+      },
+      chong_desc: '冲马（戊午）煞南',
+      yi: ['祭祀', '祈福', '求嗣', '开光', '出行', '解除', '伐木', '盖屋'],
+      ji: ['嫁娶', '动土', '安葬', '开市', '交易', '立券']
+    };
+
+    var testHours = [
+      {label:'子时', gz:'甲子', luck:'吉', yi:['祭祀'], ji:['出行']},
+      {label:'丑时', gz:'乙丑', luck:'凶', yi:['祈福'], ji:['嫁娶']},
+      {label:'寅时', gz:'丙寅', luck:'吉', yi:['开市'], ji:['动土']},
+      {label:'卯时', gz:'丁卯', luck:'凶', yi:['求财'], ji:['安葬']},
+      {label:'辰时', gz:'戊辰', luck:'吉', yi:['纳采'], ji:['修造']},
+      {label:'巳时', gz:'己巳', luck:'吉', yi:['嫁娶'], ji:['出行']},
+      {label:'午时', gz:'庚午', luck:'凶', yi:['祭祀'], ji:['开市']},
+      {label:'未时', gz:'辛未', luck:'吉', yi:['祈福'], ji:['动土']},
+      {label:'申时', gz:'壬申', luck:'吉', yi:['求嗣'], ji:['安葬']},
+      {label:'酉时', gz:'癸酉', luck:'凶', yi:['开光'], ji:['嫁娶']},
+      {label:'戌时', gz:'甲戌', luck:'吉', yi:['出行'], ji:['修造']},
+      {label:'亥时', gz:'乙亥', luck:'凶', yi:['解除'], ji:['动土']}
+    ];
+
+    // 主绘制函数
+    function drawFromMasterTemplate(day, hours, debugMode){
+      return new Promise(function(resolve, reject){
+        var masterImg = new Image();
+        masterImg.crossOrigin = 'anonymous';
+
+        masterImg.onload = function(){
+          var W = 1040;
+          var H = 1512;
+          var cv = document.createElement('canvas');
+          cv.width = W;
+          cv.height = H;
+          var c = cv.getContext('2d');
+
+          // 绘制母版底图
+          c.drawImage(masterImg, 0, 0, W, H);
+
+          // 颜色
+          var DARK = '#1e1000';
+          var BROWN2 = '#7a5230';
+          var GREEN_C = '#1e5c20';
+          var RED_C = '#7a1010';
+
+          // ══════════════════════════════════════════════
+          // 细粒度 BOX 定义（阶段1：严格按母版实际框线测量）
+          // ══════════════════════════════════════════════
+          var boxes = {
+            // ── 顶部左：星期区（细分）──
+            weekdayEnBox: {left: 70, top: 168, width: 90, height: 18, label: 'weekdayEn', color: 'rgba(255,0,0,0.3)'},
+            weekdayZhBox: {left: 35, top: 188, width: 50, height: 22, label: 'weekdayZh', color: 'rgba(0,255,0,0.3)'},
+
+            // ── 农历区（细分：badge + 白框 + 文字）──
+            lunarBadgeBox: {left: 35, top: 245, width: 35, height: 55, label: 'lunarBadge', color: 'rgba(0,0,255,0.3)'},
+            lunarWhiteFrameBox: {left: 75, top: 245, width: 75, height: 215, label: 'lunarFrame', color: 'rgba(255,255,0,0.3)'},
+            lunarTextBox: {left: 80, top: 255, width: 65, height: 195, label: 'lunarText', color: 'rgba(255,200,0,0.3)'},
+
+            // ── 中间大日期区（细分）──
+            bigDayNumberBox: {left: 250, top: 280, width: 180, height: 130, label: 'bigDayNum', color: 'rgba(255,0,255,0.3)'},
+            monthMarkerBox: {left: 310, top: 395, width: 60, height: 35, label: 'monthMark', color: 'rgba(0,255,255,0.3)'},
+            watermarkLeftBox: {left: 200, top: 300, width: 80, height: 120, label: 'wmLeft', color: 'rgba(200,200,0,0.2)'},
+            watermarkRightBox: {left: 400, top: 300, width: 80, height: 120, label: 'wmRight', color: 'rgba(0,200,200,0.2)'},
+
+            // ── 顶部右：年月日干支（拆成4个独立box）──
+            yearShengxiaoBox: {left: 560, top: 165, width: 75, height: 18, label: 'yearSX', color: 'rgba(255,128,0,0.3)'},
+            yearGanzhiBox: {left: 645, top: 165, width: 75, height: 18, label: 'yearGZ', color: 'rgba(128,255,0,0.3)'},
+            monthGanzhiBox: {left: 560, top: 188, width: 75, height: 18, label: 'monthGZ', color: 'rgba(0,128,255,0.3)'},
+            dayGanzhiBox: {left: 645, top: 188, width: 75, height: 18, label: 'dayGZ', color: 'rgba(255,0,128,0.3)'},
+
+            // ── 诸神方位（每格细分多层）──
+            // 财神
+            caishenTopDirBox: {left: 75, top: 505, width: 110, height: 25, label: 'caiTopDir', color: 'rgba(255,100,100,0.3)'},
+            caishenGodNameBox: {left: 75, top: 535, width: 110, height: 35, label: 'caiName', color: 'rgba(255,120,120,0.3)'},
+            caishenRedFrameBox: {left: 80, top: 575, width: 100, height: 35, label: 'caiFrame', color: 'rgba(255,140,140,0.3)'},
+            caishenBaguaBox: {left: 90, top: 615, width: 80, height: 50, label: 'caiBagua', color: 'rgba(255,160,160,0.3)'},
+
+            // 喜神
+            xishenTopDirBox: {left: 260, top: 505, width: 110, height: 25, label: 'xiTopDir', color: 'rgba(100,255,100,0.3)'},
+            xishenGodNameBox: {left: 260, top: 535, width: 110, height: 35, label: 'xiName', color: 'rgba(120,255,120,0.3)'},
+            xishenRedFrameBox: {left: 265, top: 575, width: 100, height: 35, label: 'xiFrame', color: 'rgba(140,255,140,0.3)'},
+            xishenBaguaBox: {left: 275, top: 615, width: 80, height: 50, label: 'xiBagua', color: 'rgba(160,255,160,0.3)'},
+
+            // 福神
+            fushenTopDirBox: {left: 545, top: 505, width: 110, height: 25, label: 'fuTopDir', color: 'rgba(100,100,255,0.3)'},
+            fushenGodNameBox: {left: 545, top: 535, width: 110, height: 35, label: 'fuName', color: 'rgba(120,120,255,0.3)'},
+            fushenRedFrameBox: {left: 550, top: 575, width: 100, height: 35, label: 'fuFrame', color: 'rgba(140,140,255,0.3)'},
+            fushenBaguaBox: {left: 560, top: 615, width: 80, height: 50, label: 'fuBagua', color: 'rgba(160,160,255,0.3)'},
+            fushenNoteBox: {left: 470, top: 645, width: 80, height: 20, label: 'fuNote', color: 'rgba(180,180,255,0.3)'},
+
+            // 阳贵
+            yangguiTopDirBox: {left: 730, top: 505, width: 110, height: 25, label: 'ygTopDir', color: 'rgba(255,255,100,0.3)'},
+            yangguiGodNameBox: {left: 730, top: 535, width: 110, height: 35, label: 'ygName', color: 'rgba(255,255,120,0.3)'},
+            yangguiRedFrameBox: {left: 735, top: 575, width: 100, height: 35, label: 'ygFrame', color: 'rgba(255,255,140,0.3)'},
+            yangguiBaguaBox: {left: 745, top: 615, width: 80, height: 50, label: 'ygBagua', color: 'rgba(255,255,160,0.3)'},
+
+            // ── 冲煞（细分：标签 + 值）──
+            chongshaLabelBox: {left: 35, top: 730, width: 80, height: 40, label: 'csLabel', color: 'rgba(255,150,150,0.3)'},
+            chongshaValueBox: {left: 120, top: 730, width: 850, height: 40, label: 'csValue', color: 'rgba(255,170,170,0.3)'},
+
+            // ── 宜忌区（细分：seal + text）──
+            yiSealBox: {left: 45, top: 785, width: 120, height: 120, label: 'yiSeal', color: 'rgba(255,0,0,0.2)'},
+            yiTextBox: {left: 45, top: 910, width: 120, height: 180, label: 'yiText', color: 'rgba(0,255,0,0.2)'},
+            jiSealBox: {left: 490, top: 785, width: 120, height: 120, label: 'jiSeal', color: 'rgba(0,0,255,0.2)'},
+            jiTextBox: {left: 490, top: 910, width: 120, height: 180, label: 'jiText', color: 'rgba(255,255,0,0.2)'},
+
+            // ── 今日时运（细分：标题 + 左右双表）──
+            timeTitleBox: {left: 180, top: 960, width: 200, height: 40, label: 'timeTitle', color: 'rgba(150,150,255,0.3)'},
+
+            // 左表（6行×4列）
+            leftTableHeaderBox: {left: 35, top: 1010, width: 435, height: 35, label: 'leftHeader', color: 'rgba(200,100,100,0.3)'},
+            // 右表（6行×4列）
+            rightTableHeaderBox: {left: 470, top: 1010, width: 435, height: 35, label: 'rightHeader', color: 'rgba(100,200,100,0.3)'}
+          };
+
+          // ── 今日时运表格：左右双表单元格（6行×4列）──
+          var leftTableRows = [];
+          var rightTableRows = [];
+          var rowHeight = 25;
+          var leftColWidths = [70, 60, 60, 245];  // 时辰、时支、吉凶、时运简述
+          var rightColWidths = [70, 60, 60, 245];
+
+          // 生成左表6行单元格
+          for(var r=0; r<6; r++){
+            var row = [];
+            var rowY = 1045 + r * rowHeight;
+            var colX = 35;
+            for(var col=0; col<4; col++){
+              row.push({
+                left: colX,
+                top: rowY,
+                width: leftColWidths[col],
+                height: rowHeight,
+                label: 'L'+r+'C'+col,
+                color: 'rgba(200,150,150,0.2)'
+              });
+              colX += leftColWidths[col];
+            }
+            leftTableRows.push(row);
+          }
+
+          // 生成右表6行单元格
+          for(var r=0; r<6; r++){
+            var row = [];
+            var rowY = 1045 + r * rowHeight;
+            var colX = 470;
+            for(var col=0; col<4; col++){
+              row.push({
+                left: colX,
+                top: rowY,
+                width: rightColWidths[col],
+                height: rowHeight,
+                label: 'R'+r+'C'+col,
+                color: 'rgba(150,200,150,0.2)'
+              });
+              colX += rightColWidths[col];
+            }
+            rightTableRows.push(row);
+          }
+
+          // ══════════════════════════════════════════════
+          // DEBUG 模式：绘制所有 box 边框
+          // ══════════════════════════════════════════════
+          if(debugMode){
+            // 绘制基础 boxes
+            for(var key in boxes){
+              var box = boxes[key];
+
+              // 填充半透明背景
+              c.fillStyle = box.color || 'rgba(255,0,0,0.2)';
+              c.fillRect(box.left, box.top, box.width, box.height);
+
+              // 绘制边框
+              c.strokeStyle = '#ff0000';
+              c.lineWidth = 2;
+              c.strokeRect(box.left, box.top, box.width, box.height);
+
+              // 标签（黑底白字）
+              c.fillStyle = 'rgba(0,0,0,0.8)';
+              c.fillRect(box.left + 2, box.top + 2, 80, 14);
+              c.font = 'bold 10px Arial';
+              c.fillStyle = '#fff';
+              c.textAlign = 'left';
+              c.textBaseline = 'top';
+              c.fillText(box.label || key, box.left + 4, box.top + 3);
+            }
+
+            // 绘制左表单元格
+            for(var r=0; r<leftTableRows.length; r++){
+              for(var col=0; col<leftTableRows[r].length; col++){
+                var cell = leftTableRows[r][col];
+                c.fillStyle = cell.color;
+                c.fillRect(cell.left, cell.top, cell.width, cell.height);
+                c.strokeStyle = '#0000ff';
+                c.lineWidth = 1;
+                c.strokeRect(cell.left, cell.top, cell.width, cell.height);
+
+                // 标签
+                c.fillStyle = 'rgba(0,0,0,0.7)';
+                c.fillRect(cell.left + 1, cell.top + 1, 35, 12);
+                c.font = 'bold 9px Arial';
+                c.fillStyle = '#fff';
+                c.textAlign = 'left';
+                c.textBaseline = 'top';
+                c.fillText(cell.label, cell.left + 2, cell.top + 2);
+              }
+            }
+
+            // 绘制右表单元格
+            for(var r=0; r<rightTableRows.length; r++){
+              for(var col=0; col<rightTableRows[r].length; col++){
+                var cell = rightTableRows[r][col];
+                c.fillStyle = cell.color;
+                c.fillRect(cell.left, cell.top, cell.width, cell.height);
+                c.strokeStyle = '#00ff00';
+                c.lineWidth = 1;
+                c.strokeRect(cell.left, cell.top, cell.width, cell.height);
+
+                // 标签
+                c.fillStyle = 'rgba(0,0,0,0.7)';
+                c.fillRect(cell.left + 1, cell.top + 1, 35, 12);
+                c.font = 'bold 9px Arial';
+                c.fillStyle = '#fff';
+                c.textAlign = 'left';
+                c.textBaseline = 'top';
+                c.fillText(cell.label, cell.left + 2, cell.top + 2);
+              }
+            }
+
+            resolve(cv.toDataURL('image/png'));
+            return;
+          }
+
+          // ══════════════════════════════════════════════
+          // 正常模式：填充文字（简化版）
+          // ══════════════════════════════════════════════
+
+          var d = new Date(day.date+'T00:00:00');
+          var WD_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+          var WD_ZH = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+          var DN = d.getDate();
+          var MO = d.getMonth()+1;
+
+          var lunarStr = day.lunar_ymd||'';
+          var ygz=day.year_gz||'', mgz=day.month_gz||'', dgz=day.day_gz||'';
+          var ZIRAN={'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
+          var yZhi=(day.year_gz||'').length>=2?day.year_gz[1]:'';
+          var shengxiao = ZIRAN[yZhi]||'';
+
+          // 工具函数
+          function drawCentered(text, box, font, color){
+            c.font = font;
+            c.fillStyle = color || DARK;
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(text, box.left + box.width/2, box.top + box.height/2);
+          }
+
+          // 简单填充示例（使用新的 box 名称）
+          drawCentered(WD_EN, boxes.weekdayEnBox, '14px Arial', DARK);
+          drawCentered(WD_ZH, boxes.weekdayZhBox, 'bold 16px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered(lunarStr, boxes.lunarTextBox, '16px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered(String(DN), boxes.bigDayNumberBox, 'bold 100px Georgia,serif', DARK);
+          drawCentered(String(MO), boxes.monthMarkerBox, '24px Georgia,serif', DARK);
+          drawCentered(shengxiao, boxes.yearShengxiaoBox, '12px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered(ygz, boxes.yearGanzhiBox, '12px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered(mgz, boxes.monthGanzhiBox, '12px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered(dgz, boxes.dayGanzhiBox, '12px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered((day.dir&&day.dir.cai)||'—', boxes.caishenTopDirBox, '16px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered((day.dir&&day.dir.xi)||'—', boxes.xishenTopDirBox, '16px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered((day.dir&&day.dir.fu)||'—', boxes.fushenTopDirBox, '16px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered((day.dir&&day.dir.yanggui)||'—', boxes.yangguiTopDirBox, '16px "STKaiti","PingFang SC",serif', DARK);
+          drawCentered(day.chong_desc||'—', boxes.chongshaValueBox, '14px "STKaiti","PingFang SC",serif', DARK);
+
+          resolve(cv.toDataURL('image/png'));
+        };
+
+        masterImg.onerror = function(){
+          reject(new Error('母版图片加载失败'));
+        };
+
+        masterImg.src = 'images/固定母版.png';
+      });
+    }
+
+    // 按钮事件
+    document.getElementById('debugBtn').addEventListener('click', function(){
+      document.getElementById('error').textContent = '';
+      document.getElementById('success').textContent = '';
+      document.getElementById('info').textContent = '正在生成 DEBUG 版本...';
+
+      drawFromMasterTemplate(testDay, testHours, true)
+        .then(function(png){
+          document.getElementById('info').textContent = '';
+          document.getElementById('success').textContent = '✓ DEBUG 模式生成成功！红框显示所有 box 边界';
+          var preview = document.getElementById('preview');
+          preview.src = png;
+          preview.style.display = 'block';
+        })
+        .catch(function(e){
+          document.getElementById('info').textContent = '';
+          document.getElementById('error').textContent = '✗ 生成失败：' + e.message;
+        });
+    });
+
+    document.getElementById('normalBtn').addEventListener('click', function(){
+      document.getElementById('error').textContent = '';
+      document.getElementById('success').textContent = '';
+      document.getElementById('info').textContent = '正在生成正常版本...';
+
+      drawFromMasterTemplate(testDay, testHours, false)
+        .then(function(png){
+          document.getElementById('info').textContent = '';
+          document.getElementById('success').textContent = '✓ 正常模式生成成功！';
+          var preview = document.getElementById('preview');
+          preview.src = png;
+          preview.style.display = 'block';
+        })
+        .catch(function(e){
+          document.getElementById('info').textContent = '';
+          document.getElementById('error').textContent = '✗ 生成失败：' + e.message;
+        });
+    });
+  </script>
+</body>
+</html>

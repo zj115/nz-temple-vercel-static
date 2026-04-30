@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试固定母版绘制</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #preview { max-width: 100%; border: 1px solid #ccc; margin-top: 20px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>测试固定母版 + 动态填字</h1>
+  <button id="testBtn">生成测试黄历</button>
+  <div id="error" class="error"></div>
+  <img id="preview" style="display:none;">
+
+  <script>
+    // 测试数据
+    var testDay = {
+      date: '2026-04-29',
+      lunar_ymd: '三月十二',
+      year_gz: '丙午',
+      month_gz: '壬辰',
+      day_gz: '甲子',
+      dir: {
+        cai: '东北',
+        xi: '西南',
+        fu: '正南',
+        yanggui: '西北'
+      },
+      chong_desc: '冲马（戊午）煞南',
+      yi: ['祭祀', '祈福', '求嗣', '开光', '出行', '解除', '伐木', '盖屋'],
+      ji: ['嫁娶', '动土', '安葬', '开市', '交易', '立券']
+    };
+
+    var testHours = [
+      {label:'子时', gz:'甲子', luck:'吉', yi:['祭祀'], ji:['出行']},
+      {label:'丑时', gz:'乙丑', luck:'凶', yi:['祈福'], ji:['嫁娶']},
+      {label:'寅时', gz:'丙寅', luck:'吉', yi:['开市'], ji:['动土']},
+      {label:'卯时', gz:'丁卯', luck:'凶', yi:['求财'], ji:['安葬']},
+      {label:'辰时', gz:'戊辰', luck:'吉', yi:['纳采'], ji:['修造']},
+      {label:'巳时', gz:'己巳', luck:'吉', yi:['嫁娶'], ji:['出行']},
+      {label:'午时', gz:'庚午', luck:'凶', yi:['祭祀'], ji:['开市']},
+      {label:'未时', gz:'辛未', luck:'吉', yi:['祈福'], ji:['动土']},
+      {label:'申时', gz:'壬申', luck:'吉', yi:['求嗣'], ji:['安葬']},
+      {label:'酉时', gz:'癸酉', luck:'凶', yi:['开光'], ji:['嫁娶']},
+      {label:'戌时', gz:'甲戌', luck:'吉', yi:['出行'], ji:['修造']},
+      {label:'亥时', gz:'乙亥', luck:'凶', yi:['解除'], ji:['动土']}
+    ];
+
+    // 复制 drawFromMasterTemplate 函数（严格 box 坐标系统）
+    function drawFromMasterTemplate(day, hours, personal){
+      return new Promise(function(resolve, reject){
+        var masterImg = new Image();
+        masterImg.crossOrigin = 'anonymous';
+
+        masterImg.onload = function(){
+          var W = 1040;  // 固定母版宽度
+          var H = 1512;  // 固定母版高度
+          var cv = document.createElement('canvas');
+          cv.width = W;
+          cv.height = H;
+          var c = cv.getContext('2d');
+
+          // 1. 绘制母版底图
+          c.drawImage(masterImg, 0, 0, W, H);
+
+          // ── 颜色常量 ──
+          var DARK    = '#1e1000';
+          var BROWN2  = '#7a5230';
+          var GREEN_C = '#1e5c20';
+          var RED_C   = '#7a1010';
+          var NAVY    = '#1a2f4f';
+
+          // ══════════════════════════════════════════════
+          // ── 工具函数：严格按 box 绘制 ──
+          // ══════════════════════════════════════════════
+
+          // 在 box 内居中绘制单行文字
+          function drawCenteredTextInBox(text, box, font, color){
+            c.font = font;
+            c.fillStyle = color || DARK;
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(text, box.left + box.width/2, box.top + box.height/2);
+          }
+
+          // 在 box 内竖排文字（居中）
+          function drawVerticalTextInBox(text, box, fontSize, color, charGap){
+            var chars = text.split('');
+            var gap = charGap || 2;
+            var totalHeight = chars.length * fontSize + (chars.length-1) * gap;
+            var startY = box.top + (box.height - totalHeight) / 2;
+            var centerX = box.left + box.width / 2;
+
+            c.font = fontSize + 'px "STKaiti","PingFang SC",serif';
+            c.fillStyle = color || DARK;
+            c.textAlign = 'center';
+            c.textBaseline = 'top';
+
+            for(var i=0; i<chars.length; i++){
+              c.fillText(chars[i], centerX, startY + i * (fontSize + gap));
+            }
+          }
+
+          // 在 box 内绘制多行文字（自动换行，居中）
+          function drawWrappedTextInBox(textArray, box, fontSize, color, lineGap){
+            var gap = lineGap || 4;
+            var totalHeight = textArray.length * fontSize + (textArray.length-1) * gap;
+            var startY = box.top + (box.height - totalHeight) / 2;
+            var centerX = box.left + box.width / 2;
+
+            c.font = fontSize + 'px "STKaiti","PingFang SC",serif';
+            c.fillStyle = color || DARK;
+            c.textAlign = 'center';
+            c.textBaseline = 'top';
+
+            for(var i=0; i<textArray.length; i++){
+              c.fillText(textArray[i], centerX, startY + i * (fontSize + gap));
+            }
+          }
+
+          // ══════════════════════════════════════════════
+          // ── 解析数据 ──
+          // ══════════════════════════════════════════════
+
+          var d = new Date(day.date+'T00:00:00');
+          var WD_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+          var WD_ZH = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+          var YR = d.getFullYear();
+          var MO = d.getMonth()+1;
+          var DN = d.getDate();
+
+          var lunarStr = day.lunar_ymd||'';
+          lunarStr = lunarStr.replace(/^[^月]+年/,'');
+          var lunarM='', lunarD='';
+          var lm = lunarStr.match(/^(.{1,4})[月](.+)$/);
+          if(lm){lunarM=lm[1]; lunarD=lm[2];}else{lunarD=lunarStr;}
+
+          var ygz=day.year_gz||'', mgz=day.month_gz||'', dgz=day.day_gz||'';
+          var ZIRAN={'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龙','巳':'蛇','午':'马','未':'羊','申':'猴','酉':'鸡','戌':'狗','亥':'猪'};
+          var yZhi=(day.year_gz||'').length>=2?day.year_gz[1]:'';
+          var shengxiao = ZIRAN[yZhi]||'';
+
+          var yi  = day.yi||[];
+          var ji  = day.ji||[];
+          var chong=day.chong_desc||'—';
+
+          // ══════════════════════════════════════════════
+          // ── BOX 坐标定义（基于母版实际框线）──
+          // ══════════════════════════════════════════════
+
+          var boxes = {
+            // 顶部区域
+            weekday: {left: 35, top: 175, width: 180, height: 70},        // 星期框
+            lunar: {left: 75, top: 245, width: 80, height: 220},          // 农历框
+            bigDate: {left: 240, top: 245, width: 280, height: 220},      // 大日期框
+            yearInfo: {left: 580, top: 175, width: 130, height: 50},      // 年生肖+年干支
+            monthDay: {left: 720, top: 175, width: 130, height: 50},      // 月干支+日干支
+
+            // 诸神方位（4格）
+            caishen: {left: 75, top: 535, width: 110, height: 110},
+            xishen: {left: 260, top: 535, width: 110, height: 110},
+            fushen: {left: 545, top: 535, width: 110, height: 110},
+            yanggui: {left: 730, top: 535, width: 110, height: 110},
+
+            // 冲煞
+            chongsha: {left: 35, top: 725, width: 970, height: 50},
+
+            // 宜忌
+            yi: {left: 45, top: 850, width: 120, height: 240},
+            ji: {left: 490, top: 850, width: 120, height: 240},
+
+            // 今日时运表格（左右两半，各6列）
+            timeTableLeft: {left: 35, top: 990, width: 435, height: 170},
+            timeTableRight: {left: 470, top: 990, width: 435, height: 170}
+          };
+
+          // ══════════════════════════════════════════════
+          // ── 绘制内容 ──
+          // ══════════════════════════════════════════════
+
+          // 1. 星期
+          drawWrappedTextInBox([WD_EN, WD_ZH], boxes.weekday, 18, DARK, 6);
+
+          // 2. 农历（竖排）
+          var lunarText = lunarM + lunarD;
+          drawVerticalTextInBox(lunarText, boxes.lunar, 20, DARK, 4);
+
+          // 3. 大日期
+          drawCenteredTextInBox(String(DN), boxes.bigDate, 'bold 120px Georgia,serif', DARK);
+          // 月份（在日期下方）
+          c.font = '28px Georgia,serif';
+          c.fillStyle = DARK;
+          c.textAlign = 'center';
+          c.textBaseline = 'top';
+          c.fillText(String(MO), boxes.bigDate.left + boxes.bigDate.width/2, boxes.bigDate.top + boxes.bigDate.height - 40);
+
+          // 4. 年生肖 + 年干支
+          drawWrappedTextInBox(['年生肖 '+shengxiao, '年干支 '+ygz], boxes.yearInfo, 14, DARK, 4);
+
+          // 5. 月干支 + 日干支
+          drawWrappedTextInBox(['月干支 '+mgz, '日干支 '+dgz], boxes.monthDay, 14, DARK, 4);
+
+          // 6. 诸神方位
+          var caiDir = (day.dir&&day.dir.cai)||'—';
+          var xiDir  = (day.dir&&day.dir.xi)||'—';
+          var fuDir  = (day.dir&&day.dir.fu)||'—';
+          var yangguiDir = (day.dir&&day.dir.yanggui)||'—';
+
+          drawCenteredTextInBox(caiDir, boxes.caishen, 'bold 24px "STKaiti","PingFang SC",serif', DARK);
+          drawCenteredTextInBox(xiDir, boxes.xishen, 'bold 24px "STKaiti","PingFang SC",serif', DARK);
+          drawCenteredTextInBox(fuDir, boxes.fushen, 'bold 24px "STKaiti","PingFang SC",serif', DARK);
+          drawCenteredTextInBox(yangguiDir, boxes.yanggui, 'bold 24px "STKaiti","PingFang SC",serif', DARK);
+
+          // 7. 冲煞
+          drawCenteredTextInBox(chong, boxes.chongsha, '16px "STKaiti","PingFang SC",serif', DARK);
+
+          // 8. 宜
+          var yiFlat=[];
+          yi.forEach(function(t){ yiFlat.push(t.replace(/[·・\s]/g,'').slice(0,4)); });
+          drawWrappedTextInBox(yiFlat.slice(0,10), boxes.yi, 16, DARK, 6);
+
+          // 9. 忌
+          var jiFlat=[];
+          ji.forEach(function(t){ jiFlat.push(t.replace(/[·・\s]/g,'').slice(0,4)); });
+          drawWrappedTextInBox(jiFlat.slice(0,10), boxes.ji, 16, DARK, 6);
+
+          // 10. 今日时运表格
+          var timeRanges = [
+            ['23:00','01:00'],['01:00','03:00'],['03:00','05:00'],['05:00','07:00'],
+            ['07:00','09:00'],['09:00','11:00'],['11:00','13:00'],['13:00','15:00'],
+            ['15:00','17:00'],['17:00','19:00'],['19:00','21:00'],['21:00','23:00']
+          ];
+
+          // 左半表格（前6个时辰）
+          var leftColWidth = boxes.timeTableLeft.width / 6;
+          for(var i=0; i<6; i++){
+            var h = hours[i];
+            if(!h) continue;
+            var colX = boxes.timeTableLeft.left + i * leftColWidth + leftColWidth/2;
+            var hLuck = h.luck;
+
+            // 时辰
+            c.font = '10px "STKaiti","PingFang SC",serif';
+            c.fillStyle = DARK;
+            c.textAlign = 'center';
+            c.textBaseline = 'top';
+            c.fillText(timeRanges[i][0], colX, boxes.timeTableLeft.top + 5);
+            c.fillText(timeRanges[i][1], colX, boxes.timeTableLeft.top + 18);
+
+            // 时支
+            c.font = 'bold 13px "STKaiti","PingFang SC",serif';
+            c.fillText(h.label||'', colX, boxes.timeTableLeft.top + 35);
+
+            // 吉凶
+            var luckColor = hLuck==='吉'?GREEN_C:hLuck==='凶'?RED_C:BROWN2;
+            c.font = 'bold 13px "STKaiti","PingFang SC",serif';
+            c.fillStyle = luckColor;
+            c.fillText(hLuck||'', colX, boxes.timeTableLeft.top + 55);
+
+            // 时运简述（竖排）
+            var yiIt=(h.yi||[]).slice(0,1);
+            var jiIt=(h.ji||[]).slice(0,1);
+
+            var descY = boxes.timeTableLeft.top + 75;
+            c.font = '11px "STKaiti","PingFang SC",serif';
+            if(yiIt.length>0){
+              var yiText = yiIt[0].replace(/[·・\s]/g,'').slice(0,3);
+              c.fillStyle = GREEN_C;
+              for(var j=0; j<yiText.length; j++){
+                c.fillText(yiText[j], colX, descY + j*13);
+              }
+              descY += yiText.length*13 + 5;
+            }
+            if(jiIt.length>0){
+              var jiText = jiIt[0].replace(/[·・\s]/g,'').slice(0,3);
+              c.fillStyle = RED_C;
+              for(var j=0; j<jiText.length; j++){
+                c.fillText(jiText[j], colX, descY + j*13);
+              }
+            }
+          }
+
+          // 右半表格（后6个时辰）
+          var rightColWidth = boxes.timeTableRight.width / 6;
+          for(var i=6; i<12; i++){
+            var h = hours[i];
+            if(!h) continue;
+            var colX = boxes.timeTableRight.left + (i-6) * rightColWidth + rightColWidth/2;
+            var hLuck = h.luck;
+
+            // 时辰
+            c.font = '10px "STKaiti","PingFang SC",serif';
+            c.fillStyle = DARK;
+            c.textAlign = 'center';
+            c.textBaseline = 'top';
+            c.fillText(timeRanges[i][0], colX, boxes.timeTableRight.top + 5);
+            c.fillText(timeRanges[i][1], colX, boxes.timeTableRight.top + 18);
+
+            // 时支
+            c.font = 'bold 13px "STKaiti","PingFang SC",serif';
+            c.fillText(h.label||'', colX, boxes.timeTableRight.top + 35);
+
+            // 吉凶
+            var luckColor = hLuck==='吉'?GREEN_C:hLuck==='凶'?RED_C:BROWN2;
+            c.font = 'bold 13px "STKaiti","PingFang SC",serif';
+            c.fillStyle = luckColor;
+            c.fillText(hLuck||'', colX, boxes.timeTableRight.top + 55);
+
+            // 时运简述（竖排）
+            var yiIt=(h.yi||[]).slice(0,1);
+            var jiIt=(h.ji||[]).slice(0,1);
+
+            var descY = boxes.timeTableRight.top + 75;
+            c.font = '11px "STKaiti","PingFang SC",serif';
+            if(yiIt.length>0){
+              var yiText = yiIt[0].replace(/[·・\s]/g,'').slice(0,3);
+              c.fillStyle = GREEN_C;
+              for(var j=0; j<yiText.length; j++){
+                c.fillText(yiText[j], colX, descY + j*13);
+              }
+              descY += yiText.length*13 + 5;
+            }
+            if(jiIt.length>0){
+              var jiText = jiIt[0].replace(/[·・\s]/g,'').slice(0,3);
+              c.fillStyle = RED_C;
+              for(var j=0; j<jiText.length; j++){
+                c.fillText(jiText[j], colX, descY + j*13);
+              }
+            }
+          }
+
+          resolve(cv.toDataURL('image/png'));
+        };
+
+        masterImg.onerror = function(){
+          reject(new Error('母版图片加载失败'));
+        };
+
+        // 加载母版图片
+        masterImg.src = 'images/固定母版.png';
+      });
+    }
+
+    // 测试按钮
+    document.getElementById('testBtn').addEventListener('click', function(){
+      document.getElementById('error').textContent = '正在生成...';
+      drawFromMasterTemplate(testDay, testHours, null)
+        .then(function(png){
+          document.getElementById('error').textContent = '生成成功！';
+          var preview = document.getElementById('preview');
+          preview.src = png;
+          preview.style.display = 'block';
+        })
+        .catch(function(e){
+          document.getElementById('error').textContent = '生成失败：' + e.message;
+        });
+    });
+  </script>
+</body>
+</html>

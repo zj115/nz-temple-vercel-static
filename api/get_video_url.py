@@ -52,10 +52,19 @@ class handler(BaseHTTPRequestHandler):
             print(f"AWS_SECRET_ACCESS_KEY exists: {bool(aws_secret_key)}", file=sys.stderr)
             print(f"AWS_REGION: {aws_region}", file=sys.stderr)
 
-            if not aws_access_key or not aws_secret_key:
+            if not aws_access_key:
+                print("ERROR: Missing AWS_ACCESS_KEY_ID in Vercel environment variables", file=sys.stderr)
                 self._send_json(500, {
                     'error': 'missing_aws_env',
-                    'detail': f'AWS_ACCESS_KEY_ID={bool(aws_access_key)}, AWS_SECRET_ACCESS_KEY={bool(aws_secret_key)}'
+                    'detail': 'Missing AWS_ACCESS_KEY_ID in Vercel environment variables. Please add it in Vercel Dashboard → Settings → Environment Variables'
+                })
+                return
+
+            if not aws_secret_key:
+                print("ERROR: Missing AWS_SECRET_ACCESS_KEY in Vercel environment variables", file=sys.stderr)
+                self._send_json(500, {
+                    'error': 'missing_aws_env',
+                    'detail': 'Missing AWS_SECRET_ACCESS_KEY in Vercel environment variables. Please add it in Vercel Dashboard → Settings → Environment Variables'
                 })
                 return
 
