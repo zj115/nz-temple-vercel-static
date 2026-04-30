@@ -588,6 +588,12 @@
     width: 100%; height: 100%;
     object-fit: cover;
   }
+  .course-cover.loading {
+    background:
+      linear-gradient(135deg, rgba(255,213,122,.18), rgba(255,184,48,.05)),
+      radial-gradient(circle at 30% 30%, rgba(255,213,122,.25), transparent 60%),
+      linear-gradient(180deg, #1a1c34 0%, #08080e 100%);
+  }
   .course-cover-fallback {
     text-align: center;
     color: var(--gold2);
@@ -1021,7 +1027,7 @@
 
       return ''+
         '<div class="course-card'+ (locked ? ' is-locked' : '') +'" data-course-id="'+ escapeHtml(course.id) +'" tabindex="0" role="button" aria-label="'+ escapeHtml(course.titleZh) +'">' +
-          '<div class="course-cover">' +
+          '<div class="course-cover loading" data-course-index="'+ i +'">' +
             cover +
             '<span class="course-badge">EP '+ num +'</span>' +
             (locked ? '' : '<div class="course-play-overlay"><div class="cpo-btn">▶</div></div>') +
@@ -1087,7 +1093,105 @@
     }
 
     render('');
+
+    // 生成缩略图
+    generateThumbnails();
   })();
+
+  // ────────────────────────────────────────────────────────────────
+  // 生成视频缩略图
+  // ────────────────────────────────────────────────────────────────
+  async function generateThumbnails() {
+    const covers = document.querySelectorAll('.course-cover[data-course-index]');
+    const concurrency = 3; // 同时生成3个
+    const queue = Array.from(covers);
+
+    async function processNext() {
+      if (queue.length === 0) return;
+
+      const coverEl = queue.shift();
+      const index = parseInt(coverEl.getAttribute('data-course-index'));
+      const course = FENG_SHUI_COURSES[index];
+
+      if (!course || course.locked) {
+        return processNext();
+      }
+
+      try {
+        const videoUrl = await buildVideoUrl(course);
+        if (!videoUrl) {
+          return processNext();
+        }
+
+        const thumbnail = await generateThumbnail(videoUrl);
+        if (thumbnail) {
+          // 创建 img 元素
+          const img = document.createElement('img');
+          img.src = thumbnail;
+          img.alt = course.titleZh;
+          img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+
+          // 移除占位符，添加缩略图
+          const fallback = coverEl.querySelector('.course-cover-fallback');
+          if (fallback) {
+            fallback.remove();
+          }
+          coverEl.insertBefore(img, coverEl.firstChild);
+          coverEl.classList.remove('loading');
+        }
+      } catch (error) {
+        console.error(`生成缩略图失败 (课程 ${index + 1}):`, error);
+      }
+
+      await processNext();
+    }
+
+    // 启动并发任务
+    const workers = Array(concurrency).fill(null).map(() => processNext());
+    await Promise.all(workers);
+  }
+
+  // 生成单个视频缩略图
+  function generateThumbnail(videoUrl) {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.preload = 'metadata';
+      video.muted = true;
+
+      video.addEventListener('loadeddata', () => {
+        video.currentTime = 1; // 跳到第1秒
+      });
+
+      video.addEventListener('seeked', () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const aspectRatio = 16 / 9;
+          canvas.width = 480;
+          canvas.height = canvas.width / aspectRatio;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(thumbnailUrl);
+        } catch (error) {
+          console.error('Canvas 绘制失败:', error);
+          resolve(null);
+        } finally {
+          video.remove();
+        }
+      });
+
+      video.addEventListener('error', (e) => {
+        console.error('视频加载失败:', e);
+        resolve(null);
+        video.remove();
+      });
+
+      video.src = videoUrl;
+    });
+  }
 
   // ────────────────────────────────────────────────────────────────
   // Modal player + locked modal
