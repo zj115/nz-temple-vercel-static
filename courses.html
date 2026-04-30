@@ -931,6 +931,17 @@
   // Helpers
   // ────────────────────────────────────────────────────────────────
 
+  // 获取当前会话
+  async function getSession() {
+    try {
+      const { data: { session } } = await _sb.auth.getSession();
+      return session;
+    } catch (error) {
+      console.error('获取会话失败:', error);
+      return null;
+    }
+  }
+
   // 鉴权：必须登录才能观看
   async function userHasAccess(course) {
     // 检查是否登录
@@ -1099,9 +1110,17 @@
   })();
 
   // ────────────────────────────────────────────────────────────────
-  // 生成视频缩略图
+  // 生成视频缩略图（移动端优化：禁用缩略图生成，避免性能问题）
   // ────────────────────────────────────────────────────────────────
   async function generateThumbnails() {
+    // 移动端检测：屏幕宽度 < 768px 或触摸设备
+    const isMobile = window.innerWidth < 768 || ('ontouchstart' in window);
+
+    if (isMobile) {
+      console.log('移动端检测：跳过缩略图生成');
+      return; // 移动端不生成缩略图，使用占位符
+    }
+
     const covers = document.querySelectorAll('.course-cover[data-course-index]');
     const concurrency = 3; // 同时生成3个
     const queue = Array.from(covers);
